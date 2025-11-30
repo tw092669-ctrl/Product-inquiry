@@ -1185,7 +1185,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans text-slate-800 pb-20">
+    <AppErrorOverlay>
+      <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans text-slate-800 pb-20">
       {/* Navbar */}
       <header className="bg-slate-900 sticky top-0 z-40 shadow-xl shadow-indigo-900/20 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -1406,5 +1407,45 @@ export default function App() {
         config={config}
       />
     </div>
+    </AppErrorOverlay>
   );
 }
+
+// --- Error Overlay for runtime diagnostics ---
+const AppErrorOverlay: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [errors, setErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    const onErr = (ev: ErrorEvent) => {
+      setErrors(prev => [...prev, `Error: ${ev.message} at ${ev.filename}:${ev.lineno}:${ev.colno}`]);
+    };
+    const onReject = (ev: PromiseRejectionEvent) => {
+      setErrors(prev => [...prev, `UnhandledRejection: ${String(ev.reason)}`]);
+    };
+    window.addEventListener('error', onErr);
+    window.addEventListener('unhandledrejection', onReject as EventListener);
+    return () => {
+      window.removeEventListener('error', onErr);
+      window.removeEventListener('unhandledrejection', onReject as EventListener);
+    };
+  }, []);
+
+  return (
+    <>
+      {children}
+      {errors.length > 0 && (
+        <div className="fixed inset-4 z-50 pointer-events-none">
+          <div className="max-w-3xl m-auto bg-red-900/90 text-white rounded-2xl p-4 shadow-2xl pointer-events-auto">
+            <div className="flex justify-between items-center mb-2">
+              <div className="font-bold">Runtime Errors</div>
+              <button onClick={() => setErrors([])} className="text-sm opacity-80 hover:opacity-100">Clear</button>
+            </div>
+            <div className="text-xs leading-relaxed">
+              {errors.map((e, i) => <div key={i} className="mb-2 break-words">{e}</div>)}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
