@@ -1389,8 +1389,8 @@ export default function App() {
       <header className="bg-slate-900 sticky top-0 z-40 shadow-xl shadow-indigo-900/20 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-white p-2.5 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all">
-              <img src="./icon.png" alt="Logo" className="w-7 h-7 object-contain" />
+            <div className="bg-gradient-to-br from-white to-slate-50 p-3 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-400/50 transition-all ring-2 ring-white/20">
+              <img src="./icon.png" alt="Logo" className="w-8 h-8 object-contain" />
             </div>
                     <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-slate-300">
                       AC Master Pro
