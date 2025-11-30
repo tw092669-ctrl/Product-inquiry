@@ -1278,8 +1278,9 @@ export default function App() {
         };
       });
 
-      setProducts(prev => [...newProducts, ...prev]);
-      alert(`成功從 Google 試算表同步 ${newProducts.length} 筆資料`);
+      // 清除現有資料並替換為新資料
+      setProducts(newProducts);
+      alert(`成功從 Google 試算表同步 ${newProducts.length} 筆資料\n(已清除舊有資料)`);
       localStorage.setItem('googleSheetUrl', googleSheetUrl);
     } catch (err) {
       console.error('同步失敗:', err);
