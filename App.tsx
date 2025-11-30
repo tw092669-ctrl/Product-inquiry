@@ -1197,8 +1197,6 @@ export default function App() {
                     <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
                       AC Master Pro
                     </h1>
-                    {/* URL pill - visible in dev & production; user can toggle visibility (saved in localStorage) */}
-                    <UrlPill />
           </div>
           
           <div className="flex items-center gap-3">
