@@ -224,7 +224,11 @@ const SettingsModal = ({
   config, 
   onSaveConfig,
   products,
-  onImport
+  onImport,
+  googleSheetUrl,
+  setGoogleSheetUrl,
+  onGoogleSheetSync,
+  isSyncing
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
@@ -232,6 +236,10 @@ const SettingsModal = ({
   onSaveConfig: (newConfig: AppConfig) => void;
   products: Product[];
   onImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  googleSheetUrl: string;
+  setGoogleSheetUrl: (url: string) => void;
+  onGoogleSheetSync: () => void;
+  isSyncing: boolean;
 }) => {
   const [localConfig, setLocalConfig] = useState<AppConfig>(config);
   const [activeTab, setActiveTab] = useState<keyof AppConfig>('brands');
@@ -369,6 +377,46 @@ const SettingsModal = ({
           >
             <Plus className="w-4 h-4" /> 新增{tabs.find(t => t.key === activeTab)?.label}
           </button>
+
+          {/* Google Sheets Sync Section */}
+          <div className="mt-8 pt-6 border-t border-slate-200">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg">
+                <Upload className="w-4 h-4" />
+              </div>
+              <h3 className="font-bold text-slate-800">Google 試算表同步</h3>
+            </div>
+            <p className="text-xs text-slate-500 mb-3">
+              輸入 Google 試算表的公開 URL 或 Apps Script Web URL，點擊同步即可自動匯入資料。
+              <a href="/GOOGLE_SHEETS_SETUP.md" target="_blank" className="text-indigo-600 hover:underline ml-1">查看設定教學</a>
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={googleSheetUrl}
+                onChange={(e) => setGoogleSheetUrl(e.target.value)}
+                placeholder="貼上 Google 試算表 URL..."
+                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              />
+              <button
+                onClick={onGoogleSheetSync}
+                disabled={isSyncing || !googleSheetUrl.trim()}
+                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium text-sm flex items-center gap-2"
+              >
+                {isSyncing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    同步中...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    同步資料
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="p-4 border-t bg-white flex justify-end gap-3">
@@ -1098,6 +1146,8 @@ export default function App() {
   const [isDashboardOpen, setIsDashboardOpen] = useState(true);
   const [isBTUOpen, setIsBTUOpen] = useState(false);
   const [isComparisonOpen, setIsComparisonOpen] = useState(false);
+  const [googleSheetUrl, setGoogleSheetUrl] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
   
   // Comparison State
   const [compareList, setCompareList] = useState<string[]>([]);
@@ -1138,6 +1188,81 @@ export default function App() {
       }
       return [...prev, id];
     });
+  };
+
+  const handleGoogleSheetSync = async () => {
+    if (!googleSheetUrl.trim()) {
+      alert('請輸入 Google 試算表 URL');
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      let finalUrl = googleSheetUrl;
+      
+      // 如果是一般的 Google Sheets URL,轉換為 CSV export URL
+      if (googleSheetUrl.includes('/edit')) {
+        const match = googleSheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+        if (match) {
+          const spreadsheetId = match[1];
+          finalUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=0`;
+        }
+      }
+
+      const response = await fetch(finalUrl);
+      if (!response.ok) throw new Error('無法取得試算表資料');
+      
+      const text = await response.text();
+      
+      // 解析 CSV
+      const lines = text.split('\n').filter(line => line.trim());
+      if (lines.length < 2) throw new Error('試算表沒有資料');
+      
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      const jsonData = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+        const row: any = {};
+        headers.forEach((header, index) => {
+          row[header] = values[index] || '';
+        });
+        return row;
+      });
+
+      // 處理資料
+      const newProducts: Product[] = jsonData.map((row: any) => {
+        const brandId = findOptionId(row['品牌'], config.brands) || config.brands[0].id;
+        const styleId = findOptionId(row['樣式'], config.styles) || config.styles[0].id;
+        const typeId = findOptionId(row['種類'], config.types) || config.types[0].id;
+        const pipeId = findOptionId(row['管徑'], config.pipes) || config.pipes[0].id;
+        
+        const indoor = row['室內機尺寸'] || row['尺寸'] || '';
+        const outdoor = row['室外機尺寸'] || '';
+
+        return {
+          id: generateId(),
+          name: row['產品名稱'] || '同步產品',
+          brandId,
+          styleId,
+          typeId,
+          pipeId,
+          environment: row['環境']?.includes('暖') ? 'heating' : 'cooling',
+          dimensions: { indoor, outdoor },
+          price: row['建議售價'] || row['價格'] || '',
+          remarks: row['備註'] || '',
+          isPinned: false,
+          createdAt: Date.now()
+        };
+      });
+
+      setProducts(prev => [...newProducts, ...prev]);
+      alert(`成功從 Google 試算表同步 ${newProducts.length} 筆資料`);
+      localStorage.setItem('googleSheetUrl', googleSheetUrl);
+    } catch (err) {
+      console.error('同步失敗:', err);
+      alert('同步失敗,請確認試算表 URL 是否正確且已設定為公開。\n\n詳見 GOOGLE_SHEETS_SETUP.md 設定說明。');
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const handleDeleteRequest = (id: string) => {
@@ -1381,6 +1506,10 @@ export default function App() {
         onSaveConfig={setConfig}
         products={products}
         onImport={handleImport}
+        googleSheetUrl={googleSheetUrl}
+        setGoogleSheetUrl={setGoogleSheetUrl}
+        onGoogleSheetSync={handleGoogleSheetSync}
+        isSyncing={isSyncing}
       />
       
       <ProductForm 
