@@ -228,7 +228,9 @@ const SettingsModal = ({
   googleSheetUrl,
   setGoogleSheetUrl,
   onGoogleSheetSync,
-  isSyncing
+  isSyncing,
+  autoSync,
+  setAutoSync
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
@@ -240,6 +242,8 @@ const SettingsModal = ({
   setGoogleSheetUrl: (url: string) => void;
   onGoogleSheetSync: () => void;
   isSyncing: boolean;
+  autoSync: boolean;
+  setAutoSync: (value: boolean) => void;
 }) => {
   const [localConfig, setLocalConfig] = useState<AppConfig>(config);
   const [activeTab, setActiveTab] = useState<keyof AppConfig>('brands');
@@ -390,6 +394,25 @@ const SettingsModal = ({
               輸入 Google 試算表的公開 URL 或 Apps Script Web URL，點擊同步即可自動匯入資料。
               <a href="/GOOGLE_SHEETS_SETUP.md" target="_blank" className="text-indigo-600 hover:underline ml-1">查看設定教學</a>
             </p>
+            
+            {/* 自動同步開關 */}
+            <div className="mb-3 flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <label className="flex items-center gap-2 cursor-pointer flex-1">
+                <input
+                  type="checkbox"
+                  checked={autoSync}
+                  onChange={(e) => setAutoSync(e.target.checked)}
+                  className="w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500"
+                />
+                <span className="text-sm font-medium text-slate-700">
+                  啟用自動同步
+                </span>
+              </label>
+              <span className="text-xs text-slate-500">
+                開啟後每次載入應用程式時自動同步
+              </span>
+            </div>
+
             <div className="flex gap-2">
               <input
                 type="text"
@@ -1148,6 +1171,7 @@ export default function App() {
   const [isComparisonOpen, setIsComparisonOpen] = useState(false);
   const [googleSheetUrl, setGoogleSheetUrl] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
+  const [autoSync, setAutoSync] = useState(false);
   
   // Comparison State
   const [compareList, setCompareList] = useState<string[]>([]);
@@ -1264,6 +1288,28 @@ export default function App() {
       setIsSyncing(false);
     }
   };
+
+  // 載入設定並自動同步
+  useEffect(() => {
+    const savedUrl = localStorage.getItem('googleSheetUrl');
+    const savedAutoSync = localStorage.getItem('autoSync');
+    
+    if (savedUrl) {
+      setGoogleSheetUrl(savedUrl);
+    }
+    
+    if (savedAutoSync === 'true') {
+      setAutoSync(true);
+    }
+    
+    // 如果啟用自動同步且有 URL,則執行同步
+    if (savedAutoSync === 'true' && savedUrl) {
+      // 延遲一下讓 UI 先渲染
+      setTimeout(() => {
+        handleGoogleSheetSync();
+      }, 500);
+    }
+  }, []); // 只在首次載入時執行
 
   const handleDeleteRequest = (id: string) => {
     setDeleteId(id);
@@ -1510,6 +1556,11 @@ export default function App() {
         setGoogleSheetUrl={setGoogleSheetUrl}
         onGoogleSheetSync={handleGoogleSheetSync}
         isSyncing={isSyncing}
+        autoSync={autoSync}
+        setAutoSync={(value) => {
+          setAutoSync(value);
+          localStorage.setItem('autoSync', value.toString());
+        }}
       />
       
       <ProductForm 
