@@ -78,6 +78,22 @@
 3.  在 **Build and deployment** > **Source** 選擇 **GitHub Actions**。
 4.  等待 Actions 執行完畢（約 1-2 分鐘），即可獲得線上網址。
 
+### 使用 Vercel 部署（快速且推薦）
+
+如果你想要最簡單的部署體驗，可以直接使用 Vercel：
+
+1.  登入 https://vercel.com 並選擇 "Import Project" → 連結到你的 GitHub repository。
+2.  選擇 main 分支並點 Deploy（Vercel 會自動偵測 Vite 並執行 build）。
+3.  部署成功後會自動提供一個 .vercel.app 的網址；你也可以綁定自訂網域。
+
+Vercel 的好處：自動化 previews、快速 CDN 發佈、免費 SSL，通常是靜態站點的首選。
+
+---
+
+### 注意（相對路徑設定）
+
+為了能兼容 GitHub Pages（通常會以 /repo/ 為根），本專案在 `vite.config.ts` 已把 `base` 設為 `./`，因此 build 後資源會用相對路徑配置，能正確部署到 GitHub Pages 或其他子路徑靜態站台。
+
 ## 🛠️ 技術棧詳細
 
 *   **Framework**: React 18

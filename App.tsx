@@ -1000,6 +1000,64 @@ const ProductCard: React.FC<{
 
 // --- Main App ---
 
+// --- Production-friendly URL pill (toggleable) ---
+const UrlPill: React.FC = () => {
+  const [visible, setVisible] = useState<boolean>(() => {
+    try {
+      const v = localStorage.getItem('showUrlPill');
+      return v === null ? true : v === 'true';
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem('showUrlPill', visible ? 'true' : 'false'); } catch {}
+  }, [visible]);
+
+  const href = typeof window !== 'undefined' ? window.location.href : '';
+
+  if (!visible) {
+    return (
+      <button
+        onClick={() => setVisible(true)}
+        className="ml-3 hidden md:inline-flex items-center gap-2 text-xs text-slate-300 px-3 py-1 rounded-full border border-white/10 hover:bg-white/5 transition"
+        title="顯示網址"
+      >
+        Show URL
+      </button>
+    );
+  }
+
+  return (
+    <div className="ml-3 hidden md:flex items-center gap-2 text-xs text-slate-300 bg-white/5 px-3 py-1 rounded-full border border-white/10">
+      <span className="font-mono truncate max-w-[250px]" title={href}>{href}</span>
+      <button
+        onClick={() => {
+          try {
+            navigator.clipboard?.writeText(href);
+            alert('已複製網址');
+          } catch {
+            // fallback
+            const ta = document.createElement('textarea');
+            ta.value = href;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+            alert('已複製網址');
+          }
+        }}
+        className="px-2 py-1 bg-white/10 rounded-md hover:bg-white/20 transition text-xs"
+        title="複製網址"
+      >
+        複製
+      </button>
+      <button onClick={() => setVisible(false)} className="px-1.5 py-1 text-xs text-slate-300 hover:text-white/90 rounded-md transition" title="隱藏網址">✕</button>
+    </div>
+  );
+};
+
 export default function App() {
   const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
   const [config, setConfig] = useState<AppConfig>(INITIAL_CONFIG);
@@ -1135,9 +1193,11 @@ export default function App() {
             <div className="bg-gradient-to-br from-indigo-500 to-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/30">
               <Zap className="w-5 h-5 text-white" fill="currentColor" />
             </div>
-            <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
-              AC Master Pro
-            </h1>
+                    <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
+                      AC Master Pro
+                    </h1>
+                    {/* URL pill - visible in dev & production; user can toggle visibility (saved in localStorage) */}
+                    <UrlPill />
           </div>
           
           <div className="flex items-center gap-3">
