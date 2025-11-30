@@ -885,21 +885,21 @@ const ProductCard: React.FC<{
   // --- LIST VIEW ---
   if (viewMode === 'list') {
     return (
-      <div id={cardId} className={`group bg-white rounded-xl border hover:shadow-lg transition-all p-4 flex items-center gap-5 ${isSelected ? 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50/10' : 'border-slate-100 hover:border-indigo-200'}`}>
+      <div id={cardId} className={`group bg-white rounded-xl border hover:shadow-lg transition-all p-3 md:p-4 flex items-center gap-2 md:gap-5 ${isSelected ? 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50/10' : 'border-slate-100 hover:border-indigo-200'}`}>
         {/* Icon & Pin */}
-        <div className="flex items-center gap-3 w-14 justify-center flex-shrink-0">
+        <div className="flex items-center gap-1 md:gap-3 w-10 md:w-14 justify-center flex-shrink-0">
           <button onClick={() => onPin(product.id)} className={`${product.isPinned ? 'text-indigo-600' : 'text-slate-200 hover:text-slate-400'}`}>
-             <Pin className={`w-4 h-4 ${product.isPinned ? 'fill-current' : ''}`} />
+             <Pin className={`w-3 h-3 md:w-4 md:h-4 ${product.isPinned ? 'fill-current' : ''}`} />
           </button>
-          <div className={`p-2 rounded-lg border ${envGradientBg} ${envColorClass}`}>
-            <EnvIcon className="w-5 h-5" />
+          <div className={`p-1.5 md:p-2 rounded-lg border ${envGradientBg} ${envColorClass}`}>
+            <EnvIcon className="w-4 h-4 md:w-5 md:h-5" />
           </div>
         </div>
 
         {/* Main Info */}
-        <div className="flex-1 min-w-[200px]">
-          <div className="text-xs font-bold mb-1 opacity-90" style={{ color: brand.color }}>{brand.label}</div>
-          <h3 className="font-bold text-slate-800 text-lg">{product.name}</h3>
+        <div className="flex-1 min-w-0">
+          <div className="text-[10px] md:text-xs font-bold mb-0.5 md:mb-1 opacity-90" style={{ color: brand.color }}>{brand.label}</div>
+          <h3 className="font-bold text-slate-800 text-sm md:text-lg truncate">{product.name}</h3>
         </div>
 
         {/* Dimensions (List View) */}
@@ -922,18 +922,18 @@ const ProductCard: React.FC<{
         </div>
 
         {/* Price */}
-        <div className="w-28 text-right font-black font-mono text-lg text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600">
+        <div className="w-16 md:w-28 text-right font-black font-mono text-sm md:text-lg text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 flex-shrink-0">
            {product.price ? `$${product.price}` : '洽詢'}
         </div>
 
         {/* Actions */}
-        <div className="flex gap-1 w-32 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-           <button onClick={() => onToggleCompare(product.id)} className={`p-2 rounded-lg transition ${isSelected ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-50'}`} title="加入比較">
-            <Scale className="w-4 h-4" />
+        <div className="flex gap-0.5 md:gap-1 w-auto md:w-32 justify-end opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+           <button onClick={() => onToggleCompare(product.id)} className={`p-1.5 md:p-2 rounded-lg transition ${isSelected ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-50'}`} title="加入比較">
+            <Scale className="w-3.5 h-3.5 md:w-4 md:h-4" />
           </button>
-          <button onClick={() => onEdit(product)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
-          <button onClick={() => exportToImage(cardId, product.name)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition"><Download className="w-4 h-4" /></button>
-          <button onClick={() => onDelete(product.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
+          <button onClick={() => onEdit(product)} className="p-1.5 md:p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"><Edit2 className="w-3.5 h-3.5 md:w-4 md:h-4" /></button>
+          <button onClick={() => exportToImage(cardId, product.name)} className="hidden sm:block p-1.5 md:p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition"><Download className="w-3.5 h-3.5 md:w-4 md:h-4" /></button>
+          <button onClick={() => onDelete(product.id)} className="p-1.5 md:p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"><Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" /></button>
         </div>
       </div>
     );
