@@ -222,12 +222,16 @@ const SettingsModal = ({
   isOpen, 
   onClose, 
   config, 
-  onSaveConfig 
+  onSaveConfig,
+  products,
+  onImport
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
   config: AppConfig; 
-  onSaveConfig: (newConfig: AppConfig) => void; 
+  onSaveConfig: (newConfig: AppConfig) => void;
+  products: Product[];
+  onImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   const [localConfig, setLocalConfig] = useState<AppConfig>(config);
   const [activeTab, setActiveTab] = useState<keyof AppConfig>('brands');
@@ -284,7 +288,29 @@ const SettingsModal = ({
             </div>
             選項設定
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded-full transition"><X className="w-5 h-5" /></button>
+          <div className="flex items-center gap-2">
+            {/* Import Excel Button */}
+            <div className="relative group">
+              <input 
+                type="file" 
+                accept=".xlsx, .xls, .csv" 
+                onChange={onImport}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+              />
+              <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="匯入 Excel">
+                <Upload className="w-5 h-5" />
+              </button>
+            </div>
+            {/* Export Excel Button */}
+            <button 
+              onClick={() => exportToExcel(products, config)}
+              className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
+              title="匯出 Excel (備份)"
+            >
+              <FileDown className="w-5 h-5" />
+            </button>
+            <button onClick={onClose} className="p-2 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded-full transition"><X className="w-5 h-5" /></button>
+          </div>
         </div>
         
         <div className="flex border-b overflow-x-auto bg-slate-50/50">
@@ -1209,28 +1235,6 @@ export default function App() {
               <Calculator className="w-5 h-5" />
             </button>
 
-             {/* Import Button */}
-             <div className="relative group">
-              <input 
-                type="file" 
-                accept=".xlsx, .xls, .csv" 
-                onChange={handleImport}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-              />
-              <button className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition" title="匯入 Excel">
-                <Upload className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Export Excel Button */}
-            <button 
-              onClick={() => exportToExcel(products, config)}
-              className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition"
-              title="匯出 Excel (備份)"
-            >
-              <FileDown className="w-5 h-5" />
-            </button>
-
             <button 
               onClick={() => setIsSettingsOpen(true)}
               className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition"
@@ -1374,7 +1378,9 @@ export default function App() {
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
         config={config} 
-        onSaveConfig={setConfig} 
+        onSaveConfig={setConfig}
+        products={products}
+        onImport={handleImport}
       />
       
       <ProductForm 
