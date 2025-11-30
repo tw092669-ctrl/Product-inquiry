@@ -1279,7 +1279,7 @@ export default function App() {
         </div>
 
         {/* Stats & View Switcher */}
-        <div className="flex flex-col sm:flex-row justify-between items-end mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
            <div>
              <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-1">產品列表</h2>
              <span className="text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full text-sm">
