@@ -1532,24 +1532,25 @@ export default function App() {
 
       {/* Floating Compare Bar */}
       {compareList.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5">
-          <div className="bg-slate-900/80 backdrop-blur-md text-white rounded-full pl-6 pr-2 py-2 flex items-center gap-6 shadow-2xl border border-white/10">
-            <div className="flex items-center gap-3">
-              <span className="font-bold">已選擇 {compareList.length} 項比較</span>
-              <span className="text-sm text-slate-400 hidden sm:inline">(最多 3 項)</span>
+        <div className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5 px-4 w-full max-w-2xl">
+          <div className="bg-slate-900/90 backdrop-blur-md text-white rounded-2xl sm:rounded-full pl-4 sm:pl-6 pr-2 py-2 sm:py-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-6 shadow-2xl border border-white/10">
+            <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 px-2 sm:px-0">
+              <span className="font-bold text-sm sm:text-base whitespace-nowrap">已選 {compareList.length} 項</span>
+              <span className="text-xs sm:text-sm text-slate-400">(最多 3 項)</span>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 sm:ml-auto">
               <button 
                 onClick={() => setCompareList([])}
-                className="px-4 py-2 hover:bg-white/10 rounded-full transition text-sm font-medium"
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 hover:bg-white/10 rounded-full transition text-xs sm:text-sm font-medium"
               >
                 清除
               </button>
               <button 
                 onClick={() => setIsComparisonOpen(true)}
-                className="px-5 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-full transition text-sm font-bold shadow-lg shadow-indigo-500/30 flex items-center gap-2"
+                className="flex-1 sm:flex-none px-4 sm:px-5 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-full transition text-xs sm:text-sm font-bold shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-1.5 sm:gap-2"
               >
-                <ArrowRightLeft className="w-4 h-4"/> 開始比較
+                <ArrowRightLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4"/> 
+                <span className="whitespace-nowrap">開始比較</span>
               </button>
             </div>
           </div>
