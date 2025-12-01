@@ -90,7 +90,7 @@ const Dashboard = ({
              <BarChart3 className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-lg font-bold text-slate-800 block">數據儀表板</span>
+            <span className="text-lg font-bold text-slate-800 block">產品分析</span>
             <span className="text-xs text-slate-500 font-medium">即時庫存概況分析</span>
           </div>
         </div>
@@ -897,6 +897,80 @@ const QuotePage = ({
     setProductPrices(prev => ({ ...prev, [productId]: newPrice }));
   };
   
+  // Calculator state
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [calcDisplay, setCalcDisplay] = useState('0');
+  const [calcPrevValue, setCalcPrevValue] = useState<string | null>(null);
+  const [calcOperation, setCalcOperation] = useState<string | null>(null);
+  const [calcNewNumber, setCalcNewNumber] = useState(true);
+  
+  const handleCalcNumber = (num: string) => {
+    if (calcNewNumber) {
+      setCalcDisplay(num);
+      setCalcNewNumber(false);
+    } else {
+      setCalcDisplay(calcDisplay === '0' ? num : calcDisplay + num);
+    }
+  };
+  
+  const handleCalcOperation = (op: string) => {
+    const current = parseFloat(calcDisplay);
+    
+    if (calcPrevValue === null) {
+      setCalcPrevValue(calcDisplay);
+    } else if (calcOperation) {
+      const prev = parseFloat(calcPrevValue);
+      let result = 0;
+      
+      switch (calcOperation) {
+        case '+': result = prev + current; break;
+        case '-': result = prev - current; break;
+        case '×': result = prev * current; break;
+        case '÷': result = prev / current; break;
+      }
+      
+      setCalcDisplay(result.toString());
+      setCalcPrevValue(result.toString());
+    }
+    
+    setCalcOperation(op);
+    setCalcNewNumber(true);
+  };
+  
+  const handleCalcEquals = () => {
+    if (calcOperation && calcPrevValue !== null) {
+      const prev = parseFloat(calcPrevValue);
+      const current = parseFloat(calcDisplay);
+      let result = 0;
+      
+      switch (calcOperation) {
+        case '+': result = prev + current; break;
+        case '-': result = prev - current; break;
+        case '×': result = prev * current; break;
+        case '÷': result = prev / current; break;
+      }
+      
+      setCalcDisplay(result.toString());
+      setCalcPrevValue(null);
+      setCalcOperation(null);
+      setCalcNewNumber(true);
+    }
+  };
+  
+  const handleCalcClear = () => {
+    setCalcDisplay('0');
+    setCalcPrevValue(null);
+    setCalcOperation(null);
+    setCalcNewNumber(true);
+  };
+  
+  const handleCalcDecimal = () => {
+    if (!calcDisplay.includes('.')) {
+      setCalcDisplay(calcDisplay + '.');
+      setCalcNewNumber(false);
+    }
+  };
+  
   // Custom items state
   type CustomItem = {
     id: string;
@@ -1097,7 +1171,7 @@ const QuotePage = ({
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => window.open('https://www.calculator.net/', '_blank')}
+              onClick={() => setShowCalculator(!showCalculator)}
               className="flex items-center gap-2 bg-slate-100 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-200 transition font-medium"
               title="開啟計算機"
             >
@@ -1387,7 +1461,7 @@ const QuotePage = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-32 resize-none"
-              placeholder="請輸入備註事項（如：付款方式、交貨時間、保固說明等）"
+              placeholder="請輸入備註事項（如：付款方式、貨物稅申請、汰舊換新廢四機...等）"
             />
           </div>
 
@@ -1398,6 +1472,77 @@ const QuotePage = ({
           </div>
         </div>
       </div>
+      
+      {/* Calculator Modal */}
+      {showCalculator && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden">
+            {/* Calculator Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-white">
+                <Calculator className="w-5 h-5" />
+                <span className="font-bold">計算機</span>
+              </div>
+              <button
+                onClick={() => setShowCalculator(false)}
+                className="text-white hover:bg-white/20 rounded-lg p-1 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Calculator Display */}
+            <div className="bg-slate-900 p-6">
+              <div className="text-right">
+                {calcOperation && calcPrevValue && (
+                  <div className="text-slate-400 text-sm mb-1 font-mono">
+                    {calcPrevValue} {calcOperation}
+                  </div>
+                )}
+                <div className="text-white text-4xl font-mono font-bold break-all">
+                  {calcDisplay}
+                </div>
+              </div>
+            </div>
+            
+            {/* Calculator Buttons */}
+            <div className="grid grid-cols-4 gap-0 bg-slate-100">
+              {[
+                { label: 'C', type: 'function', action: handleCalcClear, color: 'bg-red-500 hover:bg-red-600 text-white' },
+                { label: '÷', type: 'operator', action: () => handleCalcOperation('÷'), color: 'bg-orange-500 hover:bg-orange-600 text-white' },
+                { label: '×', type: 'operator', action: () => handleCalcOperation('×'), color: 'bg-orange-500 hover:bg-orange-600 text-white' },
+                { label: '←', type: 'function', action: () => setCalcDisplay(calcDisplay.slice(0, -1) || '0'), color: 'bg-slate-400 hover:bg-slate-500 text-white' },
+                
+                { label: '7', type: 'number', action: () => handleCalcNumber('7'), color: 'bg-white hover:bg-slate-50' },
+                { label: '8', type: 'number', action: () => handleCalcNumber('8'), color: 'bg-white hover:bg-slate-50' },
+                { label: '9', type: 'number', action: () => handleCalcNumber('9'), color: 'bg-white hover:bg-slate-50' },
+                { label: '-', type: 'operator', action: () => handleCalcOperation('-'), color: 'bg-orange-500 hover:bg-orange-600 text-white' },
+                
+                { label: '4', type: 'number', action: () => handleCalcNumber('4'), color: 'bg-white hover:bg-slate-50' },
+                { label: '5', type: 'number', action: () => handleCalcNumber('5'), color: 'bg-white hover:bg-slate-50' },
+                { label: '6', type: 'number', action: () => handleCalcNumber('6'), color: 'bg-white hover:bg-slate-50' },
+                { label: '+', type: 'operator', action: () => handleCalcOperation('+'), color: 'bg-orange-500 hover:bg-orange-600 text-white' },
+                
+                { label: '1', type: 'number', action: () => handleCalcNumber('1'), color: 'bg-white hover:bg-slate-50' },
+                { label: '2', type: 'number', action: () => handleCalcNumber('2'), color: 'bg-white hover:bg-slate-50' },
+                { label: '3', type: 'number', action: () => handleCalcNumber('3'), color: 'bg-white hover:bg-slate-50' },
+                { label: '=', type: 'equals', action: handleCalcEquals, color: 'bg-indigo-600 hover:bg-indigo-700 text-white row-span-2' },
+                
+                { label: '0', type: 'number', action: () => handleCalcNumber('0'), color: 'bg-white hover:bg-slate-50 col-span-2' },
+                { label: '.', type: 'decimal', action: handleCalcDecimal, color: 'bg-white hover:bg-slate-50' },
+              ].map((btn, idx) => (
+                <button
+                  key={idx}
+                  onClick={btn.action}
+                  className={`${btn.color} p-6 text-xl font-bold transition active:scale-95 border border-slate-200 ${btn.label === '0' ? 'col-span-2' : ''} ${btn.label === '=' ? 'row-span-2' : ''}`}
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -1958,7 +2103,7 @@ export default function App() {
               <img src="./icon.png" alt="Logo" className="w-7 h-7 object-contain" />
             </div>
                     <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-slate-300">
-                      AC Master Pro
+                      AC小隼助手
                     </h1>
           </div>
           
