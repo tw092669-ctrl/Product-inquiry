@@ -868,7 +868,183 @@ const ComparisonModal = ({ isOpen, onClose, products, config }: { isOpen: boolea
   );
 };
 
-// 6. Product Card
+// 6. Quote Page Component
+const QuotePage = ({ 
+  products, 
+  config, 
+  onBack 
+}: { 
+  products: Product[]; 
+  config: AppConfig; 
+  onBack: () => void;
+}) => {
+  const [companyName, setCompanyName] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
+  const [notes, setNotes] = useState('');
+
+  const totalPrice = useMemo(() => {
+    return products.reduce((sum, p) => {
+      const price = parseInt(p.price.toString().replace(/,/g, ''), 10);
+      return sum + (isNaN(price) ? 0 : price);
+    }, 0);
+  }, [products]);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {/* Header - Hidden when printing */}
+      <div className="print:hidden bg-white border-b sticky top-0 z-40 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium transition"
+          >
+            <X className="w-5 h-5" />
+            <span>返回</span>
+          </button>
+          <h1 className="text-xl font-bold text-slate-800">報價單</h1>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium"
+          >
+            <Download className="w-5 h-5" />
+            列印/下載
+          </button>
+        </div>
+      </div>
+
+      {/* Quote Content */}
+      <div className="max-w-5xl mx-auto p-4 sm:p-8">
+        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-10 print:shadow-none print:rounded-none">
+          {/* Title */}
+          <div className="text-center mb-8 border-b-4 border-indigo-600 pb-6">
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-800 mb-2">產品報價單</h1>
+            <p className="text-slate-500">PRODUCT QUOTATION</p>
+          </div>
+
+          {/* Info Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">公司名稱</label>
+              <input
+                type="text"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent print:border-none print:px-0"
+                placeholder="請輸入公司名稱"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">客戶姓名</label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent print:border-none print:px-0"
+                placeholder="請輸入客戶姓名"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">報價日期</label>
+              <input
+                type="date"
+                value={quoteDate}
+                onChange={(e) => setQuoteDate(e.target.value)}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent print:border-none print:px-0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2">報價編號</label>
+              <input
+                type="text"
+                value={`Q-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`}
+                readOnly
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 print:border-none print:bg-transparent print:px-0"
+              />
+            </div>
+          </div>
+
+          {/* Products Table */}
+          <div className="mb-8 overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-slate-100 print:bg-slate-200">
+                  <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">項次</th>
+                  <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">產品名稱</th>
+                  <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">品牌</th>
+                  <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">規格</th>
+                  <th className="text-right p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">單價</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product, index) => {
+                  const brand = config.brands.find(b => b.id === product.brandId);
+                  const style = config.styles.find(s => s.id === product.styleId);
+                  const type = config.types.find(t => t.id === product.typeId);
+                  
+                  return (
+                    <tr key={product.id} className="border-b border-slate-200 hover:bg-slate-50">
+                      <td className="p-3 text-slate-600">{index + 1}</td>
+                      <td className="p-3">
+                        <div className="font-medium text-slate-800">{product.name}</div>
+                        {product.remarks && (
+                          <div className="text-xs text-slate-500 mt-1">{product.remarks}</div>
+                        )}
+                      </td>
+                      <td className="p-3 text-slate-700">{brand?.label}</td>
+                      <td className="p-3 text-sm text-slate-600">
+                        <div>{style?.label} / {type?.label}</div>
+                        {product.dimensions.indoor && (
+                          <div className="text-xs text-slate-500 mt-1">室內: {product.dimensions.indoor}</div>
+                        )}
+                      </td>
+                      <td className="p-3 text-right font-mono font-bold text-slate-800">
+                        ${product.price}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="bg-slate-50">
+                  <td colSpan={4} className="p-4 text-right font-bold text-lg text-slate-700">
+                    總計：
+                  </td>
+                  <td className="p-4 text-right font-mono font-black text-2xl text-emerald-600">
+                    ${totalPrice.toLocaleString()}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          {/* Notes */}
+          <div className="mb-6">
+            <label className="block text-sm font-bold text-slate-700 mb-2">備註說明</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-32 resize-none print:border-none print:px-0"
+              placeholder="請輸入備註事項（如：付款方式、交貨時間、保固說明等）"
+            />
+          </div>
+
+          {/* Footer */}
+          <div className="border-t-2 border-slate-200 pt-6 mt-8 text-center text-sm text-slate-500">
+            <p>本報價單有效期限為 30 天</p>
+            <p className="mt-2">如有任何疑問，請隨時與我們聯繫</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 7. Product Card
 type ViewMode = 'grid' | 'list' | 'compact';
 
 const ProductCard: React.FC<{ 
@@ -1183,6 +1359,7 @@ export default function App() {
   const [googleSheetUrl, setGoogleSheetUrl] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [autoSync, setAutoSync] = useState(false);
+  const [showQuotePage, setShowQuotePage] = useState(false);
   
   // Comparison State
   const [compareList, setCompareList] = useState<string[]>([]);
@@ -1209,9 +1386,21 @@ export default function App() {
     products.filter(p => compareList.includes(p.id)), 
   [products, compareList]);
 
+  const pinnedProducts = useMemo(() => 
+    products.filter(p => p.isPinned),
+  [products]);
+
   // Handlers
   const handlePin = (id: string) => {
     setProducts(prev => prev.map(p => p.id === id ? { ...p, isPinned: !p.isPinned } : p));
+  };
+
+  const handleGenerateQuote = () => {
+    if (pinnedProducts.length === 0) {
+      alert('請先釘選至少一項產品');
+      return;
+    }
+    setShowQuotePage(true);
   };
 
   const handleToggleCompare = (id: string) => {
@@ -1395,6 +1584,13 @@ export default function App() {
 
   return (
     <AppErrorOverlay>
+      {showQuotePage ? (
+        <QuotePage 
+          products={pinnedProducts}
+          config={config}
+          onBack={() => setShowQuotePage(false)}
+        />
+      ) : (
       <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans text-slate-800 pb-20">
       {/* Navbar */}
       <header className="bg-slate-900 sticky top-0 z-40 shadow-xl shadow-indigo-900/20 text-white">
@@ -1557,6 +1753,24 @@ export default function App() {
         </div>
       )}
 
+      {/* Generate Quote Button */}
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40">
+        <button
+          onClick={handleGenerateQuote}
+          className="group bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 flex items-center gap-2 font-bold text-sm sm:text-base hover:scale-105 active:scale-95"
+          title="生成報價單"
+        >
+          <FileDown className="w-5 h-5 sm:w-6 sm:h-6 group-hover:animate-bounce" />
+          <span className="hidden sm:inline">生成報價單</span>
+          <span className="sm:hidden">報價單</span>
+          {pinnedProducts.length > 0 && (
+            <span className="ml-1 bg-white/20 text-xs px-2 py-0.5 rounded-full">
+              {pinnedProducts.length}
+            </span>
+          )}
+        </button>
+      </div>
+
       {/* Modals */}
       <SettingsModal 
         isOpen={isSettingsOpen} 
@@ -1604,6 +1818,7 @@ export default function App() {
         config={config}
       />
     </div>
+      )}
     </AppErrorOverlay>
   );
 }
