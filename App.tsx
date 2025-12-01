@@ -2141,7 +2141,8 @@ export default function App() {
         const brandId = findOptionId(row['品牌'], config.brands) || config.brands[0].id;
         const styleId = findOptionId(row['樣式'], config.styles) || config.styles[0].id;
         const typeId = findOptionId(row['種類'], config.types) || config.types[0].id;
-        const pipeId = findOptionId(row['管徑'], config.pipes) || config.pipes[0].id;
+        // 管徑直接使用原始值，不轉換為 ID
+        const pipeValue = row['管徑'] || config.pipes[0]?.label || '';
         
         const indoor = row['室內機尺寸'] || row['尺寸'] || '';
         const outdoor = row['室外機尺寸'] || '';
@@ -2152,7 +2153,7 @@ export default function App() {
           brandId,
           styleId,
           typeId,
-          pipeId,
+          pipeId: pipeValue,
           environment: row['環境']?.includes('暖') ? 'heating' : 'cooling',
           dimensions: { indoor, outdoor },
           price: row['建議售價'] || row['價格'] || '',
