@@ -1898,22 +1898,27 @@ const ProductCard: React.FC<{
         </div>
 
         {/* Specs Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-5 flex-1">
-          <div className="bg-slate-50/80 border border-slate-100 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-            <span className="text-xs text-slate-400 block mb-1">樣式</span>
-            <span className="font-semibold text-sm" style={{color: style.color}}>{style.label}</span>
-          </div>
+        <div className="grid grid-cols-4 gap-3 mb-5 flex-1">
+          {/* 種類 - 縮小 (1格) */}
           <div className="bg-slate-50/80 border border-slate-100 p-3 rounded-xl hover:bg-slate-50 transition-colors">
             <span className="text-xs text-slate-400 block mb-1">種類</span>
             <span className="font-semibold text-sm" style={{color: type.color}}>{type.label}</span>
           </div>
+          
+          {/* 樣式 - 拉長 (2格) */}
+          <div className="col-span-2 bg-slate-50/80 border border-slate-100 p-3 rounded-xl hover:bg-slate-50 transition-colors">
+            <span className="text-xs text-slate-400 block mb-1">樣式</span>
+            <span className="font-semibold text-sm" style={{color: style.color}}>{style.label}</span>
+          </div>
+          
+          {/* 管徑 - 縮小 (1格) */}
           <div className="bg-slate-50/80 border border-slate-100 p-3 rounded-xl hover:bg-slate-50 transition-colors">
             <span className="text-xs text-slate-400 block mb-1">管徑</span>
             <span className="font-semibold text-sm" style={{color: pipe.color}}>{pipe.label}</span>
           </div>
           
-          {/* Dimensions Box */}
-          <div className="bg-slate-50/80 border border-slate-100 p-3 rounded-xl flex flex-col justify-center hover:bg-slate-50 transition-colors">
+          {/* Dimensions Box - 拉長 (4格佔滿整行) */}
+          <div className="col-span-4 bg-slate-50/80 border border-slate-100 p-3 rounded-xl flex flex-col justify-center hover:bg-slate-50 transition-colors">
             <div className="flex items-start gap-2 mb-1.5">
                <Home className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0 mt-0.5" />
                <span className="text-xs font-semibold text-slate-700 break-all font-mono leading-tight">{product.dimensions.indoor || '-'}</span>
