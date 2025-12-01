@@ -1909,7 +1909,7 @@ const ProductCard: React.FC<{
           </div>
           <div className="bg-slate-50/80 border border-slate-100 p-3 rounded-xl hover:bg-slate-50 transition-colors">
             <span className="text-xs text-slate-400 block mb-1">管徑</span>
-            <span className="font-semibold text-sm break-all" style={{color: pipe.color}}>{pipe.label}</span>
+            <span className="font-semibold text-sm break-all leading-tight" style={{color: pipe.color}}>{pipe.label}</span>
           </div>
           
           {/* Dimensions Box */}
