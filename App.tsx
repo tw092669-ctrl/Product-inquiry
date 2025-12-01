@@ -883,6 +883,20 @@ const QuotePage = ({
   const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
   
+  // Product price adjustments
+  const [productPrices, setProductPrices] = useState<Record<string, string>>(() => {
+    const initialPrices: Record<string, string> = {};
+    products.forEach(p => {
+      initialPrices[p.id] = p.price.toString();
+    });
+    return initialPrices;
+  });
+  const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
+  
+  const handleUpdateProductPrice = (productId: string, newPrice: string) => {
+    setProductPrices(prev => ({ ...prev, [productId]: newPrice }));
+  };
+  
   // Custom items state
   type CustomItem = {
     id: string;
@@ -942,7 +956,8 @@ const QuotePage = ({
 
   const totalPrice = useMemo(() => {
     const productsTotal = products.reduce((sum, p) => {
-      const price = parseInt(p.price.toString().replace(/,/g, ''), 10);
+      const adjustedPrice = productPrices[p.id] || p.price.toString();
+      const price = parseInt(adjustedPrice.replace(/,/g, ''), 10);
       return sum + (isNaN(price) ? 0 : price);
     }, 0);
     
@@ -952,7 +967,7 @@ const QuotePage = ({
     }, 0);
     
     return productsTotal + customTotal;
-  }, [products, customItems]);
+  }, [products, customItems, productPrices]);
 
   const [isExporting, setIsExporting] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -1191,7 +1206,7 @@ const QuotePage = ({
                   const type = config.types.find(t => t.id === product.typeId);
                   
                   return (
-                    <tr key={product.id} className="border-b border-slate-200 hover:bg-slate-50">
+                    <tr key={product.id} className="group border-b border-slate-200 hover:bg-slate-50">
                       <td className="p-3 text-slate-600">{index + 1}</td>
                       <td className="p-3">
                         <div className="font-medium text-slate-800">{product.name}</div>
@@ -1206,8 +1221,51 @@ const QuotePage = ({
                           <div className="text-xs text-slate-500 mt-1">室內: {product.dimensions.indoor}</div>
                         )}
                       </td>
-                      <td className="p-3 text-right font-mono font-bold text-slate-800">
-                        ${product.price}
+                      <td className="p-3 text-right">
+                        <div className="export-hide flex items-center justify-end gap-2">
+                          {editingPriceId === product.id ? (
+                            <>
+                              <input
+                                type="text"
+                                value={productPrices[product.id] || product.price}
+                                onChange={(e) => handleUpdateProductPrice(product.id, e.target.value)}
+                                onBlur={() => setEditingPriceId(null)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') setEditingPriceId(null);
+                                  if (e.key === 'Escape') {
+                                    handleUpdateProductPrice(product.id, product.price.toString());
+                                    setEditingPriceId(null);
+                                  }
+                                }}
+                                className="w-28 px-2 py-1 border border-indigo-300 rounded text-right font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500"
+                                autoFocus
+                              />
+                              <button
+                                onClick={() => setEditingPriceId(null)}
+                                className="text-green-600 hover:text-green-700 p-1"
+                                title="確認"
+                              >
+                                <CheckCircle2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <span className="font-mono font-bold text-slate-800">
+                                ${productPrices[product.id] || product.price}
+                              </span>
+                              <button
+                                onClick={() => setEditingPriceId(product.id)}
+                                className="text-indigo-600 hover:text-indigo-700 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="編輯價格"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                        <div className="hidden export-show text-right font-mono font-bold text-slate-800">
+                          ${productPrices[product.id] || product.price}
+                        </div>
                       </td>
                       <td className="export-hide"></td>
                     </tr>
