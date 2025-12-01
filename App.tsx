@@ -1258,36 +1258,47 @@ const QuotePage = ({
       <div className="max-w-5xl mx-auto p-4 sm:p-8">
         <div id="quote-content" className="bg-white rounded-2xl shadow-lg p-6 sm:p-10">
           {/* Title */}
-          <div className="text-center mb-8 border-b-4 border-indigo-600 pb-6">
-            <h1 className="text-3xl sm:text-4xl font-black text-slate-800 mb-2">產品報價單</h1>
-            <p className="text-slate-500">PRODUCT QUOTATION</p>
+          <div className="text-center mb-10 pb-8 border-b-2 border-slate-200">
+            <div className="inline-block">
+              <h1 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">產品報價單</h1>
+              <div className="h-1 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 rounded-full mb-3"></div>
+            </div>
+            <p className="text-slate-500 text-sm tracking-wider">PRODUCT QUOTATION</p>
           </div>
 
           {/* Info Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">客戶姓名</label>
-              <input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="export-hide w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="請輸入客戶姓名"
-              />
-              <div className="hidden export-show px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 min-h-[42px] flex items-center">
-                {customerName || '未填寫'}
+          <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-6 mb-8 border border-slate-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
+                  客戶姓名
+                </label>
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  className="export-hide w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                  placeholder="請輸入客戶姓名"
+                />
+                <div className="hidden export-show px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
+                  {customerName || '未填寫'}
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">報價日期</label>
-              <input
-                type="date"
-                value={quoteDate}
-                onChange={(e) => setQuoteDate(e.target.value)}
-                className="export-hide w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-              <div className="hidden export-show px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 min-h-[42px] flex items-center">
-                {quoteDate || '未填寫'}
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
+                  報價日期
+                </label>
+                <input
+                  type="date"
+                  value={quoteDate}
+                  onChange={(e) => setQuoteDate(e.target.value)}
+                  className="export-hide w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                />
+                <div className="hidden export-show px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
+                  {quoteDate || '未填寫'}
+                </div>
               </div>
             </div>
           </div>
@@ -1296,13 +1307,13 @@ const QuotePage = ({
           <div className="mb-8 overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-slate-100">
-                  <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm w-16">項次</th>
-                  <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">產品名稱</th>
-                  <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">品牌</th>
-                  <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">規格</th>
-                  <th className="text-right p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm w-32">單價</th>
-                  <th className="export-hide border-b-2 border-slate-300 w-12"></th>
+                <tr className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
+                  <th className="text-left p-4 font-bold text-sm w-16 rounded-tl-xl">項次</th>
+                  <th className="text-left p-4 font-bold text-sm">產品名稱</th>
+                  <th className="text-left p-4 font-bold text-sm">品牌</th>
+                  <th className="text-left p-4 font-bold text-sm">規格</th>
+                  <th className="text-right p-4 font-bold text-sm w-32">單價</th>
+                  <th className="export-hide w-12 rounded-tr-xl"></th>
                 </tr>
               </thead>
               <tbody>
@@ -1311,7 +1322,7 @@ const QuotePage = ({
                   const style = config.styles.find(s => s.id === product.styleId);
                   const type = config.types.find(t => t.id === product.typeId);
                   const pipe = config.pipes.find(p => p.id === product.pipeId);
-                  const envLabel = product.environment === 'heating' ? '暖氣' : '冷專';
+                  const EnvIcon = product.environment === 'heating' ? Sun : Snowflake;
                   
                   return (
                     <tr key={product.id} className="group border-b border-slate-200 hover:bg-slate-50">
@@ -1324,9 +1335,9 @@ const QuotePage = ({
                       </td>
                       <td className="p-3 text-slate-700">{brand?.label}</td>
                       <td className="p-3 text-sm text-slate-600">
-                        <div>{style?.label} / {type?.label}</div>
-                        <div className="text-xs text-slate-500 mt-1">
-                          {envLabel} | {pipe?.label || '未設定'}
+                        <div className="flex items-center gap-2">
+                          <span>{style?.label} / {type?.label}</span>
+                          <EnvIcon className={`w-4 h-4 ${product.environment === 'heating' ? 'text-orange-500' : 'text-cyan-500'}`} />
                         </div>
                       </td>
                       <td className="p-3 text-right">
@@ -1472,12 +1483,14 @@ const QuotePage = ({
                 </tr>
               </tbody>
               <tfoot>
-                <tr className="bg-slate-50">
-                  <td colSpan={4} className="p-4 text-right font-bold text-lg text-slate-700">
-                    總計：
+                <tr className="bg-gradient-to-r from-emerald-50 to-teal-50 border-t-2 border-emerald-500">
+                  <td colSpan={4} className="p-5 text-right font-black text-xl text-slate-700">
+                    <span className="mr-2">總計</span>
                   </td>
-                  <td className="p-4 text-right font-mono font-black text-2xl text-emerald-600">
-                    ${totalPrice.toLocaleString()}
+                  <td className="p-5 text-right">
+                    <div className="inline-block bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-xl shadow-lg">
+                      <span className="font-mono font-black text-2xl">${totalPrice.toLocaleString()}</span>
+                    </div>
                   </td>
                   <td className="export-hide"></td>
                 </tr>
@@ -1500,9 +1513,20 @@ const QuotePage = ({
           </div>
 
           {/* Footer */}
-          <div className="border-t-2 border-slate-200 pt-6 mt-8 text-center text-sm text-slate-500">
-            <p>本報價單有效期限為 30 天</p>
-            <p className="mt-2">如有任何疑問，請隨時與我們聯繫</p>
+          <div className="mt-10 pt-8 border-t-2 border-slate-200">
+            <div className="bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl p-6 text-center">
+              <div className="text-indigo-600 font-bold text-lg mb-3">注意事項</div>
+              <div className="space-y-2 text-sm text-slate-600">
+                <p className="flex items-center justify-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
+                  本報價單有效期限為 30 天
+                </p>
+                <p className="flex items-center justify-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
+                  如有任何疑問，請隨時與我們聯繫
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
