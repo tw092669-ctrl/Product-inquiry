@@ -2104,7 +2104,8 @@ export default function App() {
       // 清除現有資料並替換為新資料
       setProducts(newProducts);
       alert(`成功從 Google 試算表同步 ${newProducts.length} 筆資料\n(已清除舊有資料)`);
-      localStorage.setItem('googleSheetUrl', googleSheetUrl);
+      // 保存使用的 URL（可能是參數傳入的或狀態中的）
+      localStorage.setItem('googleSheetUrl', urlToUse);
     } catch (err) {
       console.error('同步失敗:', err);
       alert('同步失敗,請確認試算表 URL 是否正確且已設定為公開。\n\n詳見 GOOGLE_SHEETS_SETUP.md 設定說明。');
