@@ -3,7 +3,7 @@ import {
   Search, Plus, Settings, Pin, Trash2, Edit2, Download, 
   Sun, Snowflake, Upload, X, Save, AlertTriangle, Menu,
   LayoutGrid, List, Grid3x3, Home, Trees, BarChart3, ChevronDown, ChevronUp,
-  Package, DollarSign, TrendingUp, PieChart, Zap, FileDown, Calculator, Scale, CheckCircle2, ArrowRightLeft
+  Package, DollarSign, TrendingUp, PieChart, Zap, FileDown, Calculator, Scale, CheckCircle2, ArrowRightLeft, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { Product, AppConfig, ConfigOption, EnvironmentType } from './types';
@@ -2019,9 +2019,15 @@ export default function App() {
   const [autoSync, setAutoSync] = useState(false);
   const [showQuotePage, setShowQuotePage] = useState(false);
   const [maxDisplayCards, setMaxDisplayCards] = useState(20);
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Comparison State
   const [compareList, setCompareList] = useState<string[]>([]);
+
+  // Reset to page 1 when search term or max cards changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, maxDisplayCards]);
 
   // Derived State
   const filteredProducts = useMemo(() => {
@@ -2363,27 +2369,75 @@ export default function App() {
 
         {/* Product Grid / List / Compact Wrapper */}
         {filteredProducts.length > 0 ? (
-          <div className={
-            viewMode === 'list' 
-              ? "flex flex-col gap-3" 
-              : viewMode === 'compact'
-              ? "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-5"
-              : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
-          }>
-            {filteredProducts.slice(0, maxDisplayCards).map(product => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                config={config}
-                viewMode={viewMode}
-                isSelected={compareList.includes(product.id)}
-                onToggleCompare={handleToggleCompare}
-                onPin={handlePin}
-                onEdit={(p) => { setEditingProduct(p); setIsFormOpen(true); }}
-                onDelete={handleDeleteRequest}
-              />
-            ))}
-          </div>
+          <>
+            <div className={
+              viewMode === 'list' 
+                ? "flex flex-col gap-3" 
+                : viewMode === 'compact'
+                ? "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-5"
+                : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+            }>
+              {(() => {
+                const startIndex = (currentPage - 1) * maxDisplayCards;
+                const endIndex = startIndex + maxDisplayCards;
+                return filteredProducts.slice(startIndex, endIndex).map(product => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    config={config}
+                    viewMode={viewMode}
+                    isSelected={compareList.includes(product.id)}
+                    onToggleCompare={handleToggleCompare}
+                    onPin={handlePin}
+                    onEdit={(p) => { setEditingProduct(p); setIsFormOpen(true); }}
+                    onDelete={handleDeleteRequest}
+                  />
+                ));
+              })()}
+            </div>
+            
+            {/* Pagination Controls */}
+            {filteredProducts.length > maxDisplayCards && (
+              <div className="mt-8 flex items-center justify-center gap-4">
+                <button
+                  onClick={() => {
+                    setCurrentPage(prev => Math.max(1, prev - 1));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  disabled={currentPage === 1}
+                  className="p-3 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-slate-200 disabled:hover:text-slate-600 transition shadow-sm"
+                  title="上一頁"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm">
+                  <span className="text-sm font-medium text-slate-600">
+                    第 {currentPage} 頁
+                  </span>
+                  <span className="text-slate-400">/</span>
+                  <span className="text-sm font-medium text-slate-600">
+                    共 {Math.ceil(filteredProducts.length / maxDisplayCards)} 頁
+                  </span>
+                  <span className="text-xs text-slate-400 ml-2">
+                    ({(currentPage - 1) * maxDisplayCards + 1}-{Math.min(currentPage * maxDisplayCards, filteredProducts.length)} / {filteredProducts.length})
+                  </span>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    setCurrentPage(prev => Math.min(Math.ceil(filteredProducts.length / maxDisplayCards), prev + 1));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  disabled={currentPage >= Math.ceil(filteredProducts.length / maxDisplayCards)}
+                  className="p-3 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-slate-200 disabled:hover:text-slate-600 transition shadow-sm"
+                  title="下一頁"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-20">
             <div className="bg-white w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-slate-100 border border-slate-50">
