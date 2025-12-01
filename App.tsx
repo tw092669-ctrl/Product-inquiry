@@ -954,14 +954,121 @@ const QuotePage = ({
     return productsTotal + customTotal;
   }, [products, customItems]);
 
-  const handlePrint = () => {
-    window.print();
+  const [isExporting, setIsExporting] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+
+  const handleExportImage = async () => {
+    setIsExporting(true);
+    setShowExportMenu(false);
+    try {
+      const element = document.getElementById('quote-content');
+      if (!element) return;
+
+      // Hide interactive elements
+      const editElements = element.querySelectorAll('.export-hide');
+      const displayElements = element.querySelectorAll('.export-show');
+      
+      editElements.forEach(el => (el as HTMLElement).style.display = 'none');
+      displayElements.forEach(el => (el as HTMLElement).style.display = 'block');
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true,
+      });
+
+      // Restore interactive elements
+      editElements.forEach(el => (el as HTMLElement).style.display = '');
+      displayElements.forEach(el => (el as HTMLElement).style.display = '');
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          const fileName = `報價單_${quoteDate}_${customerName || '客戶'}.jpg`;
+          link.download = fileName;
+          link.href = url;
+          link.click();
+          URL.revokeObjectURL(url);
+        }
+        setIsExporting(false);
+      }, 'image/jpeg', 0.95);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('匯出失敗，請稍後再試');
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    setShowExportMenu(false);
+    try {
+      const element = document.getElementById('quote-content');
+      if (!element) return;
+
+      // Hide interactive elements
+      const editElements = element.querySelectorAll('.export-hide');
+      const displayElements = element.querySelectorAll('.export-show');
+      
+      editElements.forEach(el => (el as HTMLElement).style.display = 'none');
+      displayElements.forEach(el => (el as HTMLElement).style.display = 'block');
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true,
+      });
+
+      // Restore interactive elements
+      editElements.forEach(el => (el as HTMLElement).style.display = '');
+      displayElements.forEach(el => (el as HTMLElement).style.display = '');
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      
+      // 使用 window.print 搭配自訂樣式來生成 PDF
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>報價單_${quoteDate}_${customerName || '客戶'}</title>
+              <style>
+                body { margin: 0; padding: 0; }
+                img { width: 100%; height: auto; display: block; }
+                @media print {
+                  body { margin: 0; }
+                  img { page-break-inside: avoid; }
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${imgData}" />
+              <script>
+                window.onload = function() {
+                  window.print();
+                  setTimeout(function() { window.close(); }, 100);
+                }
+              </script>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
+      setIsExporting(false);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('匯出失敗，請稍後再試');
+      setIsExporting(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header - Hidden when printing */}
-      <div className="print:hidden bg-white border-b sticky top-0 z-40 shadow-sm">
+      {/* Header */}
+      <div className="bg-white border-b sticky top-0 z-40 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <button 
             onClick={onBack}
@@ -971,19 +1078,58 @@ const QuotePage = ({
             <span>返回</span>
           </button>
           <h1 className="text-xl font-bold text-slate-800">報價單</h1>
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium"
-          >
-            <Download className="w-5 h-5" />
-            列印/下載
-          </button>
+          
+          {/* Export Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              disabled={isExporting}
+              className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium disabled:bg-slate-400 disabled:cursor-not-allowed"
+            >
+              {isExporting ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  匯出中...
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5" />
+                  匯出
+                </>
+              )}
+            </button>
+            
+            {showExportMenu && !isExporting && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-slate-200 py-2 z-50">
+                <button
+                  onClick={handleExportImage}
+                  className="w-full px-4 py-2 text-left hover:bg-slate-50 transition flex items-center gap-3 text-slate-700"
+                >
+                  <FileDown className="w-4 h-4 text-emerald-600" />
+                  <div>
+                    <div className="font-medium">匯出 JPG</div>
+                    <div className="text-xs text-slate-500">圖片格式</div>
+                  </div>
+                </button>
+                <button
+                  onClick={handleExportPDF}
+                  className="w-full px-4 py-2 text-left hover:bg-slate-50 transition flex items-center gap-3 text-slate-700"
+                >
+                  <FileDown className="w-4 h-4 text-red-600" />
+                  <div>
+                    <div className="font-medium">匯出 PDF</div>
+                    <div className="text-xs text-slate-500">列印為PDF</div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Quote Content */}
       <div className="max-w-5xl mx-auto p-4 sm:p-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-10 print:shadow-none print:rounded-none">
+        <div id="quote-content" className="bg-white rounded-2xl shadow-lg p-6 sm:p-10">
           {/* Title */}
           <div className="text-center mb-8 border-b-4 border-indigo-600 pb-6">
             <h1 className="text-3xl sm:text-4xl font-black text-slate-800 mb-2">產品報價單</h1>
@@ -998,7 +1144,7 @@ const QuotePage = ({
                 type="text"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent print:border-none print:px-0"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="請輸入公司名稱"
               />
             </div>
@@ -1008,7 +1154,7 @@ const QuotePage = ({
                 type="text"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent print:border-none print:px-0"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="請輸入客戶姓名"
               />
             </div>
@@ -1018,7 +1164,7 @@ const QuotePage = ({
                 type="date"
                 value={quoteDate}
                 onChange={(e) => setQuoteDate(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent print:border-none print:px-0"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
             <div>
@@ -1027,7 +1173,7 @@ const QuotePage = ({
                 type="text"
                 value={`Q-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`}
                 readOnly
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 print:border-none print:bg-transparent print:px-0"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50"
               />
             </div>
           </div>
@@ -1036,13 +1182,13 @@ const QuotePage = ({
           <div className="mb-8 overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-slate-100 print:bg-slate-200">
+                <tr className="bg-slate-100">
                   <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm w-16">項次</th>
                   <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">產品名稱</th>
                   <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">品牌</th>
                   <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">規格</th>
                   <th className="text-right p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm w-32">單價</th>
-                  <th className="print:hidden border-b-2 border-slate-300 w-12"></th>
+                  <th className="export-hide border-b-2 border-slate-300 w-12"></th>
                 </tr>
               </thead>
               <tbody>
@@ -1070,17 +1216,17 @@ const QuotePage = ({
                       <td className="p-3 text-right font-mono font-bold text-slate-800">
                         ${product.price}
                       </td>
-                      <td className="print:hidden"></td>
+                      <td className="export-hide"></td>
                     </tr>
                   );
                 })}
                 
                 {/* Custom Items */}
                 {customItems.map((item, index) => (
-                  <tr key={item.id} className="border-b border-slate-200 bg-blue-50/30 print:bg-transparent">
+                  <tr key={item.id} className="border-b border-slate-200 bg-blue-50/30">
                     <td className="p-3 text-slate-600">{products.length + index + 1}</td>
                     <td className="p-3" colSpan={1}>
-                      <div className="print:hidden">
+                      <div className="export-hide">
                         <select
                           value={item.name}
                           onChange={(e) => {
@@ -1104,30 +1250,36 @@ const QuotePage = ({
                           className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
                         />
                       </div>
-                      <div className="hidden print:block font-medium text-slate-800">{item.name}</div>
+                      <div className="hidden export-show font-medium text-slate-800">{item.name}</div>
                       {item.description && (
                         <div className="text-xs text-slate-500 mt-1">{item.description}</div>
                       )}
                     </td>
                     <td className="p-3" colSpan={2}>
-                      <input
-                        type="text"
-                        value={item.description}
-                        onChange={(e) => handleUpdateCustomItem(index, 'description', e.target.value)}
-                        placeholder="說明"
-                        className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 print:border-none print:px-0 print:py-0"
-                      />
+                      <div className="export-hide">
+                        <input
+                          type="text"
+                          value={item.description}
+                          onChange={(e) => handleUpdateCustomItem(index, 'description', e.target.value)}
+                          placeholder="說明"
+                          className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="hidden export-show text-sm text-slate-600">{item.description}</div>
                     </td>
                     <td className="p-3 text-right">
-                      <input
-                        type="text"
-                        value={item.price}
-                        onChange={(e) => handleUpdateCustomItem(index, 'price', e.target.value)}
-                        placeholder="0"
-                        className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-right font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500 print:border-none print:px-0 print:py-0"
-                      />
+                      <div className="export-hide">
+                        <input
+                          type="text"
+                          value={item.price}
+                          onChange={(e) => handleUpdateCustomItem(index, 'price', e.target.value)}
+                          placeholder="0"
+                          className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-right font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="hidden export-show text-right font-mono font-bold text-slate-800">${item.price}</div>
                     </td>
-                    <td className="p-3 print:hidden">
+                    <td className="p-3 export-hide">
                       <button
                         onClick={() => handleRemoveCustomItem(index)}
                         className="p-1 text-red-500 hover:bg-red-50 rounded transition"
@@ -1140,7 +1292,7 @@ const QuotePage = ({
                 ))}
                 
                 {/* Add Custom Item Button */}
-                <tr className="print:hidden">
+                <tr className="export-hide">
                   <td colSpan={6} className="p-3">
                     <button
                       onClick={handleAddCustomItem}
@@ -1160,7 +1312,7 @@ const QuotePage = ({
                   <td className="p-4 text-right font-mono font-black text-2xl text-emerald-600">
                     ${totalPrice.toLocaleString()}
                   </td>
-                  <td className="print:hidden"></td>
+                  <td className="export-hide"></td>
                 </tr>
               </tfoot>
             </table>
@@ -1172,7 +1324,7 @@ const QuotePage = ({
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-32 resize-none print:border-none print:px-0"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-32 resize-none"
               placeholder="請輸入備註事項（如：付款方式、交貨時間、保固說明等）"
             />
           </div>
