@@ -1814,14 +1814,14 @@ const ProductCard: React.FC<{
         </div>
 
         {/* Dimensions (List View) */}
-        <div className="hidden lg:flex flex-col text-xs text-slate-500 w-48 shrink-0 border-l border-r border-slate-100 px-4">
-           <div className="flex items-center gap-2 mb-1.5">
-             <Home className="w-3.5 h-3.5 text-indigo-400" />
-             <span className="truncate font-mono" title={product.dimensions.indoor}>{product.dimensions.indoor || '-'}</span>
+        <div className="hidden lg:flex flex-col text-xs text-slate-500 w-56 shrink-0 border-l border-r border-slate-100 px-4">
+           <div className="flex items-start gap-2 mb-1.5">
+             <Home className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0 mt-0.5" />
+             <span className="break-all font-mono leading-tight" title={product.dimensions.indoor}>{product.dimensions.indoor || '-'}</span>
            </div>
-           <div className="flex items-center gap-2">
-             <Trees className="w-3.5 h-3.5 text-emerald-400" />
-             <span className="truncate font-mono" title={product.dimensions.outdoor}>{product.dimensions.outdoor || '-'}</span>
+           <div className="flex items-start gap-2">
+             <Trees className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+             <span className="break-all font-mono leading-tight" title={product.dimensions.outdoor}>{product.dimensions.outdoor || '-'}</span>
            </div>
         </div>
 
@@ -1914,13 +1914,13 @@ const ProductCard: React.FC<{
           
           {/* Dimensions Box */}
           <div className="bg-slate-50/80 border border-slate-100 p-3 rounded-xl flex flex-col justify-center hover:bg-slate-50 transition-colors">
-            <div className="flex items-center gap-2 mb-1.5">
-               <Home className="w-3.5 h-3.5 text-indigo-400" />
-               <span className="text-xs font-semibold text-slate-700 truncate font-mono">{product.dimensions.indoor || '-'}</span>
+            <div className="flex items-start gap-2 mb-1.5">
+               <Home className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0 mt-0.5" />
+               <span className="text-xs font-semibold text-slate-700 break-all font-mono leading-tight">{product.dimensions.indoor || '-'}</span>
             </div>
-            <div className="flex items-center gap-2">
-               <Trees className="w-3.5 h-3.5 text-emerald-400" />
-               <span className="text-xs font-semibold text-slate-700 truncate font-mono">{product.dimensions.outdoor || '-'}</span>
+            <div className="flex items-start gap-2">
+               <Trees className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+               <span className="text-xs font-semibold text-slate-700 break-all font-mono leading-tight">{product.dimensions.outdoor || '-'}</span>
             </div>
           </div>
         </div>
