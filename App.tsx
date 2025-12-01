@@ -1228,29 +1228,40 @@ const QuotePage = ({
                     <td className="p-3" colSpan={1}>
                       <div className="export-hide">
                         <select
-                          value={item.name}
+                          value={item.name || ""}
                           onChange={(e) => {
-                            const selected = commonItems.find(ci => ci.name === e.target.value);
-                            if (selected) {
-                              handleSelectCommonItem(index, selected);
+                            if (e.target.value === "") {
+                              // 清空，讓使用者自訂
+                              handleUpdateCustomItem(index, 'name', '');
+                              handleUpdateCustomItem(index, 'description', '');
+                              handleUpdateCustomItem(index, 'price', '0');
+                            } else {
+                              const selected = commonItems.find(ci => ci.name === e.target.value);
+                              if (selected) {
+                                handleSelectCommonItem(index, selected);
+                              }
                             }
                           }}
-                          className="w-full px-3 py-1.5 border border-slate-300 rounded-lg mb-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 bg-white"
                         >
-                          <option value="">選擇項目或自訂...</option>
+                          <option value="">自訂項目...</option>
                           {commonItems.map((ci) => (
                             <option key={ci.name} value={ci.name}>{ci.name}</option>
                           ))}
                         </select>
-                        <input
-                          type="text"
-                          value={item.name}
-                          onChange={(e) => handleUpdateCustomItem(index, 'name', e.target.value)}
-                          placeholder="項目名稱"
-                          className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
-                        />
+                        {/* 只在下拉選單為"自訂項目"或空值時顯示輸入框 */}
+                        {!item.name && (
+                          <input
+                            type="text"
+                            value={item.name}
+                            onChange={(e) => handleUpdateCustomItem(index, 'name', e.target.value)}
+                            placeholder="請輸入項目名稱"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 mt-2"
+                            autoFocus
+                          />
+                        )}
                       </div>
-                      <div className="hidden export-show font-medium text-slate-800">{item.name}</div>
+                      <div className="hidden export-show font-medium text-slate-800">{item.name || '未命名項目'}</div>
                       {item.description && (
                         <div className="text-xs text-slate-500 mt-1">{item.description}</div>
                       )}
