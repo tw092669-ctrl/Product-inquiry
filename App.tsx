@@ -1268,7 +1268,8 @@ const QuotePage = ({
           {/* Title */}
           <div className="text-center mb-10 pb-8 border-b-2 border-slate-200">
             <div className="inline-block">
-              <h1 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">產品報價單</h1>
+              <h1 className="export-hide text-4xl sm:text-5xl font-black bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">產品報價單</h1>
+              <h1 className="hidden export-show text-4xl sm:text-5xl font-black text-indigo-600 mb-3">產品報價單</h1>
               <div className="h-1 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 rounded-full mb-3"></div>
             </div>
             <p className="text-slate-500 text-sm tracking-wider">PRODUCT QUOTATION</p>
@@ -1316,11 +1317,11 @@ const QuotePage = ({
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
-                  <th className="text-left p-4 font-bold text-sm w-16 rounded-tl-xl">項次</th>
-                  <th className="text-left p-4 font-bold text-sm">產品名稱</th>
-                  <th className="text-left p-4 font-bold text-sm">品牌</th>
-                  <th className="text-left p-4 font-bold text-sm">規格</th>
-                  <th className="text-right p-4 font-bold text-sm w-32">單價</th>
+                  <th className="text-center p-4 font-bold text-sm w-16 rounded-tl-xl">項次</th>
+                  <th className="text-center p-4 font-bold text-sm">產品名稱</th>
+                  <th className="text-center p-4 font-bold text-sm">品牌</th>
+                  <th className="text-center p-4 font-bold text-sm">規格</th>
+                  <th className="text-center p-4 font-bold text-sm w-32">單價</th>
                   <th className="export-hide w-12 rounded-tr-xl"></th>
                 </tr>
               </thead>
@@ -1334,21 +1335,21 @@ const QuotePage = ({
                   
                   return (
                     <tr key={product.id} className="group border-b border-slate-200 hover:bg-slate-50">
-                      <td className="p-3 text-slate-600">{index + 1}</td>
-                      <td className="p-3">
+                      <td className="p-4 text-center align-middle text-slate-600">{index + 1}</td>
+                      <td className="p-4 text-center align-middle">
                         <div className="font-medium text-slate-800">{product.name}</div>
                         {product.remarks && (
                           <div className="text-xs text-slate-500 mt-1">{product.remarks}</div>
                         )}
                       </td>
-                      <td className="p-3 text-slate-700">{brand?.label}</td>
-                      <td className="p-3 text-sm text-slate-600">
-                        <div className="flex items-center gap-2">
+                      <td className="p-4 text-center align-middle text-slate-700">{brand?.label}</td>
+                      <td className="p-4 text-center align-middle text-sm text-slate-600">
+                        <div className="flex items-center justify-center gap-2">
                           <span>{style?.label} / {type?.label}</span>
                           <EnvIcon className={`w-4 h-4 ${product.environment === 'heating' ? 'text-orange-500' : 'text-cyan-500'}`} />
                         </div>
                       </td>
-                      <td className="p-3 text-right">
+                      <td className="p-4 text-center align-middle">
                         <div className="export-hide flex items-center justify-end gap-2">
                           {editingPriceId === product.id ? (
                             <>
@@ -1390,7 +1391,7 @@ const QuotePage = ({
                             </>
                           )}
                         </div>
-                        <div className="hidden export-show text-right font-mono font-bold text-slate-800">
+                        <div className="hidden export-show text-center font-mono font-bold text-slate-800">
                           ${productPrices[product.id] || product.price}
                         </div>
                       </td>
@@ -1402,8 +1403,8 @@ const QuotePage = ({
                 {/* Custom Items */}
                 {customItems.map((item, index) => (
                   <tr key={item.id} className="border-b border-slate-200 bg-blue-50/30">
-                    <td className="p-3 text-slate-600">{products.length + index + 1}</td>
-                    <td className="p-3" colSpan={1}>
+                    <td className="p-4 text-center align-middle text-slate-600">{products.length + index + 1}</td>
+                    <td className="p-4 text-center align-middle" colSpan={1}>
                       <div className="export-hide">
                         <select
                           value={item.name || ""}
@@ -1441,7 +1442,7 @@ const QuotePage = ({
                       </div>
                       <div className="hidden export-show font-medium text-slate-800">{item.name || '未命名項目'}</div>
                     </td>
-                    <td className="p-3" colSpan={2}>
+                    <td className="p-4 text-center align-middle" colSpan={2}>
                       <div className="export-hide">
                         <input
                           type="text"
@@ -1453,7 +1454,7 @@ const QuotePage = ({
                       </div>
                       <div className="hidden export-show text-sm text-slate-600">{item.description}</div>
                     </td>
-                    <td className="p-3 text-right">
+                    <td className="p-4 text-center align-middle">
                       <div className="export-hide">
                         <input
                           type="text"
@@ -1463,7 +1464,7 @@ const QuotePage = ({
                           className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-right font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500"
                         />
                       </div>
-                      <div className="hidden export-show text-right font-mono font-bold text-slate-800">${item.price}</div>
+                      <div className="hidden export-show text-center font-mono font-bold text-slate-800">${item.price}</div>
                     </td>
                     <td className="p-3 export-hide">
                       <button
