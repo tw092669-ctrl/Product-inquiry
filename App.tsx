@@ -1053,6 +1053,14 @@ const QuotePage = ({
       const element = document.getElementById('quote-content');
       if (!element) return;
 
+      // Store original styles
+      const originalMinWidth = element.style.minWidth;
+      const originalWidth = element.style.width;
+      
+      // Force desktop width for mobile
+      element.style.minWidth = '800px';
+      element.style.width = '800px';
+
       // Hide interactive elements
       const editElements = element.querySelectorAll('.export-hide');
       const displayElements = element.querySelectorAll('.export-show');
@@ -1065,8 +1073,13 @@ const QuotePage = ({
         backgroundColor: '#ffffff',
         logging: false,
         useCORS: true,
+        width: 800,
       });
 
+      // Restore original styles
+      element.style.minWidth = originalMinWidth;
+      element.style.width = originalWidth;
+      
       // Restore interactive elements
       editElements.forEach(el => (el as HTMLElement).style.display = '');
       displayElements.forEach(el => (el as HTMLElement).style.display = '');
@@ -1097,6 +1110,14 @@ const QuotePage = ({
       const element = document.getElementById('quote-content');
       if (!element) return;
 
+      // Store original styles
+      const originalMinWidth = element.style.minWidth;
+      const originalWidth = element.style.width;
+      
+      // Force desktop width for mobile
+      element.style.minWidth = '800px';
+      element.style.width = '800px';
+
       // Hide interactive elements
       const editElements = element.querySelectorAll('.export-hide');
       const displayElements = element.querySelectorAll('.export-show');
@@ -1109,8 +1130,13 @@ const QuotePage = ({
         backgroundColor: '#ffffff',
         logging: false,
         useCORS: true,
+        width: 800,
       });
 
+      // Restore original styles
+      element.style.minWidth = originalMinWidth;
+      element.style.width = originalWidth;
+      
       // Restore interactive elements
       editElements.forEach(el => (el as HTMLElement).style.display = '');
       displayElements.forEach(el => (el as HTMLElement).style.display = '');
@@ -1245,9 +1271,12 @@ const QuotePage = ({
                 type="text"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="export-hide w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="請輸入客戶姓名"
               />
+              <div className="hidden export-show px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 min-h-[42px] flex items-center">
+                {customerName || '未填寫'}
+              </div>
             </div>
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">報價日期</label>
@@ -1255,8 +1284,11 @@ const QuotePage = ({
                 type="date"
                 value={quoteDate}
                 onChange={(e) => setQuoteDate(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="export-hide w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
+              <div className="hidden export-show px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 min-h-[42px] flex items-center">
+                {quoteDate || '未填寫'}
+              </div>
             </div>
           </div>
 
@@ -1460,9 +1492,12 @@ const QuotePage = ({
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-32 resize-none"
+              className="export-hide w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-32 resize-none"
               placeholder="請輸入備註事項（如：付款方式、貨物稅申請、汰舊換新廢四機...等）"
             />
+            <div className="hidden export-show px-4 py-3 border border-slate-300 rounded-lg bg-slate-50 min-h-[128px] whitespace-pre-wrap break-words">
+              {notes || '無'}
+            </div>
           </div>
 
           {/* Footer */}
