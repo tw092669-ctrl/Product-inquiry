@@ -882,13 +882,73 @@ const QuotePage = ({
   const [customerName, setCustomerName] = useState('');
   const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
+  
+  // Custom items state
+  type CustomItem = {
+    id: string;
+    name: string;
+    description: string;
+    price: string;
+  };
+  
+  const [customItems, setCustomItems] = useState<CustomItem[]>([]);
+  
+  // Common custom items templates
+  const commonItems = [
+    { name: '安裝費用', description: '標準安裝服務', price: '3000' },
+    { name: '運費', description: '運送及搬運', price: '500' },
+    { name: '延長保固', description: '額外一年保固服務', price: '2000' },
+    { name: '舊機回收', description: '舊機拆除及回收', price: '1000' },
+    { name: '管線材料', description: '銅管及配件', price: '1500' },
+    { name: '高空作業費', description: '高樓層施工費用', price: '2000' },
+    { name: '清洗保養', description: '定期清洗保養服務', price: '1500' },
+    { name: '其他', description: '', price: '0' },
+  ];
+
+  const handleAddCustomItem = () => {
+    const newItem: CustomItem = {
+      id: generateId(),
+      name: '',
+      description: '',
+      price: '0'
+    };
+    setCustomItems([...customItems, newItem]);
+  };
+
+  const handleSelectCommonItem = (index: number, commonItem: typeof commonItems[0]) => {
+    const updated = [...customItems];
+    updated[index] = {
+      ...updated[index],
+      name: commonItem.name,
+      description: commonItem.description,
+      price: commonItem.price
+    };
+    setCustomItems(updated);
+  };
+
+  const handleUpdateCustomItem = (index: number, field: keyof CustomItem, value: string) => {
+    const updated = [...customItems];
+    updated[index][field] = value;
+    setCustomItems(updated);
+  };
+
+  const handleRemoveCustomItem = (index: number) => {
+    setCustomItems(customItems.filter((_, i) => i !== index));
+  };
 
   const totalPrice = useMemo(() => {
-    return products.reduce((sum, p) => {
+    const productsTotal = products.reduce((sum, p) => {
       const price = parseInt(p.price.toString().replace(/,/g, ''), 10);
       return sum + (isNaN(price) ? 0 : price);
     }, 0);
-  }, [products]);
+    
+    const customTotal = customItems.reduce((sum, item) => {
+      const price = parseInt(item.price.replace(/,/g, ''), 10);
+      return sum + (isNaN(price) ? 0 : price);
+    }, 0);
+    
+    return productsTotal + customTotal;
+  }, [products, customItems]);
 
   const handlePrint = () => {
     window.print();
@@ -973,11 +1033,12 @@ const QuotePage = ({
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-slate-100 print:bg-slate-200">
-                  <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">項次</th>
+                  <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm w-16">項次</th>
                   <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">產品名稱</th>
                   <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">品牌</th>
                   <th className="text-left p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">規格</th>
-                  <th className="text-right p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm">單價</th>
+                  <th className="text-right p-3 border-b-2 border-slate-300 font-bold text-slate-700 text-sm w-32">單價</th>
+                  <th className="print:hidden border-b-2 border-slate-300 w-12"></th>
                 </tr>
               </thead>
               <tbody>
@@ -1005,9 +1066,87 @@ const QuotePage = ({
                       <td className="p-3 text-right font-mono font-bold text-slate-800">
                         ${product.price}
                       </td>
+                      <td className="print:hidden"></td>
                     </tr>
                   );
                 })}
+                
+                {/* Custom Items */}
+                {customItems.map((item, index) => (
+                  <tr key={item.id} className="border-b border-slate-200 bg-blue-50/30 print:bg-transparent">
+                    <td className="p-3 text-slate-600">{products.length + index + 1}</td>
+                    <td className="p-3" colSpan={1}>
+                      <div className="print:hidden">
+                        <select
+                          value={item.name}
+                          onChange={(e) => {
+                            const selected = commonItems.find(ci => ci.name === e.target.value);
+                            if (selected) {
+                              handleSelectCommonItem(index, selected);
+                            }
+                          }}
+                          className="w-full px-3 py-1.5 border border-slate-300 rounded-lg mb-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                        >
+                          <option value="">選擇項目或自訂...</option>
+                          {commonItems.map((ci) => (
+                            <option key={ci.name} value={ci.name}>{ci.name}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          value={item.name}
+                          onChange={(e) => handleUpdateCustomItem(index, 'name', e.target.value)}
+                          placeholder="項目名稱"
+                          className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="hidden print:block font-medium text-slate-800">{item.name}</div>
+                      {item.description && (
+                        <div className="text-xs text-slate-500 mt-1">{item.description}</div>
+                      )}
+                    </td>
+                    <td className="p-3" colSpan={2}>
+                      <input
+                        type="text"
+                        value={item.description}
+                        onChange={(e) => handleUpdateCustomItem(index, 'description', e.target.value)}
+                        placeholder="說明"
+                        className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 print:border-none print:px-0 print:py-0"
+                      />
+                    </td>
+                    <td className="p-3 text-right">
+                      <input
+                        type="text"
+                        value={item.price}
+                        onChange={(e) => handleUpdateCustomItem(index, 'price', e.target.value)}
+                        placeholder="0"
+                        className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-right font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500 print:border-none print:px-0 print:py-0"
+                      />
+                    </td>
+                    <td className="p-3 print:hidden">
+                      <button
+                        onClick={() => handleRemoveCustomItem(index)}
+                        className="p-1 text-red-500 hover:bg-red-50 rounded transition"
+                        title="刪除"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                
+                {/* Add Custom Item Button */}
+                <tr className="print:hidden">
+                  <td colSpan={6} className="p-3">
+                    <button
+                      onClick={handleAddCustomItem}
+                      className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 transition flex items-center justify-center gap-2 font-medium"
+                    >
+                      <Plus className="w-5 h-5" />
+                      新增自訂項目
+                    </button>
+                  </td>
+                </tr>
               </tbody>
               <tfoot>
                 <tr className="bg-slate-50">
@@ -1017,6 +1156,7 @@ const QuotePage = ({
                   <td className="p-4 text-right font-mono font-black text-2xl text-emerald-600">
                     ${totalPrice.toLocaleString()}
                   </td>
+                  <td className="print:hidden"></td>
                 </tr>
               </tfoot>
             </table>
