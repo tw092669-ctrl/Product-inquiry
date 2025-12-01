@@ -1428,9 +1428,6 @@ const QuotePage = ({
                       <td className="p-4 text-center align-middle text-slate-600">{index + 1}</td>
                       <td className="p-4 text-center align-middle">
                         <div className="font-medium text-slate-800">{product.name}</div>
-                        {product.remarks && (
-                          <div className="text-xs text-slate-500 mt-1">{product.remarks}</div>
-                        )}
                       </td>
                       <td className="p-4 text-center align-middle text-slate-700">{brand?.label}</td>
                       <td className="p-4 text-center align-middle text-sm text-slate-600">
