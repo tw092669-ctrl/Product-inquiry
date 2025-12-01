@@ -241,7 +241,7 @@ const SettingsModal = ({
   onImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
   googleSheetUrl: string;
   setGoogleSheetUrl: (url: string) => void;
-  onGoogleSheetSync: () => void;
+  onGoogleSheetSync: (url?: string) => void;
   isSyncing: boolean;
   autoSync: boolean;
   setAutoSync: (value: boolean) => void;
@@ -431,7 +431,7 @@ const SettingsModal = ({
                 className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
               />
               <button
-                onClick={onGoogleSheetSync}
+                onClick={() => onGoogleSheetSync(googleSheetUrl)}
                 disabled={isSyncing || !googleSheetUrl.trim()}
                 className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium text-sm flex items-center gap-2"
               >
@@ -2406,7 +2406,7 @@ export default function App() {
         onImport={handleImport}
         googleSheetUrl={googleSheetUrl}
         setGoogleSheetUrl={setGoogleSheetUrl}
-        onGoogleSheetSync={handleGoogleSheetSync}
+        onGoogleSheetSync={(url) => handleGoogleSheetSync(url)}
         isSyncing={isSyncing}
         autoSync={autoSync}
         setAutoSync={(value) => {
