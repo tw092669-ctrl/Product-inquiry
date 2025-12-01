@@ -5,6 +5,7 @@ import {
   LayoutGrid, List, Grid3x3, Home, Trees, BarChart3, ChevronDown, ChevronUp,
   Package, DollarSign, TrendingUp, PieChart, Zap, FileDown, Calculator, Scale, CheckCircle2, ArrowRightLeft
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { Product, AppConfig, ConfigOption, EnvironmentType } from './types';
 import { INITIAL_CONFIG, MOCK_PRODUCTS } from './constants';
 import { generateId, exportToImage, parseExcel, findOptionId, exportToExcel } from './utils';
