@@ -454,7 +454,13 @@ const SettingsModal = ({
         <div className="p-4 border-t bg-white flex justify-end gap-3">
           <button onClick={onClose} className="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl transition font-medium">取消</button>
           <button 
-            onClick={() => { onSaveConfig(localConfig); onClose(); }}
+            onClick={() => { 
+              onSaveConfig(localConfig); 
+              // 保存 Google Sheet URL 和自動同步設定
+              localStorage.setItem('googleSheetUrl', googleSheetUrl);
+              localStorage.setItem('autoSync', autoSync.toString());
+              onClose(); 
+            }}
             className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 hover:brightness-110 transition font-medium"
           >
             儲存設定
