@@ -707,7 +707,7 @@ const BTUModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void })
     const p = parseFloat(pings);
     if (!p) return { kw: 0, kcal: 0 };
     
-    let baseKcal = 500; // slightly safer baseline
+    let baseKcal = 600; // base cooling capacity per ping
     if (factors.topFloor) baseKcal *= 1.2;
     if (factors.westSun) baseKcal *= 1.2;
     if (factors.heatSource) baseKcal *= 1.2;
