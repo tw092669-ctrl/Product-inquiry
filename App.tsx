@@ -196,7 +196,7 @@ const Dashboard = ({
           </div>
 
           {/* Bottom Row: Brand Distribution */}
-          <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 mb-5">
+          <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
             <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
               <div className="p-1 bg-indigo-100 text-indigo-600 rounded">
                 <PieChart className="w-4 h-4" /> 
@@ -218,7 +218,7 @@ const Dashboard = ({
               ))}
             </div>
             
-            <div className="flex flex-wrap gap-x-6 gap-y-3">
+            <div className="flex flex-wrap gap-x-6 gap-y-3 mb-6">
               {stats.brandStats.map(brand => (
                 <div key={brand.id} className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border border-slate-100 shadow-sm">
                   <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: brand.color }} />
@@ -227,36 +227,34 @@ const Dashboard = ({
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* 特定品牌和樣式統計 */}
-          <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-5 border border-slate-200">
-            <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
-              <div className="p-1 bg-blue-100 text-blue-600 rounded">
-                <Zap className="w-4 h-4" /> 
-              </div>
-              重點品牌與樣式
-            </h4>
-            
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              {/* 一對多 */}
-              <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm hover:shadow-md transition">
-                <div className="text-xs text-slate-500 mb-1">一對多</div>
-                <div className="text-2xl font-black text-purple-600">{stats.oneToManyCount}</div>
-                <div className="text-xs text-slate-400 mt-1">台</div>
-              </div>
+            {/* 重點品牌與樣式 - 整合在同一區塊 */}
+            <div className="pt-5 border-t border-slate-200">
+              <h5 className="text-xs font-bold text-slate-600 mb-3 flex items-center gap-2">
+                <Zap className="w-3.5 h-3.5 text-indigo-500" />
+                重點品牌與樣式
+              </h5>
               
-              {/* 特定品牌 */}
-              {stats.specialBrandStats.map(brand => (
-                <div key={brand.label} className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm hover:shadow-md transition">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: brand.color }} />
-                    <div className="text-xs text-slate-500">{brand.label}</div>
-                  </div>
-                  <div className="text-2xl font-black" style={{ color: brand.color }}>{brand.count}</div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {/* 一對多 */}
+                <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm hover:shadow-md transition">
+                  <div className="text-xs text-slate-500 mb-1">一對多</div>
+                  <div className="text-2xl font-black text-purple-600">{stats.oneToManyCount}</div>
                   <div className="text-xs text-slate-400 mt-1">台</div>
                 </div>
-              ))}
+                
+                {/* 特定品牌 */}
+                {stats.specialBrandStats.map(brand => (
+                  <div key={brand.label} className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: brand.color }} />
+                      <div className="text-xs text-slate-500">{brand.label}</div>
+                    </div>
+                    <div className="text-2xl font-black" style={{ color: brand.color }}>{brand.count}</div>
+                    <div className="text-xs text-slate-400 mt-1">台</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
