@@ -895,13 +895,17 @@ const QuotePage = ({
   
   // Common custom items templates
   const commonItems = [
-    { name: '安裝費用', description: '標準安裝服務', price: '3000' },
-    { name: '運費', description: '運送及搬運', price: '500' },
-    { name: '延長保固', description: '額外一年保固服務', price: '2000' },
-    { name: '舊機回收', description: '舊機拆除及回收', price: '1000' },
-    { name: '管線材料', description: '銅管及配件', price: '1500' },
-    { name: '高空作業費', description: '高樓層施工費用', price: '2000' },
-    { name: '清洗保養', description: '定期清洗保養服務', price: '1500' },
+    { name: '安裝費用', description: '分離式安裝工資×組', price: '3500' },
+    { name: '移機費用', description: '拆除&安裝工資×組', price: '4500' },
+    { name: '銅線費用', description: '客廳/主/次臥銅管&線材費用共計', price: '5000' },
+    { name: '安裝架', description: '室外機不鏽鋼L/豪華架', price: '2000' },
+    { name: '洗孔費用', description: '牆體洗洞工程×孔', price: '1000' },
+    { name: '焊接費用', description: '焊接工程', price: '1500' },
+    { name: '管槽費用', description: '防曬美化管槽(○色)', price: '3000' },
+    { name: '危險施工作業', description: '高空危險施工費用', price: '5000' },
+    { name: '管路保養', description: '舊管冷凍油清洗工程×組', price: '3000' },
+    { name: '清洗保養', description: '室內/外機-清洗保養服務×組', price: '3000' },
+    { name: '打壁費用', description: '牆體切槽配管含水泥填回×組', price: '2000' },
     { name: '其他', description: '', price: '0' },
   ];
 
