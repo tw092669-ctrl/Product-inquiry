@@ -2037,7 +2037,8 @@ export default function App() {
   const handleGoogleSheetSync = async (urlOverride?: string) => {
     const urlToUse = urlOverride || googleSheetUrl;
     
-    if (!urlToUse.trim()) {
+    // 確保 urlToUse 是字串
+    if (typeof urlToUse !== 'string' || !urlToUse.trim()) {
       alert('請輸入 Google 試算表 URL');
       return;
     }
