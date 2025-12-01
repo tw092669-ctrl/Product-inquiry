@@ -418,7 +418,15 @@ const SettingsModal = ({
               <input
                 type="text"
                 value={googleSheetUrl}
-                onChange={(e) => setGoogleSheetUrl(e.target.value)}
+                onChange={(e) => {
+                  const newUrl = e.target.value;
+                  setGoogleSheetUrl(newUrl);
+                  // 如果清空 URL，自動停用自動同步
+                  if (!newUrl.trim() && autoSync) {
+                    setAutoSync(false);
+                    localStorage.setItem('autoSync', 'false');
+                  }
+                }}
                 placeholder="貼上 Google 試算表 URL..."
                 className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
               />
@@ -2058,18 +2066,19 @@ export default function App() {
     
     if (savedUrl) {
       setGoogleSheetUrl(savedUrl);
-    }
-    
-    if (savedAutoSync === 'true') {
-      setAutoSync(true);
-    }
-    
-    // 如果啟用自動同步且有 URL,則執行同步
-    if (savedAutoSync === 'true' && savedUrl) {
-      // 延遲一下讓 UI 先渲染
-      setTimeout(() => {
-        handleGoogleSheetSync();
-      }, 500);
+      
+      // 如果有 URL 且啟用自動同步,則執行同步
+      if (savedAutoSync === 'true') {
+        setAutoSync(true);
+        // 延遲一下讓 UI 先渲染
+        setTimeout(() => {
+          handleGoogleSheetSync();
+        }, 500);
+      }
+    } else {
+      // 沒有 URL 時,停用自動同步
+      setAutoSync(false);
+      localStorage.setItem('autoSync', 'false');
     }
   }, []); // 只在首次載入時執行
 
