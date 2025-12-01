@@ -1310,6 +1310,8 @@ const QuotePage = ({
                   const brand = config.brands.find(b => b.id === product.brandId);
                   const style = config.styles.find(s => s.id === product.styleId);
                   const type = config.types.find(t => t.id === product.typeId);
+                  const pipe = config.pipes.find(p => p.id === product.pipeId);
+                  const envLabel = product.environment === 'heating' ? '暖氣' : '冷專';
                   
                   return (
                     <tr key={product.id} className="group border-b border-slate-200 hover:bg-slate-50">
@@ -1323,9 +1325,9 @@ const QuotePage = ({
                       <td className="p-3 text-slate-700">{brand?.label}</td>
                       <td className="p-3 text-sm text-slate-600">
                         <div>{style?.label} / {type?.label}</div>
-                        {product.dimensions.indoor && (
-                          <div className="text-xs text-slate-500 mt-1">室內: {product.dimensions.indoor}</div>
-                        )}
+                        <div className="text-xs text-slate-500 mt-1">
+                          {envLabel} | {pipe?.label || '未設定'}
+                        </div>
                       </td>
                       <td className="p-3 text-right">
                         <div className="export-hide flex items-center justify-end gap-2">
@@ -1419,9 +1421,6 @@ const QuotePage = ({
                         )}
                       </div>
                       <div className="hidden export-show font-medium text-slate-800">{item.name || '未命名項目'}</div>
-                      {item.description && (
-                        <div className="text-xs text-slate-500 mt-1">{item.description}</div>
-                      )}
                     </td>
                     <td className="p-3" colSpan={2}>
                       <div className="export-hide">
