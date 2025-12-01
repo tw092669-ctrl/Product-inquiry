@@ -231,7 +231,10 @@ const SettingsModal = ({
   onGoogleSheetSync,
   isSyncing,
   autoSync,
-  setAutoSync
+  setAutoSync,
+  maxDisplayCards,
+  setMaxDisplayCards,
+  filteredProducts
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
@@ -245,6 +248,9 @@ const SettingsModal = ({
   isSyncing: boolean;
   autoSync: boolean;
   setAutoSync: (value: boolean) => void;
+  maxDisplayCards: number;
+  setMaxDisplayCards: (value: number) => void;
+  filteredProducts: Product[];
 }) => {
   const [localConfig, setLocalConfig] = useState<AppConfig>(config);
   const [activeTab, setActiveTab] = useState<keyof AppConfig>('brands');
@@ -449,6 +455,37 @@ const SettingsModal = ({
               </button>
             </div>
           </div>
+
+          {/* 顯示卡片數量設定 */}
+          <div className="mt-6 pt-6 border-t border-slate-200">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg">
+                <LayoutGrid className="w-4 h-4" />
+              </div>
+              <h3 className="font-bold text-slate-800">顯示設定</h3>
+            </div>
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium text-slate-700 whitespace-nowrap">
+                最大顯示產品數量：
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="999"
+                value={maxDisplayCards}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+                  if (!isNaN(value) && value > 0) {
+                    setMaxDisplayCards(value);
+                  }
+                }}
+                className="w-24 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              />
+              <span className="text-xs text-slate-500">
+                目前顯示 {Math.min(filteredProducts.length, maxDisplayCards)} / {filteredProducts.length} 張卡片
+              </span>
+            </div>
+          </div>
         </div>
 
         <div className="p-4 border-t bg-white flex justify-end gap-3">
@@ -459,6 +496,7 @@ const SettingsModal = ({
               // 保存 Google Sheet URL 和自動同步設定
               localStorage.setItem('googleSheetUrl', googleSheetUrl);
               localStorage.setItem('autoSync', autoSync.toString());
+              localStorage.setItem('maxDisplayCards', maxDisplayCards.toString());
               onClose(); 
             }}
             className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 hover:brightness-110 transition font-medium"
@@ -1980,6 +2018,7 @@ export default function App() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [autoSync, setAutoSync] = useState(false);
   const [showQuotePage, setShowQuotePage] = useState(false);
+  const [maxDisplayCards, setMaxDisplayCards] = useState(20);
   
   // Comparison State
   const [compareList, setCompareList] = useState<string[]>([]);
@@ -2118,6 +2157,7 @@ export default function App() {
   useEffect(() => {
     const savedUrl = localStorage.getItem('googleSheetUrl');
     const savedAutoSync = localStorage.getItem('autoSync');
+    const savedMaxCards = localStorage.getItem('maxDisplayCards');
     
     if (savedUrl) {
       setGoogleSheetUrl(savedUrl);
@@ -2134,6 +2174,10 @@ export default function App() {
       // 沒有 URL 時,停用自動同步
       setAutoSync(false);
       localStorage.setItem('autoSync', 'false');
+    }
+    
+    if (savedMaxCards) {
+      setMaxDisplayCards(parseInt(savedMaxCards, 10));
     }
   }, []); // 只在首次載入時執行
 
@@ -2326,7 +2370,7 @@ export default function App() {
               ? "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-5"
               : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
           }>
-            {filteredProducts.map(product => (
+            {filteredProducts.slice(0, maxDisplayCards).map(product => (
               <ProductCard
                 key={product.id}
                 product={product}
@@ -2413,6 +2457,9 @@ export default function App() {
           setAutoSync(value);
           localStorage.setItem('autoSync', value.toString());
         }}
+        maxDisplayCards={maxDisplayCards}
+        setMaxDisplayCards={setMaxDisplayCards}
+        filteredProducts={filteredProducts}
       />
       
       <ProductForm 
