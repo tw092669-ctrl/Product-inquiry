@@ -2272,7 +2272,7 @@ export default function App() {
               <img src="./icon.png" alt="Logo" className="w-7 h-7 object-contain" />
             </div>
                     <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-slate-300">
-                      AC小隼助手 ver 2.0
+                      小隼 ver. 2.0
                     </h1>
           </div>
           
