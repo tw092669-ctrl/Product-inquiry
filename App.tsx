@@ -879,7 +879,6 @@ const QuotePage = ({
   config: AppConfig; 
   onBack: () => void;
 }) => {
-  const [companyName, setCompanyName] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
@@ -1080,27 +1079,38 @@ const QuotePage = ({
           </button>
           <h1 className="text-xl font-bold text-slate-800">報價單</h1>
           
-          {/* Export Menu */}
-          <div className="relative">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              disabled={isExporting}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium disabled:bg-slate-400 disabled:cursor-not-allowed"
+              onClick={() => window.open('https://www.calculator.net/', '_blank')}
+              className="flex items-center gap-2 bg-slate-100 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-200 transition font-medium"
+              title="開啟計算機"
             >
-              {isExporting ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  匯出中...
-                </>
-              ) : (
-                <>
-                  <Download className="w-5 h-5" />
-                  匯出
-                </>
-              )}
+              <Calculator className="w-5 h-5" />
+              <span className="hidden sm:inline">計算機</span>
             </button>
             
-            {showExportMenu && !isExporting && (
+            {/* Export Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                disabled={isExporting}
+                className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium disabled:bg-slate-400 disabled:cursor-not-allowed"
+              >
+                {isExporting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    匯出中...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-5 h-5" />
+                    匯出
+                  </>
+                )}
+              </button>
+            
+              {showExportMenu && !isExporting && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-slate-200 py-2 z-50">
                 <button
                   onClick={handleExportImage}
@@ -1123,7 +1133,8 @@ const QuotePage = ({
                   </div>
                 </button>
               </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -1139,16 +1150,6 @@ const QuotePage = ({
 
           {/* Info Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">公司名稱</label>
-              <input
-                type="text"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="請輸入公司名稱"
-              />
-            </div>
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">客戶姓名</label>
               <input
@@ -1166,15 +1167,6 @@ const QuotePage = ({
                 value={quoteDate}
                 onChange={(e) => setQuoteDate(e.target.value)}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">報價編號</label>
-              <input
-                type="text"
-                value={`Q-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`}
-                readOnly
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50"
               />
             </div>
           </div>
