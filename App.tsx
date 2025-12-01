@@ -538,12 +538,16 @@ const ProductForm = ({
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
+        // 將 pipeId 轉換為顯示值（如果是ID則顯示label，否則直接顯示）
+        const pipeOpt = config.pipes.find(p => p.id === initialData.pipeId);
+        const pipeValue = pipeOpt ? pipeOpt.label : initialData.pipeId;
+        
         setFormData({
           name: initialData.name,
           brandId: initialData.brandId,
           styleId: initialData.styleId,
           typeId: initialData.typeId,
-          pipeId: initialData.pipeId,
+          pipeId: pipeValue,
           environment: initialData.environment,
           dimensions: initialData.dimensions || { indoor: '', outdoor: '' },
           price: initialData.price.toString(),
@@ -556,7 +560,7 @@ const ProductForm = ({
           brandId: config.brands[0]?.id || '',
           styleId: config.styles[0]?.id || '',
           typeId: config.types[0]?.id || '',
-          pipeId: config.pipes[0]?.id || '',
+          pipeId: config.pipes[0]?.label || '',
           environment: 'cooling',
           dimensions: { indoor: '', outdoor: '' },
           price: '',
@@ -649,9 +653,18 @@ const ProductForm = ({
             </div>
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">管徑</label>
-              <select required value={formData.pipeId} onChange={e => setFormData({...formData, pipeId: e.target.value})} className="w-full rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border bg-white">
-                {config.pipes.map(opt => <option key={opt.id} value={opt.id} style={{color: opt.color}}>{opt.label}</option>)}
-              </select>
+              <input 
+                required 
+                type="text"
+                list="pipe-options"
+                value={formData.pipeId} 
+                onChange={e => setFormData({...formData, pipeId: e.target.value})} 
+                className="w-full rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border bg-white"
+                placeholder="選擇或輸入管徑"
+              />
+              <datalist id="pipe-options">
+                {config.pipes.map(opt => <option key={opt.id} value={opt.label}>{opt.label}</option>)}
+              </datalist>
             </div>
           </div>
 
@@ -1726,10 +1739,16 @@ const ProductCard: React.FC<{
     return opt ? { label: opt.label, color: opt.color } : { label: '未知', color: '#94a3b8' };
   };
 
+  // 管徑特殊處理：如果是設定中的ID則使用設定，否則直接顯示輸入值
+  const getPipeLabel = (pipeIdOrValue: string) => {
+    const opt = config.pipes.find(x => x.id === pipeIdOrValue || x.label === pipeIdOrValue);
+    return opt ? { label: opt.label, color: opt.color } : { label: pipeIdOrValue, color: '#64748b' };
+  };
+
   const brand = getLabel('brands', product.brandId);
   const style = getLabel('styles', product.styleId);
   const type = getLabel('types', product.typeId);
-  const pipe = getLabel('pipes', product.pipeId);
+  const pipe = getPipeLabel(product.pipeId);
 
   const cardId = `product-card-${product.id}`;
 
