@@ -890,6 +890,8 @@ const QuotePage = ({
   const [customerName, setCustomerName] = useState('');
   const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
+  const [quoteTitle, setQuoteTitle] = useState('空調設備報價單');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   
   // Product price adjustments
   const [productPrices, setProductPrices] = useState<Record<string, string>>(() => {
@@ -1268,11 +1270,55 @@ const QuotePage = ({
           {/* Title */}
           <div className="text-center mb-10 pb-8 border-b-2 border-slate-200">
             <div className="inline-block">
-              <h1 className="export-hide text-4xl sm:text-5xl font-black bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">產品報價單</h1>
-              <h1 className="hidden export-show text-4xl sm:text-5xl font-black text-indigo-600 mb-3">產品報價單</h1>
+              {/* 編輯模式 */}
+              <div className="export-hide">
+                {isEditingTitle ? (
+                  <div className="flex items-center gap-3 justify-center mb-3">
+                    <input
+                      type="text"
+                      value={quoteTitle}
+                      onChange={(e) => setQuoteTitle(e.target.value)}
+                      onBlur={() => setIsEditingTitle(false)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') setIsEditingTitle(false);
+                        if (e.key === 'Escape') {
+                          setQuoteTitle('空調設備報價單');
+                          setIsEditingTitle(false);
+                        }
+                      }}
+                      className="text-4xl sm:text-5xl font-black text-center bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent border-b-2 border-indigo-300 focus:outline-none focus:border-indigo-500 px-4"
+                      autoFocus
+                    />
+                    <button
+                      onClick={() => setIsEditingTitle(false)}
+                      className="text-green-600 hover:text-green-700 p-2"
+                      title="確認"
+                    >
+                      <CheckCircle2 className="w-6 h-6" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 justify-center mb-3 group">
+                    <h1 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      {quoteTitle}
+                    </h1>
+                    <button
+                      onClick={() => setIsEditingTitle(true)}
+                      className="text-indigo-600 hover:text-indigo-700 p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="編輯標題"
+                    >
+                      <Edit2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {/* 匯出模式 */}
+              <h1 className="hidden export-show text-4xl sm:text-5xl font-black text-indigo-600 mb-3">{quoteTitle}</h1>
+              
               <div className="h-1 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 rounded-full mb-3"></div>
             </div>
-            <p className="text-slate-500 text-sm tracking-wider">PRODUCT QUOTATION</p>
+            <p className="text-slate-500 text-sm tracking-wider">QUOTATION</p>
           </div>
 
           {/* Info Section */}
@@ -1492,14 +1538,12 @@ const QuotePage = ({
                 </tr>
               </tbody>
               <tfoot>
-                <tr className="bg-gradient-to-r from-emerald-50 to-teal-50 border-t-2 border-emerald-500">
-                  <td colSpan={4} className="p-5 text-right font-black text-xl text-slate-700">
-                    <span className="mr-2">總計</span>
+                <tr className="border-t-2 border-slate-300">
+                  <td colSpan={4} className="p-5 text-center font-black text-xl text-slate-700">
+                    總計
                   </td>
-                  <td className="p-5 text-right">
-                    <div className="inline-block bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-xl shadow-lg">
-                      <span className="font-mono font-black text-2xl">${totalPrice.toLocaleString()}</span>
-                    </div>
+                  <td className="p-5 text-center">
+                    <span className="font-mono font-black text-2xl text-emerald-600">${totalPrice.toLocaleString()}</span>
                   </td>
                   <td className="export-hide"></td>
                 </tr>
@@ -1984,19 +2028,21 @@ export default function App() {
     });
   };
 
-  const handleGoogleSheetSync = async () => {
-    if (!googleSheetUrl.trim()) {
+  const handleGoogleSheetSync = async (urlOverride?: string) => {
+    const urlToUse = urlOverride || googleSheetUrl;
+    
+    if (!urlToUse.trim()) {
       alert('請輸入 Google 試算表 URL');
       return;
     }
 
     setIsSyncing(true);
     try {
-      let finalUrl = googleSheetUrl;
+      let finalUrl = urlToUse;
       
       // 如果是一般的 Google Sheets URL,轉換為 CSV export URL
-      if (googleSheetUrl.includes('/edit')) {
-        const match = googleSheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      if (urlToUse.includes('/edit')) {
+        const match = urlToUse.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
         if (match) {
           const spreadsheetId = match[1];
           finalUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=0`;
@@ -2071,9 +2117,9 @@ export default function App() {
       // 如果有 URL 且啟用自動同步,則執行同步
       if (savedAutoSync === 'true') {
         setAutoSync(true);
-        // 延遲一下讓 UI 先渲染
+        // 延遲一下讓 UI 先渲染，並傳入 savedUrl 避免空值檢查
         setTimeout(() => {
-          handleGoogleSheetSync();
+          handleGoogleSheetSync(savedUrl);
         }, 500);
       }
     } else {
