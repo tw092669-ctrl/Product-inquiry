@@ -1826,10 +1826,10 @@ const ProductCard: React.FC<{
         </div>
 
         {/* Specs Tags */}
-        <div className="hidden md:flex gap-2 flex-wrap w-[25%]">
-          <span className="text-xs px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-slate-600 font-medium" style={{color: style.color}}>{style.label}</span>
-          <span className="text-xs px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-slate-600 font-medium" style={{color: type.color}}>{type.label}</span>
-          <span className="text-xs px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-slate-600 font-medium" style={{color: pipe.color}}>{pipe.label}</span>
+        <div className="hidden md:flex gap-2 flex-wrap w-[28%]">
+          <span className="text-xs px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-slate-600 font-medium whitespace-nowrap overflow-hidden text-ellipsis" style={{color: style.color}} title={style.label}>{style.label}</span>
+          <span className="text-xs px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-slate-600 font-medium whitespace-nowrap overflow-hidden text-ellipsis" style={{color: type.color}} title={type.label}>{type.label}</span>
+          <span className="text-xs px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-slate-600 font-medium whitespace-nowrap overflow-hidden text-ellipsis" style={{color: pipe.color}} title={pipe.label}>{pipe.label}</span>
         </div>
 
         {/* Price */}
