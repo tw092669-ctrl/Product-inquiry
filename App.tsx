@@ -1084,6 +1084,7 @@ const QuotePage = ({
   onBack: () => void;
 }) => {
   const [customerName, setCustomerName] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
   const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
   const [quoteTitle, setQuoteTitle] = useState('空調設備報價單');
@@ -1099,8 +1100,22 @@ const QuotePage = ({
   });
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   
+  // Product quantities
+  const [productQuantities, setProductQuantities] = useState<Record<string, number>>(() => {
+    const initialQuantities: Record<string, number> = {};
+    products.forEach(p => {
+      initialQuantities[p.id] = 1;
+    });
+    return initialQuantities;
+  });
+  const [editingQuantityId, setEditingQuantityId] = useState<string | null>(null);
+  
   const handleUpdateProductPrice = (productId: string, newPrice: string) => {
     setProductPrices(prev => ({ ...prev, [productId]: newPrice }));
+  };
+  
+  const handleUpdateProductQuantity = (productId: string, newQuantity: number) => {
+    setProductQuantities(prev => ({ ...prev, [productId]: Math.max(1, newQuantity) }));
   };
   
   // Calculator state
@@ -1189,17 +1204,17 @@ const QuotePage = ({
   
   // Common custom items templates
   const commonItems = [
-    { name: '安裝費用', description: '分離式安裝工資×組', price: '3500' },
-    { name: '移機費用', description: '拆除&安裝工資×組', price: '4500' },
+    { name: '安裝費用', description: '分離式安裝工資', price: '3500' },
+    { name: '移機費用', description: '拆除&安裝工資', price: '4500' },
     { name: '銅線費用', description: '客廳/主/次臥銅管&線材費用共計', price: '5000' },
     { name: '安裝架', description: '室外機不鏽鋼L/豪華架', price: '2000' },
-    { name: '洗孔費用', description: '牆體洗洞工程×孔', price: '1000' },
+    { name: '洗孔費用', description: '牆體洗洞工程', price: '1000' },
     { name: '焊接費用', description: '焊接工程', price: '1500' },
     { name: '管槽費用', description: '防曬美化管槽(○色)', price: '3000' },
     { name: '危險施工作業', description: '高空危險施工費用', price: '5000' },
-    { name: '管路保養', description: '舊管冷凍油清洗工程×組', price: '3000' },
-    { name: '清洗保養', description: '室內/外機-清洗保養服務×組', price: '3000' },
-    { name: '打壁費用', description: '牆體切槽配管含水泥填回×組', price: '2000' },
+    { name: '管路保養', description: '舊管冷凍油清洗工程', price: '3000' },
+    { name: '清洗保養', description: '室內/外機-清洗保養服務', price: '3000' },
+    { name: '打壁費用', description: '牆體切槽配管含水泥填回', price: '2000' },
     { name: '其他', description: '', price: '0' },
   ];
 
@@ -1238,7 +1253,8 @@ const QuotePage = ({
     const productsTotal = products.reduce((sum, p) => {
       const adjustedPrice = productPrices[p.id] || p.price.toString();
       const price = parseInt(adjustedPrice.replace(/,/g, ''), 10);
-      return sum + (isNaN(price) ? 0 : price);
+      const quantity = productQuantities[p.id] || 1;
+      return sum + (isNaN(price) ? 0 : price * quantity);
     }, 0);
     
     const customTotal = customItems.reduce((sum, item) => {
@@ -1247,7 +1263,7 @@ const QuotePage = ({
     }, 0);
     
     return productsTotal + customTotal;
-  }, [products, customItems, productPrices]);
+  }, [products, customItems, productPrices, productQuantities]);
 
   const [isExporting, setIsExporting] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -1551,6 +1567,22 @@ const QuotePage = ({
                   {quoteDate || '未填寫'}
                 </div>
               </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
+                  客戶地址
+                </label>
+                <input
+                  type="text"
+                  value={customerAddress}
+                  onChange={(e) => setCustomerAddress(e.target.value)}
+                  className="export-hide w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                  placeholder="請輸入客戶地址"
+                />
+                <div className="hidden export-show px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
+                  {customerAddress || '未填寫'}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1563,7 +1595,9 @@ const QuotePage = ({
                   <th className="text-center p-4 font-bold text-sm">產品名稱</th>
                   <th className="text-center p-4 font-bold text-sm">品牌</th>
                   <th className="text-center p-4 font-bold text-sm">規格</th>
+                  <th className="text-center p-4 font-bold text-sm w-20">數量</th>
                   <th className="text-center p-4 font-bold text-sm w-32">單價</th>
+                  <th className="text-center p-4 font-bold text-sm w-32">小計</th>
                   <th className="export-hide w-12 rounded-tr-xl"></th>
                 </tr>
               </thead>
@@ -1574,6 +1608,9 @@ const QuotePage = ({
                   const type = config.types.find(t => t.id === product.typeId);
                   const pipe = config.pipes.find(p => p.id === product.pipeId);
                   const EnvIcon = product.environment === 'heating' ? Sun : Snowflake;
+                  const quantity = productQuantities[product.id] || 1;
+                  const unitPrice = parseInt((productPrices[product.id] || product.price).toString().replace(/,/g, ''), 10);
+                  const subtotal = isNaN(unitPrice) ? 0 : unitPrice * quantity;
                   
                   return (
                     <tr key={product.id} className="group border-b border-slate-200 hover:bg-slate-50">
@@ -1586,6 +1623,53 @@ const QuotePage = ({
                         <div className="flex items-center justify-center gap-2">
                           <span>{style?.label} / {type?.label}</span>
                           <EnvIcon className={`w-4 h-4 ${product.environment === 'heating' ? 'text-orange-500' : 'text-cyan-500'}`} />
+                        </div>
+                      </td>
+                      <td className="p-4 text-center align-middle">
+                        <div className="export-hide flex items-center justify-center gap-2">
+                          {editingQuantityId === product.id ? (
+                            <>
+                              <input
+                                type="number"
+                                min="1"
+                                value={productQuantities[product.id] || 1}
+                                onChange={(e) => handleUpdateProductQuantity(product.id, parseInt(e.target.value) || 1)}
+                                onBlur={() => setEditingQuantityId(null)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') setEditingQuantityId(null);
+                                  if (e.key === 'Escape') {
+                                    handleUpdateProductQuantity(product.id, 1);
+                                    setEditingQuantityId(null);
+                                  }
+                                }}
+                                className="w-16 px-2 py-1 border border-indigo-300 rounded text-center font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500"
+                                autoFocus
+                              />
+                              <button
+                                onClick={() => setEditingQuantityId(null)}
+                                className="text-green-600 hover:text-green-700 p-1"
+                                title="確認"
+                              >
+                                <CheckCircle2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <span className="font-mono font-bold text-slate-800">
+                                {quantity}
+                              </span>
+                              <button
+                                onClick={() => setEditingQuantityId(product.id)}
+                                className="text-indigo-600 hover:text-indigo-700 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="編輯數量"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                        <div className="hidden export-show text-center font-mono font-bold text-slate-800">
+                          {quantity}
                         </div>
                       </td>
                       <td className="p-4 text-center align-middle">
@@ -1633,6 +1717,11 @@ const QuotePage = ({
                         <div className="hidden export-show text-center font-mono font-bold text-slate-800">
                           ${productPrices[product.id] || product.price}
                         </div>
+                      </td>
+                      <td className="p-4 text-center align-middle">
+                        <span className="font-mono font-bold text-emerald-600 text-lg">
+                          ${subtotal.toLocaleString()}
+                        </span>
                       </td>
                       <td className="export-hide"></td>
                     </tr>
