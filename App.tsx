@@ -586,10 +586,10 @@ const ProductForm = ({
         
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData); }} className="p-8 space-y-6">
           
-          {/* Environment (Sun/Snow) */}
+          {/* Environment (Sun/Snow/Indoor Unit) */}
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-3">環境功能 (選擇圖示)</label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <button
                 type="button"
                 onClick={() => setFormData({...formData, environment: 'heating'})}
@@ -602,7 +602,7 @@ const ProductForm = ({
                 <div className={`p-2 rounded-full transition-colors ${formData.environment === 'heating' ? 'bg-orange-100' : 'bg-slate-100 group-hover:bg-orange-100'}`}>
                    <Sun className="w-6 h-6" />
                 </div>
-                <span className="font-medium">暖氣 (太陽)</span>
+                <span className="font-medium text-xs">暖氣</span>
                 {formData.environment === 'heating' && <div className="absolute top-2 right-2 w-2 h-2 bg-orange-500 rounded-full animate-pulse" />}
               </button>
 
@@ -618,8 +618,29 @@ const ProductForm = ({
                 <div className={`p-2 rounded-full transition-colors ${formData.environment === 'cooling' ? 'bg-cyan-100' : 'bg-slate-100 group-hover:bg-cyan-100'}`}>
                   <Snowflake className="w-6 h-6" />
                 </div>
-                <span className="font-medium">冷氣 (雪花)</span>
+                <span className="font-medium text-xs">冷氣</span>
                 {formData.environment === 'cooling' && <div className="absolute top-2 right-2 w-2 h-2 bg-cyan-500 rounded-full animate-pulse" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData({...formData, environment: 'indoor-unit'})}
+                className={`group relative py-4 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all duration-300 ${
+                  formData.environment === 'indoor-unit' 
+                    ? 'border-indigo-500 bg-indigo-50 text-indigo-600 shadow-md shadow-indigo-500/10' 
+                    : 'border-slate-100 text-slate-400 hover:border-indigo-200 hover:bg-indigo-50/50'
+                }`}
+              >
+                <div className={`p-2 rounded-full transition-colors ${formData.environment === 'indoor-unit' ? 'bg-indigo-100' : 'bg-slate-100 group-hover:bg-indigo-100'}`}>
+                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                     <rect x="3" y="6" width="18" height="10" rx="2" />
+                     <path d="M3 10h18" />
+                     <path d="M7 14h2M11 14h2M15 14h2" strokeLinecap="round" />
+                     <path d="M12 16v2" strokeLinecap="round" />
+                   </svg>
+                </div>
+                <span className="font-medium text-xs">內機</span>
+                {formData.environment === 'indoor-unit' && <div className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />}
               </button>
             </div>
           </div>
@@ -1607,7 +1628,19 @@ const QuotePage = ({
                   const style = config.styles.find(s => s.id === product.styleId);
                   const type = config.types.find(t => t.id === product.typeId);
                   const pipe = config.pipes.find(p => p.id === product.pipeId);
-                  const EnvIcon = product.environment === 'heating' ? Sun : Snowflake;
+                  const EnvIcon = product.environment === 'heating' ? Sun : 
+                                 product.environment === 'cooling' ? Snowflake :
+                                 () => (
+                                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                     <rect x="3" y="6" width="18" height="10" rx="2" />
+                                     <path d="M3 10h18" />
+                                     <path d="M7 14h2M11 14h2M15 14h2" strokeLinecap="round" />
+                                     <path d="M12 16v2" strokeLinecap="round" />
+                                   </svg>
+                                 );
+                  const envColor = product.environment === 'heating' ? 'text-orange-500' : 
+                                  product.environment === 'cooling' ? 'text-cyan-500' : 
+                                  'text-indigo-500';
                   const quantity = productQuantities[product.id] || 1;
                   const unitPrice = parseInt((productPrices[product.id] || product.price).toString().replace(/,/g, ''), 10);
                   const subtotal = isNaN(unitPrice) ? 0 : unitPrice * quantity;
@@ -1622,7 +1655,7 @@ const QuotePage = ({
                       <td className="p-4 text-center align-middle text-sm text-slate-600">
                         <div className="flex items-center justify-center gap-2">
                           <span>{style?.label} / {type?.label}</span>
-                          <EnvIcon className={`w-4 h-4 ${product.environment === 'heating' ? 'text-orange-500' : 'text-cyan-500'}`} />
+                          <EnvIcon className={`w-4 h-4 ${envColor}`} />
                         </div>
                       </td>
                       <td className="p-4 text-center align-middle">
@@ -1980,12 +2013,28 @@ const ProductCard: React.FC<{
 
   const cardId = `product-card-${product.id}`;
 
-  const EnvIcon = product.environment === 'heating' ? Sun : Snowflake;
+  // Environment icon component
+  const EnvIcon = product.environment === 'heating' ? Sun : 
+                  product.environment === 'cooling' ? Snowflake :
+                  // Indoor unit SVG icon
+                  () => (
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="6" width="18" height="10" rx="2" />
+                      <path d="M3 10h18" />
+                      <path d="M7 14h2M11 14h2M15 14h2" strokeLinecap="round" />
+                      <path d="M12 16v2" strokeLinecap="round" />
+                    </svg>
+                  );
+  
   // Use gradients for text
-  const envColorClass = product.environment === 'heating' ? 'text-orange-500' : 'text-cyan-500';
+  const envColorClass = product.environment === 'heating' ? 'text-orange-500' : 
+                       product.environment === 'cooling' ? 'text-cyan-500' : 
+                       'text-indigo-500';
   const envGradientBg = product.environment === 'heating' 
     ? 'bg-gradient-to-br from-orange-100 to-rose-100 border-orange-200' 
-    : 'bg-gradient-to-br from-cyan-100 to-blue-100 border-cyan-200';
+    : product.environment === 'cooling'
+    ? 'bg-gradient-to-br from-cyan-100 to-blue-100 border-cyan-200'
+    : 'bg-gradient-to-br from-indigo-100 to-purple-100 border-indigo-200';
 
   // --- COMPACT VIEW ---
   if (viewMode === 'compact') {
@@ -2510,6 +2559,17 @@ export default function App() {
           const indoor = row['室內機尺寸'] || row['尺寸'] || '';
           const outdoor = row['室外機尺寸'] || '';
 
+          // 判斷環境類型
+          let environment: EnvironmentType = 'cooling';
+          const envValue = row['環境']?.toLowerCase();
+          if (envValue?.includes('暖')) {
+            environment = 'heating';
+          } else if (envValue?.includes('內機') || envValue?.includes('indoor')) {
+            environment = 'indoor-unit';
+          } else if (envValue?.includes('冷')) {
+            environment = 'cooling';
+          }
+
           newProducts.push({
             id: generateId(),
             name: row['產品名稱'] || '同步產品',
@@ -2517,7 +2577,7 @@ export default function App() {
             styleId,
             typeId,
             pipeId: pipeValue,
-            environment: row['環境']?.includes('暖') ? 'heating' : 'cooling',
+            environment,
             dimensions: { indoor, outdoor },
             price: row['建議售價'] || row['價格'] || '',
             remarks: row['備註'] || '',

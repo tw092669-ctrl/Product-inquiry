@@ -1,4 +1,4 @@
-export type EnvironmentType = 'heating' | 'cooling' | 'both';
+export type EnvironmentType = 'heating' | 'cooling' | 'both' | 'indoor-unit';
 
 export interface ConfigOption {
   id: string;
