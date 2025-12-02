@@ -2471,36 +2471,72 @@ export default function App() {
         return row;
       });
 
-      // 處理資料
-      const newProducts: Product[] = jsonData.map((row: any) => {
-        const brandId = findOptionId(row['品牌'], config.brands) || config.brands[0].id;
-        const styleId = findOptionId(row['樣式'], config.styles) || config.styles[0].id;
-        const typeId = findOptionId(row['種類'], config.types) || config.types[0].id;
-        // 管徑直接使用原始值，不轉換為 ID
-        const pipeValue = row['管徑'] || config.pipes[0]?.label || '';
-        
-        const indoor = row['室內機尺寸'] || row['尺寸'] || '';
-        const outdoor = row['室外機尺寸'] || '';
+      // 檢查是否有分類欄位
+      const hasCategory = headers.includes('分類');
+      
+      const newProducts: Product[] = [];
+      const newMiscItems: any[] = [];
 
-        return {
-          id: generateId(),
-          name: row['產品名稱'] || '同步產品',
-          brandId,
-          styleId,
-          typeId,
-          pipeId: pipeValue,
-          environment: row['環境']?.includes('暖') ? 'heating' : 'cooling',
-          dimensions: { indoor, outdoor },
-          price: row['建議售價'] || row['價格'] || '',
-          remarks: row['備註'] || '',
-          isPinned: false,
-          createdAt: Date.now()
-        };
+      jsonData.forEach((row: any) => {
+        const category = row['分類']?.toLowerCase();
+        
+        // 如果有分類欄位且為材料/工具/高空，則加入雜項
+        if (hasCategory && (category === '材料' || category === 'materials' || 
+            category === '工具' || category === 'tools' || 
+            category === '高空' || category === 'high-altitude')) {
+          
+          let categoryType: 'materials' | 'tools' | 'high-altitude' = 'materials';
+          if (category === '工具' || category === 'tools') categoryType = 'tools';
+          else if (category === '高空' || category === 'high-altitude') categoryType = 'high-altitude';
+          
+          newMiscItems.push({
+            id: generateId(),
+            category: categoryType,
+            name: row['項目名稱'] || row['產品名稱'] || row['名稱'] || '未命名項目',
+            specification: row['規格'] || '',
+            unit: row['單位'] || '',
+            price: row['價格'] || row['建議售價'] || '0',
+            remarks: row['備註'] || '',
+            createdAt: Date.now()
+          });
+        } else {
+          // 否則作為產品處理
+          const brandId = findOptionId(row['品牌'], config.brands) || config.brands[0].id;
+          const styleId = findOptionId(row['樣式'], config.styles) || config.styles[0].id;
+          const typeId = findOptionId(row['種類'], config.types) || config.types[0].id;
+          // 管徑直接使用原始值，不轉換為 ID
+          const pipeValue = row['管徑'] || config.pipes[0]?.label || '';
+          
+          const indoor = row['室內機尺寸'] || row['尺寸'] || '';
+          const outdoor = row['室外機尺寸'] || '';
+
+          newProducts.push({
+            id: generateId(),
+            name: row['產品名稱'] || '同步產品',
+            brandId,
+            styleId,
+            typeId,
+            pipeId: pipeValue,
+            environment: row['環境']?.includes('暖') ? 'heating' : 'cooling',
+            dimensions: { indoor, outdoor },
+            price: row['建議售價'] || row['價格'] || '',
+            remarks: row['備註'] || '',
+            isPinned: false,
+            createdAt: Date.now()
+          });
+        }
       });
 
       // 清除現有資料並替換為新資料
       setProducts(newProducts);
-      alert(`成功從 Google 試算表同步 ${newProducts.length} 筆資料\n(已清除舊有資料)`);
+      setMiscItems(newMiscItems);
+      
+      let message = `成功從 Google 試算表同步資料：\n`;
+      message += `- 空調產品：${newProducts.length} 筆\n`;
+      message += `- 雜項項目：${newMiscItems.length} 筆\n`;
+      message += `(已清除舊有資料)`;
+      
+      alert(message);
       // 保存使用的 URL（可能是參數傳入的或狀態中的）
       localStorage.setItem('googleSheetUrl', urlToUse);
     } catch (err) {
