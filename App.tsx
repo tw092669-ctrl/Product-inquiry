@@ -2250,7 +2250,91 @@ export default function App() {
   
   // Category State
   const [activeCategory, setActiveCategory] = useState<'air-conditioning' | 'materials' | 'tools' | 'high-altitude'>('air-conditioning');
-  const [miscItems, setMiscItems] = useState<any[]>([]);
+  const [miscItems, setMiscItems] = useState<any[]>([
+    // 材料範例資料
+    {
+      id: 'misc-material-1',
+      category: 'materials',
+      name: '銅管2330',
+      specification: '1/4" + 3/8"',
+      unit: '30米',
+      price: '5000',
+      remarks: '冷媒管',
+      createdAt: Date.now() - 1000
+    },
+    {
+      id: 'misc-material-2',
+      category: 'materials',
+      name: '銅管2430',
+      specification: '1/4" + 1/2"',
+      unit: '30米',
+      price: '6000',
+      remarks: '冷媒管',
+      createdAt: Date.now() - 2000
+    },
+    {
+      id: 'misc-material-3',
+      category: 'materials',
+      name: '銅管2530',
+      specification: '1/4" + 5/8"',
+      unit: '30米',
+      price: '8000',
+      remarks: '冷媒管',
+      createdAt: Date.now() - 3000
+    },
+    {
+      id: 'misc-material-4',
+      category: 'materials',
+      name: '排水管',
+      specification: 'PVC 16mm',
+      unit: '米',
+      price: '30',
+      remarks: '冷凝水排放',
+      createdAt: Date.now() - 4000
+    },
+    // 工具範例資料
+    {
+      id: 'misc-tool-1',
+      category: 'tools',
+      name: '威克士真空泵',
+      specification: '1/4HP',
+      unit: '台',
+      price: '8500',
+      remarks: '抽真空用',
+      createdAt: Date.now() - 5000
+    },
+    {
+      id: 'misc-tool-2',
+      category: 'tools',
+      name: '扭力扳手',
+      specification: '專業型',
+      unit: '支',
+      price: '1200',
+      remarks: '銅管接頭用',
+      createdAt: Date.now() - 6000
+    },
+    // 高空範例資料
+    {
+      id: 'misc-high-1',
+      category: 'high-altitude',
+      name: '高空作業費',
+      specification: '3-5樓',
+      unit: '次',
+      price: '3000',
+      remarks: '危險加給',
+      createdAt: Date.now() - 7000
+    },
+    {
+      id: 'misc-high-2',
+      category: 'high-altitude',
+      name: '吊車費用',
+      specification: '25噸吊車',
+      unit: '趟',
+      price: '15000',
+      remarks: '大型設備吊裝',
+      createdAt: Date.now() - 8000
+    }
+  ]);
   const [isMiscFormOpen, setIsMiscFormOpen] = useState(false);
   
   // Modals & UI State
