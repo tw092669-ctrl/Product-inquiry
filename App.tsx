@@ -726,6 +726,145 @@ const ProductForm = ({
   );
 };
 
+// 2.5 Misc Item Form Modal
+const MiscItemForm = ({
+  isOpen,
+  onClose,
+  onSave,
+  category
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: { name: string; specification: string; unit: string; price: string; remarks: string }) => void;
+  category: 'air-conditioning' | 'materials' | 'tools' | 'high-altitude';
+}) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    specification: '',
+    unit: '',
+    price: '',
+    remarks: ''
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({ name: '', specification: '', unit: '', price: '', remarks: '' });
+    }
+  }, [isOpen]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.trim()) {
+      alert('請輸入項目名稱');
+      return;
+    }
+    onSave(formData);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  const categoryLabels = {
+    'air-conditioning': '空調',
+    'materials': '材料',
+    'tools': '工具',
+    'high-altitude': '高空'
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full my-8 border border-slate-100 animate-in zoom-in-95 duration-200">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-t-3xl">
+          <h2 className="text-2xl font-black text-white flex items-center gap-3">
+            <Plus className="w-7 h-7" />
+            新增{categoryLabels[category]}項目
+          </h2>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1.5">項目名稱 *</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={e => setFormData({...formData, name: e.target.value})}
+              className="w-full rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
+              placeholder="輸入項目名稱..."
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1.5">規格</label>
+            <input
+              type="text"
+              value={formData.specification}
+              onChange={e => setFormData({...formData, specification: e.target.value})}
+              className="w-full rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
+              placeholder="輸入規格..."
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-1.5">單位</label>
+              <input
+                type="text"
+                value={formData.unit}
+                onChange={e => setFormData({...formData, unit: e.target.value})}
+                className="w-full rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border"
+                placeholder="例: 個、組、米..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-1.5">價格</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="text-slate-500">$</span>
+                </div>
+                <input
+                  type="text"
+                  value={formData.price}
+                  onChange={e => setFormData({...formData, price: e.target.value})}
+                  className="w-full pl-7 rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border font-mono text-lg font-semibold"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1.5">備註</label>
+            <textarea
+              value={formData.remarks}
+              onChange={e => setFormData({...formData, remarks: e.target.value})}
+              className="w-full rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 border h-24"
+              placeholder="輸入備註..."
+            />
+          </div>
+
+          <div className="pt-4 flex justify-end gap-3 border-t border-slate-100 mt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-3 text-slate-600 hover:bg-slate-100 rounded-xl transition font-medium"
+            >
+              取消
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 hover:brightness-110 transition font-bold flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" /> 儲存項目
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 // 3. Confirm Modal
 const ConfirmModal = ({ 
   isOpen, 
@@ -1933,12 +2072,10 @@ const ProductCard: React.FC<{
           
           {/* Dimensions Box */}
           <div className="bg-slate-50/80 border border-slate-100 p-3 rounded-xl flex flex-col justify-center hover:bg-slate-50 transition-colors">
-            <div className="flex items-start gap-2 mb-1.5">
-               <Home className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0 mt-0.5" />
+            <div className="mb-1.5">
                <span className="text-xs font-semibold text-slate-700 break-all font-mono leading-tight">{product.dimensions.indoor || '-'}</span>
             </div>
-            <div className="flex items-start gap-2">
-               <Trees className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+            <div>
                <span className="text-xs font-semibold text-slate-700 break-all font-mono leading-tight">{product.dimensions.outdoor || '-'}</span>
             </div>
           </div>
@@ -2022,6 +2159,11 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   
+  // Category State
+  const [activeCategory, setActiveCategory] = useState<'air-conditioning' | 'materials' | 'tools' | 'high-altitude'>('air-conditioning');
+  const [miscItems, setMiscItems] = useState<any[]>([]);
+  const [isMiscFormOpen, setIsMiscFormOpen] = useState(false);
+  
   // Modals & UI State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -2093,6 +2235,26 @@ export default function App() {
       }
       return [...prev, id];
     });
+  };
+
+  const handleSaveMiscItem = (data: { name: string; specification: string; unit: string; price: string; remarks: string }) => {
+    const newItem = {
+      id: generateId(),
+      category: activeCategory,
+      name: data.name,
+      specification: data.specification,
+      unit: data.unit,
+      price: data.price,
+      remarks: data.remarks,
+      createdAt: Date.now()
+    };
+    setMiscItems(prev => [...prev, newItem]);
+  };
+
+  const handleDeleteMiscItem = (id: string) => {
+    if (confirm('確定要刪除此項目嗎？')) {
+      setMiscItems(prev => prev.filter(item => item.id !== id));
+    }
   };
 
   const handleGoogleSheetSync = async (urlOverride?: string) => {
@@ -2181,6 +2343,7 @@ export default function App() {
     const savedUrl = localStorage.getItem('googleSheetUrl');
     const savedAutoSync = localStorage.getItem('autoSync');
     const savedMaxCards = localStorage.getItem('maxDisplayCards');
+    const savedMiscItems = localStorage.getItem('miscItems');
     
     if (savedUrl) {
       setGoogleSheetUrl(savedUrl);
@@ -2202,7 +2365,20 @@ export default function App() {
     if (savedMaxCards) {
       setMaxDisplayCards(parseInt(savedMaxCards, 10));
     }
+
+    if (savedMiscItems) {
+      try {
+        setMiscItems(JSON.parse(savedMiscItems));
+      } catch (e) {
+        console.error('Failed to load misc items:', e);
+      }
+    }
   }, []); // 只在首次載入時執行
+
+  // 儲存雜項項目到 localStorage
+  useEffect(() => {
+    localStorage.setItem('miscItems', JSON.stringify(miscItems));
+  }, [miscItems]);
 
   const handleDeleteRequest = (id: string) => {
     setDeleteId(id);
@@ -2349,16 +2525,72 @@ export default function App() {
           />
         </div>
 
+        {/* Category Tabs */}
+        <div className="mb-8 bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+          <div className="flex flex-wrap">
+            <button
+              onClick={() => setActiveCategory('air-conditioning')}
+              className={`flex-1 min-w-[120px] px-6 py-4 font-bold text-sm transition-all border-b-4 ${
+                activeCategory === 'air-conditioning'
+                  ? 'bg-blue-50 border-blue-500 text-blue-700'
+                  : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              <Package className="w-5 h-5 inline-block mr-2" />
+              空調
+            </button>
+            <button
+              onClick={() => setActiveCategory('materials')}
+              className={`flex-1 min-w-[120px] px-6 py-4 font-bold text-sm transition-all border-b-4 ${
+                activeCategory === 'materials'
+                  ? 'bg-green-50 border-green-500 text-green-700'
+                  : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              <Scale className="w-5 h-5 inline-block mr-2" />
+              材料
+            </button>
+            <button
+              onClick={() => setActiveCategory('tools')}
+              className={`flex-1 min-w-[120px] px-6 py-4 font-bold text-sm transition-all border-b-4 ${
+                activeCategory === 'tools'
+                  ? 'bg-orange-50 border-orange-500 text-orange-700'
+                  : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              <Settings className="w-5 h-5 inline-block mr-2" />
+              工具
+            </button>
+            <button
+              onClick={() => setActiveCategory('high-altitude')}
+              className={`flex-1 min-w-[120px] px-6 py-4 font-bold text-sm transition-all border-b-4 ${
+                activeCategory === 'high-altitude'
+                  ? 'bg-purple-50 border-purple-500 text-purple-700'
+                  : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              <TrendingUp className="w-5 h-5 inline-block mr-2" />
+              高空
+            </button>
+          </div>
+        </div>
+
         {/* Stats & View Switcher */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
            <div>
-             <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-1">產品列表</h2>
+             <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-1">
+               {activeCategory === 'air-conditioning' ? '產品列表' : 
+                activeCategory === 'materials' ? '材料項目' :
+                activeCategory === 'tools' ? '工具項目' :
+                '高空項目'}
+             </h2>
              <span className="text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full text-sm">
-               共 {filteredProducts.length} 筆
+               {activeCategory === 'air-conditioning' ? `共 ${filteredProducts.length} 筆` : `共 ${miscItems.filter(item => item.category === activeCategory).length} 筆`}
              </span>
            </div>
 
-           {/* View Switcher Controls */}
+           {/* View Switcher Controls - Only show for air-conditioning */}
+           {activeCategory === 'air-conditioning' && (
            <div className="bg-white p-1.5 rounded-xl border border-slate-100 shadow-sm flex items-center gap-1">
              <button 
                onClick={() => setViewMode('grid')}
@@ -2382,8 +2614,13 @@ export default function App() {
                <Grid3x3 className="w-5 h-5" />
              </button>
            </div>
+           )}
         </div>
 
+        {/* Content based on active category */}
+        {activeCategory === 'air-conditioning' ? (
+          // Show product cards
+          <>
         {/* Product Grid / List / Compact Wrapper */}
         {filteredProducts.length > 0 ? (
           <>
@@ -2464,6 +2701,63 @@ export default function App() {
             <p className="text-slate-500">試試看搜尋其他關鍵字或點擊上方「新增產品」</p>
           </div>
         )}
+        </>
+        ) : (
+          // Show misc items table for other categories
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">項目名稱</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">規格</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">單位</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">價格</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">備註</th>
+                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider">操作</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {miscItems.filter(item => item.category === activeCategory).length > 0 ? (
+                    miscItems.filter(item => item.category === activeCategory).map((item, index) => (
+                      <tr key={item.id} className="hover:bg-slate-50 transition">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-800">{item.name}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{item.specification}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{item.unit}</td>
+                        <td className="px-6 py-4 text-sm font-bold text-emerald-600">${item.price}</td>
+                        <td className="px-6 py-4 text-sm text-slate-500">{item.remarks || '-'}</td>
+                        <td className="px-6 py-4 text-right">
+                          <button 
+                            onClick={() => handleDeleteMiscItem(item.id)}
+                            className="text-slate-400 hover:text-red-600 transition p-2"
+                            title="刪除項目"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                        尚無資料，點擊下方按鈕新增項目
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="p-4 border-t border-slate-100 bg-slate-50">
+              <button 
+                onClick={() => setIsMiscFormOpen(true)}
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/30 transition flex items-center justify-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                新增項目
+              </button>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Floating Compare Bar */}
@@ -2539,6 +2833,13 @@ export default function App() {
         onSubmit={handleSaveProduct} 
         initialData={editingProduct} 
         config={config} 
+      />
+
+      <MiscItemForm
+        isOpen={isMiscFormOpen}
+        onClose={() => setIsMiscFormOpen(false)}
+        onSave={handleSaveMiscItem}
+        category={activeCategory}
       />
 
       <ConfirmModal 

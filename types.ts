@@ -32,3 +32,16 @@ export interface Product {
   isPinned: boolean;
   createdAt: number;
 }
+
+export type CategoryType = 'air-conditioning' | 'materials' | 'tools' | 'high-altitude';
+
+export interface MiscItem {
+  id: string;
+  category: CategoryType;
+  name: string;
+  specification: string;
+  unit: string;
+  price: number | string;
+  remarks: string;
+  createdAt: number;
+}
