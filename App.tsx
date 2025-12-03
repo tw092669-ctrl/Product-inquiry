@@ -1108,7 +1108,7 @@ const QuotePage = ({
   const [customerAddress, setCustomerAddress] = useState('');
   const [quoteDate, setQuoteDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
-  const [quoteTitle, setQuoteTitle] = useState('空調設備報價單');
+  const [quoteTitle, setQuoteTitle] = useState('冷氣估價單');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   
   // Product price adjustments
@@ -1218,6 +1218,8 @@ const QuotePage = ({
     id: string;
     name: string;
     description: string;
+    quantity: number;
+    unitPrice: string;
     price: string;
   };
   
@@ -1225,18 +1227,18 @@ const QuotePage = ({
   
   // Common custom items templates
   const commonItems = [
-    { name: '安裝費用', description: '分離式安裝工資', price: '3500' },
-    { name: '移機費用', description: '拆除&安裝工資', price: '4500' },
-    { name: '銅線費用', description: '客廳/主/次臥銅管&線材費用共計', price: '5000' },
-    { name: '安裝架', description: '室外機不鏽鋼L/豪華架', price: '2000' },
-    { name: '洗孔費用', description: '牆體洗洞工程', price: '1000' },
-    { name: '焊接費用', description: '焊接工程', price: '1500' },
-    { name: '管槽費用', description: '防曬美化管槽(○色)', price: '3000' },
-    { name: '危險施工作業', description: '高空危險施工費用', price: '5000' },
-    { name: '管路保養', description: '舊管冷凍油清洗工程', price: '3000' },
-    { name: '清洗保養', description: '室內/外機-清洗保養服務', price: '3000' },
-    { name: '打壁費用', description: '牆體切槽配管含水泥填回', price: '2000' },
-    { name: '其他', description: '', price: '0' },
+    { name: '安裝費用', description: '分離式安裝工資', quantity: 1, unitPrice: '3500', price: '3500' },
+    { name: '移機費用', description: '拆除&安裝工資', quantity: 1, unitPrice: '4500', price: '4500' },
+    { name: '銅線費用', description: '客廳/主/次臥銅管&線材費用共計', quantity: 1, unitPrice: '5000', price: '5000' },
+    { name: '安裝架', description: '室外機不鏽鋼L/豪華架', quantity: 1, unitPrice: '2000', price: '2000' },
+    { name: '洗孔費用', description: '牆體洗洞工程', quantity: 1, unitPrice: '1000', price: '1000' },
+    { name: '焊接費用', description: '焊接工程', quantity: 1, unitPrice: '1500', price: '1500' },
+    { name: '管槽費用', description: '防曬美化管槽(○色)', quantity: 1, unitPrice: '3000', price: '3000' },
+    { name: '危險施工作業', description: '高空危險施工費用', quantity: 1, unitPrice: '5000', price: '5000' },
+    { name: '管路保養', description: '舊管冷凍油清洗工程', quantity: 1, unitPrice: '3000', price: '3000' },
+    { name: '清洗保養', description: '室內/外機-清洗保養服務', quantity: 1, unitPrice: '3000', price: '3000' },
+    { name: '打壁費用', description: '牆體切槽配管含水泥填回', quantity: 1, unitPrice: '2000', price: '2000' },
+    { name: '其他', description: '', quantity: 1, unitPrice: '0', price: '0' },
   ];
 
   const handleAddCustomItem = () => {
@@ -1244,6 +1246,8 @@ const QuotePage = ({
       id: generateId(),
       name: '',
       description: '',
+      quantity: 1,
+      unitPrice: '0',
       price: '0'
     };
     setCustomItems([...customItems, newItem]);
@@ -1255,14 +1259,30 @@ const QuotePage = ({
       ...updated[index],
       name: commonItem.name,
       description: commonItem.description,
+      quantity: commonItem.quantity,
+      unitPrice: commonItem.unitPrice,
       price: commonItem.price
     };
     setCustomItems(updated);
   };
 
-  const handleUpdateCustomItem = (index: number, field: keyof CustomItem, value: string) => {
+  const handleUpdateCustomItem = (index: number, field: keyof CustomItem, value: string | number) => {
     const updated = [...customItems];
-    updated[index][field] = value;
+    if (field === 'quantity') {
+      updated[index][field] = typeof value === 'number' ? value : parseInt(value) || 1;
+      // 更新總價
+      const unitPrice = parseInt(updated[index].unitPrice.replace(/,/g, ''), 10);
+      const quantity = updated[index].quantity;
+      updated[index].price = (isNaN(unitPrice) ? 0 : unitPrice * quantity).toString();
+    } else if (field === 'unitPrice') {
+      updated[index][field] = value.toString();
+      // 更新總價
+      const unitPrice = parseInt(value.toString().replace(/,/g, ''), 10);
+      const quantity = updated[index].quantity;
+      updated[index].price = (isNaN(unitPrice) ? 0 : unitPrice * quantity).toString();
+    } else {
+      updated[index][field] = value as any;
+    }
     setCustomItems(updated);
   };
 
@@ -1279,8 +1299,9 @@ const QuotePage = ({
     }, 0);
     
     const customTotal = customItems.reduce((sum, item) => {
-      const price = parseInt(item.price.replace(/,/g, ''), 10);
-      return sum + (isNaN(price) ? 0 : price);
+      const unitPrice = parseInt(item.unitPrice.replace(/,/g, ''), 10);
+      const quantity = item.quantity || 1;
+      return sum + (isNaN(unitPrice) ? 0 : unitPrice * quantity);
     }, 0);
     
     return productsTotal + customTotal;
@@ -1515,7 +1536,7 @@ const QuotePage = ({
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') setIsEditingTitle(false);
                         if (e.key === 'Escape') {
-                          setQuoteTitle('空調設備報價單');
+                          setQuoteTitle('冷氣估價單');
                           setIsEditingTitle(false);
                         }
                       }}
@@ -1616,7 +1637,7 @@ const QuotePage = ({
                   <th className="text-center p-4 font-bold text-sm">產品名稱</th>
                   <th className="text-center p-4 font-bold text-sm">品牌</th>
                   <th className="text-center p-4 font-bold text-sm">規格</th>
-                  <th className="text-center p-4 font-bold text-sm w-20">數量</th>
+                  <th className="text-center p-4 font-bold text-sm w-16">數量</th>
                   <th className="text-center p-4 font-bold text-sm w-32">單價</th>
                   <th className="text-center p-4 font-bold text-sm w-32">小計</th>
                   <th className="export-hide w-12 rounded-tr-xl"></th>
@@ -1762,86 +1783,111 @@ const QuotePage = ({
                 })}
                 
                 {/* Custom Items */}
-                {customItems.map((item, index) => (
-                  <tr key={item.id} className="border-b border-slate-200 bg-blue-50/30">
-                    <td className="p-4 text-center align-middle text-slate-600">{products.length + index + 1}</td>
-                    <td className="p-4 text-center align-middle" colSpan={1}>
-                      <div className="export-hide">
-                        <select
-                          value={item.name || ""}
-                          onChange={(e) => {
-                            if (e.target.value === "") {
-                              // 清空，讓使用者自訂
-                              handleUpdateCustomItem(index, 'name', '');
-                              handleUpdateCustomItem(index, 'description', '');
-                              handleUpdateCustomItem(index, 'price', '0');
-                            } else {
-                              const selected = commonItems.find(ci => ci.name === e.target.value);
-                              if (selected) {
-                                handleSelectCommonItem(index, selected);
+                {customItems.map((item, index) => {
+                  const quantity = item.quantity || 1;
+                  const unitPrice = parseInt((item.unitPrice || '0').toString().replace(/,/g, ''), 10);
+                  const subtotal = isNaN(unitPrice) ? 0 : unitPrice * quantity;
+                  
+                  return (
+                    <tr key={item.id} className="border-b border-slate-200 bg-blue-50/30">
+                      <td className="p-4 text-center align-middle text-slate-600">{products.length + index + 1}</td>
+                      <td className="p-4 text-center align-middle">
+                        <div className="export-hide">
+                          <select
+                            value={item.name || ""}
+                            onChange={(e) => {
+                              if (e.target.value === "") {
+                                // 清空，讓使用者自訂
+                                handleUpdateCustomItem(index, 'name', '');
+                                handleUpdateCustomItem(index, 'description', '');
+                                handleUpdateCustomItem(index, 'unitPrice', '0');
+                              } else {
+                                const selected = commonItems.find(ci => ci.name === e.target.value);
+                                if (selected) {
+                                  handleSelectCommonItem(index, selected);
+                                }
                               }
-                            }
-                          }}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 bg-white"
-                        >
-                          <option value="">自訂項目...</option>
-                          {commonItems.map((ci) => (
-                            <option key={ci.name} value={ci.name}>{ci.name}</option>
-                          ))}
-                        </select>
-                        {/* 只在下拉選單為"自訂項目"或空值時顯示輸入框 */}
-                        {!item.name && (
+                            }}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 bg-white"
+                          >
+                            <option value="">自訂項目...</option>
+                            {commonItems.map((ci) => (
+                              <option key={ci.name} value={ci.name}>{ci.name}</option>
+                            ))}
+                          </select>
+                          {/* 只在下拉選單為"自訂項目"或空值時顯示輸入框 */}
+                          {!item.name && (
+                            <input
+                              type="text"
+                              value={item.name}
+                              onChange={(e) => handleUpdateCustomItem(index, 'name', e.target.value)}
+                              placeholder="請輸入項目名稱"
+                              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 mt-2"
+                              autoFocus
+                            />
+                          )}
+                        </div>
+                        <div className="hidden export-show font-medium text-slate-800">{item.name || '未命名項目'}</div>
+                      </td>
+                      <td className="p-4 text-center align-middle" colSpan={2}>
+                        <div className="export-hide">
                           <input
                             type="text"
-                            value={item.name}
-                            onChange={(e) => handleUpdateCustomItem(index, 'name', e.target.value)}
-                            placeholder="請輸入項目名稱"
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 mt-2"
-                            autoFocus
+                            value={item.description}
+                            onChange={(e) => handleUpdateCustomItem(index, 'description', e.target.value)}
+                            placeholder="說明"
+                            className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
                           />
-                        )}
-                      </div>
-                      <div className="hidden export-show font-medium text-slate-800">{item.name || '未命名項目'}</div>
-                    </td>
-                    <td className="p-4 text-center align-middle" colSpan={2}>
-                      <div className="export-hide">
-                        <input
-                          type="text"
-                          value={item.description}
-                          onChange={(e) => handleUpdateCustomItem(index, 'description', e.target.value)}
-                          placeholder="說明"
-                          className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="hidden export-show text-sm text-slate-600">{item.description}</div>
-                    </td>
-                    <td className="p-4 text-center align-middle">
-                      <div className="export-hide">
-                        <input
-                          type="text"
-                          value={item.price}
-                          onChange={(e) => handleUpdateCustomItem(index, 'price', e.target.value)}
-                          placeholder="0"
-                          className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-right font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="hidden export-show text-center font-mono font-bold text-slate-800">${item.price}</div>
-                    </td>
-                    <td className="p-3 export-hide">
-                      <button
-                        onClick={() => handleRemoveCustomItem(index)}
-                        className="p-1 text-red-500 hover:bg-red-50 rounded transition"
-                        title="刪除"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                        </div>
+                        <div className="hidden export-show text-sm text-slate-600">{item.description}</div>
+                      </td>
+                      <td className="p-4 text-center align-middle">
+                        <div className="export-hide">
+                          <input
+                            type="number"
+                            min="1"
+                            value={quantity}
+                            onChange={(e) => handleUpdateCustomItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                            className="w-16 px-2 py-1 border border-slate-300 rounded text-center font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <div className="hidden export-show text-center font-mono font-bold text-slate-800">
+                          {quantity}
+                        </div>
+                      </td>
+                      <td className="p-4 text-center align-middle">
+                        <div className="export-hide">
+                          <input
+                            type="text"
+                            value={item.unitPrice}
+                            onChange={(e) => handleUpdateCustomItem(index, 'unitPrice', e.target.value)}
+                            placeholder="0"
+                            className="w-28 px-2 py-1 border border-slate-300 rounded text-right font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <div className="hidden export-show text-right font-mono font-bold text-slate-800">${item.unitPrice}</div>
+                      </td>
+                      <td className="p-4 text-center align-middle">
+                        <div className="text-center font-mono font-bold text-slate-800">
+                          ${subtotal.toLocaleString()}
+                        </div>
+                      </td>
+                      <td className="p-3 export-hide">
+                        <button
+                          onClick={() => handleRemoveCustomItem(index)}
+                          className="p-1 text-red-500 hover:bg-red-50 rounded transition"
+                          title="刪除"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
                 
                 {/* Add Custom Item Button */}
                 <tr className="export-hide">
-                  <td colSpan={6} className="p-3">
+                  <td colSpan={8} className="p-3">
                     <button
                       onClick={handleAddCustomItem}
                       className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 transition flex items-center justify-center gap-2 font-medium"
@@ -1854,7 +1900,7 @@ const QuotePage = ({
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-slate-300">
-                  <td colSpan={4} className="p-5 text-center font-black text-xl text-slate-700">
+                  <td colSpan={6} className="p-5 text-center font-black text-xl text-slate-700">
                     總計
                   </td>
                   <td className="p-5 text-center">
