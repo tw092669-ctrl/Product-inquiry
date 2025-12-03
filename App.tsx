@@ -1569,17 +1569,14 @@ const QuotePage = ({
               
               {/* 匯出模式 */}
               <h1 className="hidden export-show text-4xl sm:text-5xl font-black text-indigo-600 mb-3">{quoteTitle}</h1>
-              
-              <div className="h-1 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 rounded-full mb-3"></div>
             </div>
-            <p className="text-slate-500 text-sm tracking-wider">QUOTATION</p>
           </div>
 
           {/* Info Section */}
           <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-6 mb-8 border border-slate-200">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+              <div className="flex items-center gap-4">
+                <label className="text-sm font-bold text-slate-700 flex items-center gap-2 whitespace-nowrap">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
                   客戶姓名
                 </label>
@@ -1587,15 +1584,15 @@ const QuotePage = ({
                   type="text"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="export-hide w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                  className="export-hide flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                   placeholder="請輸入客戶姓名"
                 />
-                <div className="hidden export-show px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
+                <div className="hidden export-show flex-1 px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
                   {customerName || '未填寫'}
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+              <div className="flex items-center gap-4">
+                <label className="text-sm font-bold text-slate-700 flex items-center gap-2 whitespace-nowrap">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
                   報價日期
                 </label>
@@ -1603,14 +1600,14 @@ const QuotePage = ({
                   type="date"
                   value={quoteDate}
                   onChange={(e) => setQuoteDate(e.target.value)}
-                  className="export-hide w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                  className="export-hide flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                 />
-                <div className="hidden export-show px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
+                <div className="hidden export-show flex-1 px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
                   {quoteDate || '未填寫'}
                 </div>
               </div>
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
+              <div className="sm:col-span-2 flex items-center gap-4">
+                <label className="text-sm font-bold text-slate-700 flex items-center gap-2 whitespace-nowrap">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
                   客戶地址
                 </label>
@@ -1618,10 +1615,10 @@ const QuotePage = ({
                   type="text"
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
-                  className="export-hide w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                  className="export-hide flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                   placeholder="請輸入客戶地址"
                 />
-                <div className="hidden export-show px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
+                <div className="hidden export-show flex-1 px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
                   {customerAddress || '未填寫'}
                 </div>
               </div>
@@ -1672,7 +1669,7 @@ const QuotePage = ({
                       <td className="p-4 text-center align-middle">
                         <div className="font-medium text-slate-800">{product.name}</div>
                       </td>
-                      <td className="p-4 text-center align-middle text-slate-700">{brand?.label}</td>
+                      <td className="p-4 text-center align-middle text-slate-700">{brand?.label.split(' (')[0]}</td>
                       <td className="p-4 text-center align-middle text-sm text-slate-600">
                         <div className="flex items-center justify-center gap-2">
                           <span>{style?.label} / {type?.label}</span>
