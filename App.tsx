@@ -2105,7 +2105,9 @@ const QuotePage = ({
                 <button
                   key={idx}
                   onClick={btn.action}
-                  className={`${btn.color} rounded-full text-2xl font-light transition active:brightness-75 aspect-square flex items-center justify-center ${btn.label === '0' ? 'col-span-2 rounded-full' : ''} ${btn.label === '=' ? 'row-span-2' : ''}`}
+                  className={`${btn.color} rounded-full text-2xl font-light transition active:brightness-75 flex items-center justify-center ${
+                    btn.label === '0' ? 'col-span-2 rounded-full aspect-[2/1]' : 'aspect-square'
+                  } ${btn.label === '=' ? 'row-span-2' : ''}`}
                 >
                   {btn.label}
                 </button>
