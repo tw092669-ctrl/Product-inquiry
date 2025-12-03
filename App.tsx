@@ -1999,10 +1999,16 @@ const QuotePage = ({
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="export-hide w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-32 resize-none"
+                className="export-hide w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none overflow-hidden"
                 placeholder="請輸入備註事項（如：付款方式、貨物稅申請、汰舊換新廢四機...等）"
+                rows={1}
+                onInput={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = 'auto';
+                  target.style.height = target.scrollHeight + 'px';
+                }}
               />
-              <div className="hidden export-show px-4 py-3 border border-slate-300 rounded-lg bg-slate-50 min-h-[128px] whitespace-pre-wrap break-words">
+              <div className="hidden export-show px-4 py-3 border border-slate-300 rounded-lg bg-slate-50 whitespace-pre-wrap break-words">
                 {notes}
               </div>
             </div>
