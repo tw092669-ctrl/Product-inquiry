@@ -1568,7 +1568,7 @@ const QuotePage = ({
               </div>
               
               {/* 匯出模式 */}
-              <h1 className="hidden export-show text-4xl sm:text-5xl font-black text-indigo-600 mb-1">{quoteTitle}</h1>
+              <h1 className="hidden export-show text-4xl sm:text-5xl font-black text-indigo-600 mb-4">{quoteTitle}</h1>
             </div>
           </div>
 
