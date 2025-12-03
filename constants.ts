@@ -8,7 +8,7 @@ export const INITIAL_CONFIG: AppConfig = {
     // New Brands
     { id: 'b5', label: '三菱重工 (Mitsubishi Heavy)', color: '#881337' }, // Dark Rose
     { id: 'b6', label: '三菱電機 (Mitsubishi Electric)', color: '#b91c1c' }, // Red
-    { id: 'b7', label: '金鼎 (King Ding)', color: '#d97706' }, // Amber/Gold
+    { id: 'b7', label: '金鼎 (Jin Ting)', color: '#d97706' }, // Amber/Gold
     { id: 'b8', label: '華菱 (Hawrin)', color: '#047857' }, // Emerald Green
     { id: 'b9', label: '聲寶 (Sampo)', color: '#ea580c' }, // Orange
     { id: 'b10', label: '東元 (Teco)', color: '#0369a1' }, // Deep Sky Blue
