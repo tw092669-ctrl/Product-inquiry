@@ -1374,8 +1374,13 @@ const QuotePage = ({
       const element = document.getElementById('quote-content');
       if (!element) return;
 
-      // Get current element width instead of forcing fixed width
-      const currentWidth = element.offsetWidth;
+      // Store original styles
+      const originalMinWidth = element.style.minWidth;
+      const originalWidth = element.style.width;
+      
+      // Force desktop width for consistent export
+      element.style.minWidth = '800px';
+      element.style.width = '800px';
 
       // Hide interactive elements
       const editElements = element.querySelectorAll('.export-hide');
@@ -1389,9 +1394,13 @@ const QuotePage = ({
         backgroundColor: '#ffffff',
         logging: false,
         useCORS: true,
-        width: currentWidth,
+        width: 800,
       });
 
+      // Restore original styles
+      element.style.minWidth = originalMinWidth;
+      element.style.width = originalWidth;
+      
       // Restore interactive elements
       editElements.forEach(el => (el as HTMLElement).style.display = '');
       displayElements.forEach(el => (el as HTMLElement).style.display = '');
@@ -1734,7 +1743,9 @@ const QuotePage = ({
                           ))}
                         </div>
                       </td>
-                      <td className="p-4 text-center align-middle text-slate-700 whitespace-nowrap">{brand?.label.split(' (')[0]}</td>
+                      <td className="p-4 text-center align-middle text-slate-700 whitespace-nowrap">
+                        {brand?.label.split(' (')[0].replace('三菱重工', '重工').replace('三菱電機', '電機')}
+                      </td>
                       <td className="p-4 text-center align-middle text-sm text-slate-600 whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
                           <span>{style?.label} / {type?.label}</span>
