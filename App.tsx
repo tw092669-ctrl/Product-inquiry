@@ -1396,19 +1396,105 @@ const QuotePage = ({
       editElements.forEach(el => (el as HTMLElement).style.display = '');
       displayElements.forEach(el => (el as HTMLElement).style.display = '');
 
-      // Convert canvas to blob and download as PNG (simpler and more reliable than PDF)
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          const fileName = `報價單_${quoteDate}_${customerName || '客戶'}.png`;
-          link.download = fileName;
-          link.href = url;
-          link.click();
-          URL.revokeObjectURL(url);
-        }
-        setIsExporting(false);
-      }, 'image/png');
+      const imgData = canvas.toDataURL('image/png');
+      
+      // Open in new window to display
+      const previewWindow = window.open('', '_blank');
+      if (previewWindow) {
+        previewWindow.document.write(`
+          <html>
+            <head>
+              <title>報價單預覽 - ${quoteDate}_${customerName || '客戶'}</title>
+              <style>
+                body { 
+                  margin: 0; 
+                  padding: 20px;
+                  background: #f5f5f5;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  min-height: 100vh;
+                }
+                .container {
+                  max-width: 1200px;
+                  background: white;
+                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                  border-radius: 8px;
+                  overflow: hidden;
+                }
+                img { 
+                  width: 100%; 
+                  height: auto; 
+                  display: block; 
+                }
+                .toolbar {
+                  padding: 15px 20px;
+                  background: #fff;
+                  border-bottom: 1px solid #e5e7eb;
+                  display: flex;
+                  gap: 10px;
+                  justify-content: center;
+                }
+                button {
+                  padding: 10px 20px;
+                  border: none;
+                  border-radius: 6px;
+                  font-size: 14px;
+                  font-weight: 600;
+                  cursor: pointer;
+                  transition: all 0.2s;
+                }
+                .btn-print {
+                  background: #4f46e5;
+                  color: white;
+                }
+                .btn-print:hover {
+                  background: #4338ca;
+                }
+                .btn-download {
+                  background: #059669;
+                  color: white;
+                }
+                .btn-download:hover {
+                  background: #047857;
+                }
+                @media print {
+                  body { 
+                    background: white;
+                    padding: 0;
+                  }
+                  .toolbar { 
+                    display: none; 
+                  }
+                  .container {
+                    box-shadow: none;
+                    max-width: none;
+                  }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="toolbar">
+                  <button class="btn-print" onclick="window.print()">🖨️ 列印</button>
+                  <button class="btn-download" onclick="downloadImage()">💾 下載圖片</button>
+                </div>
+                <img src="${imgData}" alt="報價單" />
+              </div>
+              <script>
+                function downloadImage() {
+                  const link = document.createElement('a');
+                  link.download = '報價單_${quoteDate}_${customerName || '客戶'}.png';
+                  link.href = '${imgData}';
+                  link.click();
+                }
+              </script>
+            </body>
+          </html>
+        `);
+        previewWindow.document.close();
+      }
+      setIsExporting(false);
     } catch (error) {
       console.error('Export failed:', error);
       alert('匯出失敗，請稍後再試');
@@ -1479,8 +1565,8 @@ const QuotePage = ({
                 >
                   <FileDown className="w-4 h-4 text-red-600" />
                   <div>
-                    <div className="font-medium">匯出高解析度圖片</div>
-                    <div className="text-xs text-slate-500">適合列印</div>
+                    <div className="font-medium">預覽報價單</div>
+                    <div className="text-xs text-slate-500">可列印或下載</div>
                   </div>
                 </button>
               </div>
@@ -1607,7 +1693,7 @@ const QuotePage = ({
                   <th className="text-center p-4 font-bold text-sm whitespace-nowrap">品牌</th>
                   <th className="text-center p-4 font-bold text-sm whitespace-nowrap">規格</th>
                   <th className="text-center p-4 font-bold text-sm w-16 whitespace-nowrap">數量</th>
-                  <th className="text-center p-4 font-bold text-sm w-32 whitespace-nowrap">單價</th>
+                  <th className="text-center p-4 font-bold text-sm w-24 whitespace-nowrap">單價</th>
                   <th className="text-center p-4 font-bold text-sm w-32 whitespace-nowrap">小計</th>
                   <th className="export-hide w-12 rounded-tr-xl"></th>
                 </tr>
@@ -1732,7 +1818,7 @@ const QuotePage = ({
                           ) : (
                             <>
                               <span className="font-mono font-bold text-slate-800">
-                                ${productPrices[product.id] || product.price}
+                                {productPrices[product.id] || product.price}
                               </span>
                               <button
                                 onClick={() => setEditingPriceId(product.id)}
@@ -1745,7 +1831,7 @@ const QuotePage = ({
                           )}
                         </div>
                         <div className="hidden export-show text-center font-mono font-bold text-slate-800 whitespace-nowrap">
-                          ${productPrices[product.id] || product.price}
+                          {productPrices[product.id] || product.price}
                         </div>
                       </td>
                       <td className="p-4 text-center align-middle whitespace-nowrap">
@@ -1848,7 +1934,7 @@ const QuotePage = ({
                             className="w-28 px-2 py-1 border border-slate-300 rounded text-right font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500"
                           />
                         </div>
-                        <div className="hidden export-show text-right font-mono font-bold text-slate-800 whitespace-nowrap">${item.unitPrice}</div>
+                        <div className="hidden export-show text-right font-mono font-bold text-slate-800 whitespace-nowrap">{item.unitPrice}</div>
                       </td>
                       <td className="p-4 text-center align-middle whitespace-nowrap">
                         <div className="text-center font-mono font-bold text-slate-800">
