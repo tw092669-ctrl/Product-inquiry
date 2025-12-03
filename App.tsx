@@ -1638,8 +1638,15 @@ const QuotePage = ({
                   return (
                     <tr key={product.id} className="group border-b border-slate-200 hover:bg-slate-50">
                       <td className="p-4 text-center align-middle text-slate-600 whitespace-nowrap">{index + 1}</td>
-                      <td className="p-4 text-center align-middle whitespace-nowrap">
-                        <div className="font-medium text-slate-800">{product.name}</div>
+                      <td className="p-3 text-center align-middle">
+                        <div className="font-medium text-slate-800 text-sm leading-tight">
+                          {product.name.split('/').map((part, i, arr) => (
+                            <span key={i}>
+                              {part.trim()}
+                              {i < arr.length - 1 && <br />}
+                            </span>
+                          ))}
+                        </div>
                       </td>
                       <td className="p-4 text-center align-middle text-slate-700 whitespace-nowrap">{brand?.label.split(' (')[0]}</td>
                       <td className="p-4 text-center align-middle text-sm text-slate-600 whitespace-nowrap">
@@ -1796,7 +1803,14 @@ const QuotePage = ({
                             />
                           )}
                         </div>
-                        <div className="hidden export-show font-medium text-slate-800">{item.name || '未命名項目'}</div>
+                        <div className="hidden export-show font-medium text-slate-800 text-sm leading-tight">
+                          {(item.name || '未命名項目').split('/').map((part, i, arr) => (
+                            <span key={i}>
+                              {part.trim()}
+                              {i < arr.length - 1 && <br />}
+                            </span>
+                          ))}
+                        </div>
                       </td>
                       <td className="p-4 text-center align-middle" colSpan={2}>
                         <div className="export-hide">
