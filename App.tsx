@@ -2097,17 +2097,17 @@ const QuotePage = ({
                 { label: '1', type: 'number', action: () => handleCalcNumber('1'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
                 { label: '2', type: 'number', action: () => handleCalcNumber('2'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
                 { label: '3', type: 'number', action: () => handleCalcNumber('3'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
-                { label: '=', type: 'equals', action: handleCalcEquals, color: 'bg-[#FF9F0A] hover:bg-[#FFB340] text-white row-span-2' },
                 
                 { label: '0', type: 'number', action: () => handleCalcNumber('0'), color: 'bg-[#333333] hover:bg-[#505050] text-white col-span-2' },
                 { label: '.', type: 'decimal', action: handleCalcDecimal, color: 'bg-[#333333] hover:bg-[#505050] text-white' },
+                { label: '=', type: 'equals', action: handleCalcEquals, color: 'bg-[#FF9F0A] hover:bg-[#FFB340] text-white' },
               ].map((btn, idx) => (
                 <button
                   key={idx}
                   onClick={btn.action}
                   className={`${btn.color} rounded-full text-2xl font-light transition active:brightness-75 flex items-center justify-center ${
                     btn.label === '0' ? 'col-span-2 rounded-full aspect-[2/1]' : 'aspect-square'
-                  } ${btn.label === '=' ? 'row-span-2' : ''}`}
+                  }`}
                 >
                   {btn.label}
                 </button>
