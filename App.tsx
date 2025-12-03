@@ -1396,38 +1396,19 @@ const QuotePage = ({
       editElements.forEach(el => (el as HTMLElement).style.display = '');
       displayElements.forEach(el => (el as HTMLElement).style.display = '');
 
-      const imgData = canvas.toDataURL('image/png');
-      
-      // 使用 window.print 搭配自訂樣式來生成 PDF
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>報價單_${quoteDate}_${customerName || '客戶'}</title>
-              <style>
-                body { margin: 0; padding: 0; }
-                img { width: 100%; height: auto; display: block; }
-                @media print {
-                  body { margin: 0; }
-                  img { page-break-inside: avoid; }
-                }
-              </style>
-            </head>
-            <body>
-              <img src="${imgData}" />
-              <script>
-                window.onload = function() {
-                  window.print();
-                  setTimeout(function() { window.close(); }, 100);
-                }
-              </script>
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-      }
-      setIsExporting(false);
+      // Convert canvas to blob and download as PNG (simpler and more reliable than PDF)
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          const fileName = `報價單_${quoteDate}_${customerName || '客戶'}.png`;
+          link.download = fileName;
+          link.href = url;
+          link.click();
+          URL.revokeObjectURL(url);
+        }
+        setIsExporting(false);
+      }, 'image/png');
     } catch (error) {
       console.error('Export failed:', error);
       alert('匯出失敗，請稍後再試');
@@ -1498,8 +1479,8 @@ const QuotePage = ({
                 >
                   <FileDown className="w-4 h-4 text-red-600" />
                   <div>
-                    <div className="font-medium">匯出 PDF</div>
-                    <div className="text-xs text-slate-500">列印為PDF</div>
+                    <div className="font-medium">匯出高解析度圖片</div>
+                    <div className="text-xs text-slate-500">適合列印</div>
                   </div>
                 </button>
               </div>
