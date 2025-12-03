@@ -2036,65 +2036,65 @@ const QuotePage = ({
       {/* Calculator Modal */}
       {showCalculator && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden">
+          <div className="bg-black rounded-3xl shadow-2xl w-full max-w-xs overflow-hidden">
             {/* Calculator Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-white">
+            <div className="bg-black px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-white/80">
                 <Calculator className="w-5 h-5" />
-                <span className="font-bold">計算機</span>
+                <span className="font-medium text-sm">計算機</span>
               </div>
               <button
                 onClick={() => setShowCalculator(false)}
-                className="text-white hover:bg-white/20 rounded-lg p-1 transition"
+                className="text-white/80 hover:text-white rounded-lg p-1 transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             
             {/* Calculator Display */}
-            <div className="bg-slate-900 p-6">
+            <div className="bg-black px-6 pt-8 pb-4">
               <div className="text-right">
                 {calcOperation && calcPrevValue && (
-                  <div className="text-slate-400 text-sm mb-1 font-mono">
+                  <div className="text-white/40 text-lg mb-2 font-light">
                     {calcPrevValue} {calcOperation}
                   </div>
                 )}
-                <div className="text-white text-4xl font-mono font-bold break-all">
+                <div className="text-white text-6xl font-extralight break-all tracking-tight">
                   {calcDisplay}
                 </div>
               </div>
             </div>
             
             {/* Calculator Buttons */}
-            <div className="grid grid-cols-4 gap-0 bg-slate-100">
+            <div className="grid grid-cols-4 gap-3 p-3 bg-black">
               {[
-                { label: 'C', type: 'function', action: handleCalcClear, color: 'bg-red-500 hover:bg-red-600 text-white' },
-                { label: '÷', type: 'operator', action: () => handleCalcOperation('÷'), color: 'bg-orange-500 hover:bg-orange-600 text-white' },
-                { label: '×', type: 'operator', action: () => handleCalcOperation('×'), color: 'bg-orange-500 hover:bg-orange-600 text-white' },
-                { label: '←', type: 'function', action: () => setCalcDisplay(calcDisplay.slice(0, -1) || '0'), color: 'bg-slate-400 hover:bg-slate-500 text-white' },
+                { label: 'C', type: 'function', action: handleCalcClear, color: 'bg-[#A5A5A5] hover:bg-[#D4D4D4] text-black' },
+                { label: '÷', type: 'operator', action: () => handleCalcOperation('÷'), color: 'bg-[#FF9F0A] hover:bg-[#FFB340] text-white' },
+                { label: '×', type: 'operator', action: () => handleCalcOperation('×'), color: 'bg-[#FF9F0A] hover:bg-[#FFB340] text-white' },
+                { label: '←', type: 'function', action: () => setCalcDisplay(calcDisplay.slice(0, -1) || '0'), color: 'bg-[#A5A5A5] hover:bg-[#D4D4D4] text-black' },
                 
-                { label: '7', type: 'number', action: () => handleCalcNumber('7'), color: 'bg-white hover:bg-slate-50' },
-                { label: '8', type: 'number', action: () => handleCalcNumber('8'), color: 'bg-white hover:bg-slate-50' },
-                { label: '9', type: 'number', action: () => handleCalcNumber('9'), color: 'bg-white hover:bg-slate-50' },
-                { label: '-', type: 'operator', action: () => handleCalcOperation('-'), color: 'bg-orange-500 hover:bg-orange-600 text-white' },
+                { label: '7', type: 'number', action: () => handleCalcNumber('7'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
+                { label: '8', type: 'number', action: () => handleCalcNumber('8'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
+                { label: '9', type: 'number', action: () => handleCalcNumber('9'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
+                { label: '-', type: 'operator', action: () => handleCalcOperation('-'), color: 'bg-[#FF9F0A] hover:bg-[#FFB340] text-white' },
                 
-                { label: '4', type: 'number', action: () => handleCalcNumber('4'), color: 'bg-white hover:bg-slate-50' },
-                { label: '5', type: 'number', action: () => handleCalcNumber('5'), color: 'bg-white hover:bg-slate-50' },
-                { label: '6', type: 'number', action: () => handleCalcNumber('6'), color: 'bg-white hover:bg-slate-50' },
-                { label: '+', type: 'operator', action: () => handleCalcOperation('+'), color: 'bg-orange-500 hover:bg-orange-600 text-white' },
+                { label: '4', type: 'number', action: () => handleCalcNumber('4'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
+                { label: '5', type: 'number', action: () => handleCalcNumber('5'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
+                { label: '6', type: 'number', action: () => handleCalcNumber('6'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
+                { label: '+', type: 'operator', action: () => handleCalcOperation('+'), color: 'bg-[#FF9F0A] hover:bg-[#FFB340] text-white' },
                 
-                { label: '1', type: 'number', action: () => handleCalcNumber('1'), color: 'bg-white hover:bg-slate-50' },
-                { label: '2', type: 'number', action: () => handleCalcNumber('2'), color: 'bg-white hover:bg-slate-50' },
-                { label: '3', type: 'number', action: () => handleCalcNumber('3'), color: 'bg-white hover:bg-slate-50' },
-                { label: '=', type: 'equals', action: handleCalcEquals, color: 'bg-indigo-600 hover:bg-indigo-700 text-white row-span-2' },
+                { label: '1', type: 'number', action: () => handleCalcNumber('1'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
+                { label: '2', type: 'number', action: () => handleCalcNumber('2'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
+                { label: '3', type: 'number', action: () => handleCalcNumber('3'), color: 'bg-[#333333] hover:bg-[#505050] text-white' },
+                { label: '=', type: 'equals', action: handleCalcEquals, color: 'bg-[#FF9F0A] hover:bg-[#FFB340] text-white row-span-2' },
                 
-                { label: '0', type: 'number', action: () => handleCalcNumber('0'), color: 'bg-white hover:bg-slate-50 col-span-2' },
-                { label: '.', type: 'decimal', action: handleCalcDecimal, color: 'bg-white hover:bg-slate-50' },
+                { label: '0', type: 'number', action: () => handleCalcNumber('0'), color: 'bg-[#333333] hover:bg-[#505050] text-white col-span-2' },
+                { label: '.', type: 'decimal', action: handleCalcDecimal, color: 'bg-[#333333] hover:bg-[#505050] text-white' },
               ].map((btn, idx) => (
                 <button
                   key={idx}
                   onClick={btn.action}
-                  className={`${btn.color} p-6 text-xl font-bold transition active:scale-95 border border-slate-200 ${btn.label === '0' ? 'col-span-2' : ''} ${btn.label === '=' ? 'row-span-2' : ''}`}
+                  className={`${btn.color} rounded-full text-2xl font-light transition active:brightness-75 aspect-square flex items-center justify-center ${btn.label === '0' ? 'col-span-2 rounded-full' : ''} ${btn.label === '=' ? 'row-span-2' : ''}`}
                 >
                   {btn.label}
                 </button>
