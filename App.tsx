@@ -1352,14 +1352,14 @@ const QuotePage = ({
         if (blob) {
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');
-          const fileName = `報價單_${quoteDate}_${customerName || '客戶'}.jpg`;
+          const fileName = `報價單_${quoteDate}_${customerName || '客戶'}.png`;
           link.download = fileName;
           link.href = url;
           link.click();
           URL.revokeObjectURL(url);
         }
         setIsExporting(false);
-      }, 'image/jpeg', 0.95);
+      }, 'image/png');
     } catch (error) {
       console.error('Export failed:', error);
       alert('匯出失敗，請稍後再試');
@@ -1374,13 +1374,8 @@ const QuotePage = ({
       const element = document.getElementById('quote-content');
       if (!element) return;
 
-      // Store original styles
-      const originalMinWidth = element.style.minWidth;
-      const originalWidth = element.style.width;
-      
-      // Force desktop width for mobile
-      element.style.minWidth = '800px';
-      element.style.width = '800px';
+      // Get current element width instead of forcing fixed width
+      const currentWidth = element.offsetWidth;
 
       // Hide interactive elements
       const editElements = element.querySelectorAll('.export-hide');
@@ -1394,18 +1389,14 @@ const QuotePage = ({
         backgroundColor: '#ffffff',
         logging: false,
         useCORS: true,
-        width: 800,
+        width: currentWidth,
       });
 
-      // Restore original styles
-      element.style.minWidth = originalMinWidth;
-      element.style.width = originalWidth;
-      
       // Restore interactive elements
       editElements.forEach(el => (el as HTMLElement).style.display = '');
       displayElements.forEach(el => (el as HTMLElement).style.display = '');
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const imgData = canvas.toDataURL('image/png');
       
       // 使用 window.print 搭配自訂樣式來生成 PDF
       const printWindow = window.open('', '_blank');
@@ -1497,7 +1488,7 @@ const QuotePage = ({
                 >
                   <FileDown className="w-4 h-4 text-emerald-600" />
                   <div>
-                    <div className="font-medium">匯出 JPG</div>
+                    <div className="font-medium">匯出 PNG</div>
                     <div className="text-xs text-slate-500">圖片格式</div>
                   </div>
                 </button>
