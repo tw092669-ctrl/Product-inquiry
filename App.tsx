@@ -1621,13 +1621,13 @@ const QuotePage = ({
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
-                  <th className="text-center p-4 font-bold text-sm w-16 rounded-tl-xl">項次</th>
-                  <th className="text-center p-4 font-bold text-sm">產品名稱</th>
-                  <th className="text-center p-4 font-bold text-sm">品牌</th>
-                  <th className="text-center p-4 font-bold text-sm">規格</th>
-                  <th className="text-center p-4 font-bold text-sm w-16">數量</th>
-                  <th className="text-center p-4 font-bold text-sm w-32">單價</th>
-                  <th className="text-center p-4 font-bold text-sm w-32">小計</th>
+                  <th className="text-center p-4 font-bold text-sm w-16 rounded-tl-xl whitespace-nowrap">項次</th>
+                  <th className="text-center p-4 font-bold text-sm whitespace-nowrap">產品名稱</th>
+                  <th className="text-center p-4 font-bold text-sm whitespace-nowrap">品牌</th>
+                  <th className="text-center p-4 font-bold text-sm whitespace-nowrap">規格</th>
+                  <th className="text-center p-4 font-bold text-sm w-16 whitespace-nowrap">數量</th>
+                  <th className="text-center p-4 font-bold text-sm w-32 whitespace-nowrap">單價</th>
+                  <th className="text-center p-4 font-bold text-sm w-32 whitespace-nowrap">小計</th>
                   <th className="export-hide w-12 rounded-tr-xl"></th>
                 </tr>
               </thead>
@@ -1656,12 +1656,12 @@ const QuotePage = ({
                   
                   return (
                     <tr key={product.id} className="group border-b border-slate-200 hover:bg-slate-50">
-                      <td className="p-4 text-center align-middle text-slate-600">{index + 1}</td>
-                      <td className="p-4 text-center align-middle">
+                      <td className="p-4 text-center align-middle text-slate-600 whitespace-nowrap">{index + 1}</td>
+                      <td className="p-4 text-center align-middle whitespace-nowrap">
                         <div className="font-medium text-slate-800">{product.name}</div>
                       </td>
-                      <td className="p-4 text-center align-middle text-slate-700">{brand?.label.split(' (')[0]}</td>
-                      <td className="p-4 text-center align-middle text-sm text-slate-600">
+                      <td className="p-4 text-center align-middle text-slate-700 whitespace-nowrap">{brand?.label.split(' (')[0]}</td>
+                      <td className="p-4 text-center align-middle text-sm text-slate-600 whitespace-nowrap">
                         <div className="flex items-center justify-center gap-2">
                           <span>{style?.label} / {type?.label}</span>
                           <EnvIcon className={`w-4 h-4 ${envColor}`} />
@@ -1714,7 +1714,7 @@ const QuotePage = ({
                           {quantity}
                         </div>
                       </td>
-                      <td className="p-4 text-center align-middle">
+                      <td className="p-4 text-center align-middle whitespace-nowrap">
                         <div className="export-hide flex items-center justify-end gap-2">
                           {editingPriceId === product.id ? (
                             <>
@@ -1756,11 +1756,11 @@ const QuotePage = ({
                             </>
                           )}
                         </div>
-                        <div className="hidden export-show text-center font-mono font-bold text-slate-800">
+                        <div className="hidden export-show text-center font-mono font-bold text-slate-800 whitespace-nowrap">
                           ${productPrices[product.id] || product.price}
                         </div>
                       </td>
-                      <td className="p-4 text-center align-middle">
+                      <td className="p-4 text-center align-middle whitespace-nowrap">
                         <span className="font-mono font-bold text-emerald-600 text-lg">
                           ${subtotal.toLocaleString()}
                         </span>
@@ -1778,8 +1778,8 @@ const QuotePage = ({
                   
                   return (
                     <tr key={item.id} className="border-b border-slate-200 bg-blue-50/30">
-                      <td className="p-4 text-center align-middle text-slate-600">{products.length + index + 1}</td>
-                      <td className="p-4 text-center align-middle">
+                      <td className="p-4 text-center align-middle text-slate-600 whitespace-nowrap">{products.length + index + 1}</td>
+                      <td className="p-4 text-center align-middle whitespace-nowrap">
                         <div className="export-hide">
                           <select
                             value={item.name || ""}
@@ -1829,7 +1829,7 @@ const QuotePage = ({
                         </div>
                         <div className="hidden export-show text-sm text-slate-600">{item.description}</div>
                       </td>
-                      <td className="p-4 text-center align-middle">
+                      <td className="p-4 text-center align-middle whitespace-nowrap">
                         <div className="export-hide">
                           <input
                             type="number"
@@ -1843,7 +1843,7 @@ const QuotePage = ({
                           {quantity}
                         </div>
                       </td>
-                      <td className="p-4 text-center align-middle">
+                      <td className="p-4 text-center align-middle whitespace-nowrap">
                         <div className="export-hide">
                           <input
                             type="text"
@@ -1853,9 +1853,9 @@ const QuotePage = ({
                             className="w-28 px-2 py-1 border border-slate-300 rounded text-right font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500"
                           />
                         </div>
-                        <div className="hidden export-show text-right font-mono font-bold text-slate-800">${item.unitPrice}</div>
+                        <div className="hidden export-show text-right font-mono font-bold text-slate-800 whitespace-nowrap">${item.unitPrice}</div>
                       </td>
-                      <td className="p-4 text-center align-middle">
+                      <td className="p-4 text-center align-middle whitespace-nowrap">
                         <div className="text-center font-mono font-bold text-slate-800">
                           ${subtotal.toLocaleString()}
                         </div>
@@ -3030,24 +3030,24 @@ export default function App() {
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">項目名稱</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">規格</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">單位</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">價格</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">備註</th>
-                    <th className="px-6 py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider">操作</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">名稱</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">規格</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">單位</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">價格</th>
+                    <th className="hidden md:table-cell px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">備註</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">操作</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {miscItems.filter(item => item.category === activeCategory).length > 0 ? (
                     miscItems.filter(item => item.category === activeCategory).map((item, index) => (
                       <tr key={item.id} className="hover:bg-slate-50 transition">
-                        <td className="px-6 py-4 text-sm font-medium text-slate-800">{item.name}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{item.specification}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{item.unit}</td>
-                        <td className="px-6 py-4 text-sm font-bold text-emerald-600">${item.price}</td>
-                        <td className="px-6 py-4 text-sm text-slate-500">{item.remarks || '-'}</td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-slate-800 whitespace-nowrap truncate max-w-[100px] sm:max-w-none">{item.name}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-600 whitespace-nowrap truncate max-w-[80px] sm:max-w-none">{item.specification}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-600 whitespace-nowrap">{item.unit}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold text-emerald-600 whitespace-nowrap">${item.price}</td>
+                        <td className="hidden md:table-cell px-6 py-4 text-sm text-slate-500">{item.remarks || '-'}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
                           <button 
                             onClick={() => handleDeleteMiscItem(item.id)}
                             className="text-slate-400 hover:text-red-600 transition p-2"
