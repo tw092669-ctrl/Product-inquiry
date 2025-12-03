@@ -1573,9 +1573,9 @@ const QuotePage = ({
           </div>
 
           {/* Info Section */}
-          <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-6 mb-8 border border-slate-200">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="flex items-center gap-4">
+          <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-4 mb-8 border border-slate-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex items-center gap-3">
                 <label className="text-sm font-bold text-slate-700 flex items-center gap-2 whitespace-nowrap">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
                   客戶姓名
@@ -1584,14 +1584,14 @@ const QuotePage = ({
                   type="text"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="export-hide flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                  className="export-hide flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                   placeholder="請輸入客戶姓名"
                 />
-                <div className="hidden export-show flex-1 px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
+                <div className="hidden export-show flex-1 px-3 py-2 border border-slate-300 rounded-lg bg-white min-h-[40px] flex items-center font-medium text-slate-800">
                   {customerName || '未填寫'}
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <label className="text-sm font-bold text-slate-700 flex items-center gap-2 whitespace-nowrap">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
                   報價日期
@@ -1600,13 +1600,13 @@ const QuotePage = ({
                   type="date"
                   value={quoteDate}
                   onChange={(e) => setQuoteDate(e.target.value)}
-                  className="export-hide flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                  className="export-hide flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                 />
-                <div className="hidden export-show flex-1 px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
+                <div className="hidden export-show flex-1 px-3 py-2 border border-slate-300 rounded-lg bg-white min-h-[40px] flex items-center font-medium text-slate-800">
                   {quoteDate || '未填寫'}
                 </div>
               </div>
-              <div className="sm:col-span-2 flex items-center gap-4">
+              <div className="sm:col-span-2 flex items-center gap-3">
                 <label className="text-sm font-bold text-slate-700 flex items-center gap-2 whitespace-nowrap">
                   <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
                   客戶地址
@@ -1615,10 +1615,10 @@ const QuotePage = ({
                   type="text"
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
-                  className="export-hide flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                  className="export-hide flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                   placeholder="請輸入客戶地址"
                 />
-                <div className="hidden export-show flex-1 px-4 py-3 border border-slate-300 rounded-lg bg-white min-h-[48px] flex items-center font-medium text-slate-800">
+                <div className="hidden export-show flex-1 px-3 py-2 border border-slate-300 rounded-lg bg-white min-h-[40px] flex items-center font-medium text-slate-800">
                   {customerAddress || '未填寫'}
                 </div>
               </div>
@@ -1909,33 +1909,46 @@ const QuotePage = ({
             </table>
           </div>
 
-          {/* Notes */}
-          <div className="mb-6">
-            <label className="block text-sm font-bold text-slate-700 mb-2">備註說明</label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="export-hide w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-32 resize-none"
-              placeholder="請輸入備註事項（如：付款方式、貨物稅申請、汰舊換新廢四機...等）"
-            />
-            <div className="hidden export-show px-4 py-3 border border-slate-300 rounded-lg bg-slate-50 min-h-[128px] whitespace-pre-wrap break-words">
-              {notes || '無'}
+          {/* Notes - Only show if has content or in edit mode */}
+          {(notes || !isExporting) && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-bold text-slate-700">備註說明</label>
+                {notes && (
+                  <button
+                    onClick={() => setNotes('')}
+                    className="export-hide text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1 transition"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    清除備註
+                  </button>
+                )}
+              </div>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="export-hide w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent h-32 resize-none"
+                placeholder="請輸入備註事項（如：付款方式、貨物稅申請、汰舊換新廢四機...等）"
+              />
+              <div className="hidden export-show px-4 py-3 border border-slate-300 rounded-lg bg-slate-50 min-h-[128px] whitespace-pre-wrap break-words">
+                {notes}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Footer */}
           <div className="mt-10 pt-8 border-t-2 border-slate-200">
-            <div className="bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl p-6 text-center">
-              <div className="text-indigo-600 font-bold text-lg mb-3">注意事項</div>
-              <div className="space-y-2 text-sm text-slate-600">
-                <p className="flex items-center justify-center gap-2">
+            <div className="bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl p-4 text-center">
+              <div className="flex items-center justify-center gap-4 text-sm text-slate-600">
+                <span className="font-bold text-indigo-600">注意事項</span>
+                <span className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
                   本報價單有效期限為 30 天
-                </p>
-                <p className="flex items-center justify-center gap-2">
+                </span>
+                <span className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
                   如有任何疑問，請隨時與我們聯繫
-                </p>
+                </span>
               </div>
             </div>
           </div>
@@ -2890,13 +2903,18 @@ export default function App() {
         {/* Stats & View Switcher */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
            <div>
-             <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-1">
+             <h2 className={`text-3xl font-black tracking-tight mb-1 px-4 py-2 rounded-lg inline-block ${
+               activeCategory === 'air-conditioning' ? 'text-slate-800 bg-transparent' : 
+               activeCategory === 'materials' ? 'text-green-700 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200' :
+               activeCategory === 'tools' ? 'text-amber-700 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200' :
+               'text-red-700 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200'
+             }`}>
                {activeCategory === 'air-conditioning' ? '產品列表' : 
-                activeCategory === 'materials' ? '材料項目' :
-                activeCategory === 'tools' ? '工具項目' :
-                '高空項目'}
+                activeCategory === 'materials' ? '📦 材料項目' :
+                activeCategory === 'tools' ? '🔧 工具項目' :
+                '⛰️ 高空項目'}
              </h2>
-             <span className="text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full text-sm">
+             <span className="text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full text-sm ml-2">
                {activeCategory === 'air-conditioning' ? `共 ${filteredProducts.length} 筆` : `共 ${miscItems.filter(item => item.category === activeCategory).length} 筆`}
              </span>
            </div>
