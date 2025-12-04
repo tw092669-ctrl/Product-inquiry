@@ -2171,11 +2171,19 @@ const QuotePage = ({
                           </button>
                           <input
                             type="number"
-                            value={item.quantity}
+                            value={item.quantity === 0 ? '' : item.quantity}
                             onChange={(e) => setPipeWireItems(prev => ({
                               ...prev,
                               [key]: { ...prev[key as keyof typeof prev], quantity: e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value) || 0) }
                             }))}
+                            onBlur={(e) => {
+                              if (e.target.value === '') {
+                                setPipeWireItems(prev => ({
+                                  ...prev,
+                                  [key]: { ...prev[key as keyof typeof prev], quantity: 0 }
+                                }));
+                              }
+                            }}
                             className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold"
                           />
                           <button
@@ -2220,11 +2228,19 @@ const QuotePage = ({
                           </button>
                           <input
                             type="number"
-                            value={item.quantity}
+                            value={item.quantity === 0 ? '' : item.quantity}
                             onChange={(e) => setPipeWireItems(prev => ({
                               ...prev,
                               [key]: { ...prev[key as keyof typeof prev], quantity: e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value) || 0) }
                             }))}
+                            onBlur={(e) => {
+                              if (e.target.value === '') {
+                                setPipeWireItems(prev => ({
+                                  ...prev,
+                                  [key]: { ...prev[key as keyof typeof prev], quantity: 0 }
+                                }));
+                              }
+                            }}
                             className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold"
                           />
                           <button
@@ -2269,11 +2285,19 @@ const QuotePage = ({
                           </button>
                           <input
                             type="number"
-                            value={item.quantity}
+                            value={item.quantity === 0 ? '' : item.quantity}
                             onChange={(e) => setPipeWireItems(prev => ({
                               ...prev,
                               [key]: { ...prev[key as keyof typeof prev], quantity: e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value) || 0) }
                             }))}
+                            onBlur={(e) => {
+                              if (e.target.value === '') {
+                                setPipeWireItems(prev => ({
+                                  ...prev,
+                                  [key]: { ...prev[key as keyof typeof prev], quantity: 0 }
+                                }));
+                              }
+                            }}
                             className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold"
                           />
                           <button
