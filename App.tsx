@@ -1096,11 +1096,13 @@ const ComparisonModal = ({ isOpen, onClose, products, config }: { isOpen: boolea
 const QuotePage = ({ 
   products, 
   config, 
-  onBack 
+  onBack,
+  onRemoveFromCart
 }: { 
   products: Product[]; 
   config: AppConfig; 
   onBack: () => void;
+  onRemoveFromCart?: (productId: string) => void;
 }) => {
   const [customerName, setCustomerName] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
@@ -1134,7 +1136,24 @@ const QuotePage = ({
   };
   
   const handleUpdateProductQuantity = (productId: string, newQuantity: number) => {
-    setProductQuantities(prev => ({ ...prev, [productId]: Math.max(1, newQuantity) }));
+    if (newQuantity === 0) {
+      const product = products.find(p => p.id === productId);
+      const confirmRemove = window.confirm(`數量設為0，是否從報價單中移除「${product?.name}」？`);
+      if (confirmRemove && onRemoveFromCart) {
+        onRemoveFromCart(productId);
+        // Also remove from quantity tracking
+        setProductQuantities(prev => {
+          const newQuantities = { ...prev };
+          delete newQuantities[productId];
+          return newQuantities;
+        });
+      } else {
+        // Keep quantity at 1 if user cancels
+        setProductQuantities(prev => ({ ...prev, [productId]: 1 }));
+      }
+    } else {
+      setProductQuantities(prev => ({ ...prev, [productId]: Math.max(1, newQuantity) }));
+    }
   };
   
   // Calculator state
@@ -2840,13 +2859,24 @@ export default function App() {
     if (isAlreadyInCart) {
       const confirmAdd = window.confirm(`此產品「${product.name}」已在報價單中，是否再次添加？`);
       if (!confirmAdd) return;
+      
+      setCartItems(prev => [...prev, product.id]);
+      alert('產品已再次添加到報價單');
+    } else {
+      setCartItems(prev => [...prev, product.id]);
     }
-    
-    setCartItems(prev => [...prev, product.id]);
-    
-    // Show success feedback
-    const message = isAlreadyInCart ? '產品已再次添加到報價單' : '產品已加入報價單';
-    alert(message);
+  };
+  
+  const handleRemoveFromCart = (productId: string) => {
+    setCartItems(prev => {
+      const index = prev.indexOf(productId);
+      if (index > -1) {
+        const newItems = [...prev];
+        newItems.splice(index, 1);
+        return newItems;
+      }
+      return prev;
+    });
   };
 
   const handleGenerateQuote = () => {
@@ -3135,6 +3165,7 @@ export default function App() {
           products={cartProducts}
           config={config}
           onBack={() => setShowQuotePage(false)}
+          onRemoveFromCart={handleRemoveFromCart}
         />
       ) : (
       <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans text-slate-800 pb-20">
