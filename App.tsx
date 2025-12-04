@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Search, Plus, Settings, Pin, Trash2, Edit2, Download, 
+  Search, Plus, Minus, Settings, Pin, Trash2, Edit2, Download, 
   Sun, Snowflake, Upload, X, Save, AlertTriangle, Menu,
   LayoutGrid, List, Grid3x3, Home, Trees, BarChart3, ChevronDown, ChevronUp,
-  Package, DollarSign, TrendingUp, PieChart, Zap, FileDown, Calculator, Scale, CheckCircle2, ArrowRightLeft, ChevronLeft, ChevronRight
+  Package, DollarSign, TrendingUp, PieChart, Zap, FileDown, Calculator, Scale, CheckCircle2, ArrowRightLeft, ChevronLeft, ChevronRight, ShoppingCart
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { Product, AppConfig, ConfigOption, EnvironmentType } from './types';
@@ -1010,9 +1010,7 @@ const ComparisonModal = ({ isOpen, onClose, products, config }: { isOpen: boolea
       <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-5xl h-[95vh] sm:h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
         <div className="p-3 sm:p-6 border-b flex justify-between items-center bg-gradient-to-r from-slate-50 to-white rounded-t-2xl sm:rounded-t-3xl">
           <h3 className="text-base sm:text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <div className="p-1.5 sm:p-2 bg-indigo-100 text-indigo-600 rounded-lg"><ArrowRightLeft className="w-4 h-4 sm:w-5 sm:h-5"/></div>
-            <span className="hidden xs:inline">產品超級比一比</span>
-            <span className="xs:hidden">比較</span>
+            <span>產品比較</span>
           </h3>
           <button onClick={onClose} className="p-1.5 sm:p-2 hover:bg-slate-100 rounded-full transition"><X className="w-5 h-5 sm:w-6 sm:h-6 text-slate-500"/></button>
         </div>
@@ -1753,47 +1751,24 @@ const QuotePage = ({
                         </div>
                       </td>
                       <td className="p-4 text-center align-middle">
-                        <div className="export-hide flex items-center justify-center gap-2">
-                          {editingQuantityId === product.id ? (
-                            <>
-                              <input
-                                type="number"
-                                min="1"
-                                value={productQuantities[product.id] || 1}
-                                onChange={(e) => handleUpdateProductQuantity(product.id, parseInt(e.target.value) || 1)}
-                                onBlur={() => setEditingQuantityId(null)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') setEditingQuantityId(null);
-                                  if (e.key === 'Escape') {
-                                    handleUpdateProductQuantity(product.id, 1);
-                                    setEditingQuantityId(null);
-                                  }
-                                }}
-                                className="w-16 px-2 py-1 border border-indigo-300 rounded text-center font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500"
-                                autoFocus
-                              />
-                              <button
-                                onClick={() => setEditingQuantityId(null)}
-                                className="text-green-600 hover:text-green-700 p-1"
-                                title="確認"
-                              >
-                                <CheckCircle2 className="w-4 h-4" />
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              <span className="font-mono font-bold text-slate-800">
-                                {quantity}
-                              </span>
-                              <button
-                                onClick={() => setEditingQuantityId(product.id)}
-                                className="text-indigo-600 hover:text-indigo-700 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                title="編輯數量"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
+                        <div className="export-hide flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => handleUpdateProductQuantity(product.id, Math.max(0, quantity - 1))}
+                            className="text-slate-600 hover:text-indigo-600 p-1 hover:bg-indigo-50 rounded transition"
+                            title="減少數量"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="font-mono font-bold text-slate-800 min-w-[2rem] text-center">
+                            {quantity}
+                          </span>
+                          <button
+                            onClick={() => handleUpdateProductQuantity(product.id, quantity + 1)}
+                            className="text-slate-600 hover:text-indigo-600 p-1 hover:bg-indigo-50 rounded transition"
+                            title="增加數量"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
                         </div>
                         <div className="hidden export-show text-center font-mono font-bold text-slate-800">
                           {quantity}
@@ -2131,7 +2106,8 @@ const ProductCard: React.FC<{
   onToggleCompare: (id: string) => void;
   onPin: (id: string) => void; 
   onEdit: (product: Product) => void; 
-  onDelete: (id: string) => void; 
+  onDelete: (id: string) => void;
+  onAddToCart: (product: Product) => void;
 }> = ({ 
   product, 
   config, 
@@ -2140,7 +2116,8 @@ const ProductCard: React.FC<{
   onToggleCompare,
   onPin, 
   onEdit, 
-  onDelete 
+  onDelete,
+  onAddToCart
 }) => {
   const getLabel = (cat: keyof AppConfig, id: string) => {
     const opt = config[cat].find(x => x.id === id);
@@ -2200,8 +2177,8 @@ const ProductCard: React.FC<{
 
         {/* Action Buttons (Overlay) */}
         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-white/90 p-1.5 rounded-lg shadow-sm backdrop-blur-md border border-slate-100">
-           <button onClick={() => onToggleCompare(product.id)} className={`p-1.5 rounded transition ${isSelected ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 hover:text-indigo-600'}`}>
-            <Scale className="w-3.5 h-3.5" />
+          <button onClick={() => onAddToCart(product)} className="p-1.5 text-slate-500 hover:text-emerald-600 rounded transition" title="加入報價單">
+            <ShoppingCart className="w-3.5 h-3.5" />
           </button>
           <button onClick={() => onEdit(product)} className="p-1.5 text-slate-500 hover:text-indigo-600 rounded transition">
             <Edit2 className="w-3.5 h-3.5" />
@@ -2282,9 +2259,7 @@ const ProductCard: React.FC<{
 
         {/* Actions */}
         <div className="flex gap-0.5 md:gap-1 w-auto md:w-32 justify-end opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-           <button onClick={() => onToggleCompare(product.id)} className={`p-1.5 md:p-2 rounded-lg transition ${isSelected ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-50'}`} title="加入比較">
-            <Scale className="w-3.5 h-3.5 md:w-4 md:h-4" />
-          </button>
+          <button onClick={() => onAddToCart(product)} className="p-1.5 md:p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="加入報價單"><ShoppingCart className="w-3.5 h-3.5 md:w-4 md:h-4" /></button>
           <button onClick={() => onEdit(product)} className="p-1.5 md:p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition"><Edit2 className="w-3.5 h-3.5 md:w-4 md:h-4" /></button>
           <button onClick={() => exportToImage(cardId, product.name)} className="hidden sm:block p-1.5 md:p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition"><Download className="w-3.5 h-3.5 md:w-4 md:h-4" /></button>
           <button onClick={() => onDelete(product.id)} className="p-1.5 md:p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"><Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" /></button>
@@ -2310,8 +2285,8 @@ const ProductCard: React.FC<{
 
       {/* Action Bar */}
       <div className="absolute top-4 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-white/95 p-1.5 rounded-xl shadow-sm backdrop-blur-md border border-slate-100">
-         <button onClick={() => onToggleCompare(product.id)} className={`p-1.5 rounded-lg transition ${isSelected ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 hover:text-indigo-600 hover:bg-indigo-50'}`} title="加入比較">
-          <Scale className="w-4 h-4" />
+        <button onClick={() => onAddToCart(product)} className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="加入報價單">
+          <ShoppingCart className="w-4 h-4" />
         </button>
         <button onClick={() => onEdit(product)} className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="編輯">
           <Edit2 className="w-4 h-4" />
@@ -2550,6 +2525,9 @@ export default function App() {
   
   // Comparison State
   const [compareList, setCompareList] = useState<string[]>([]);
+  
+  // Cart State - stores product IDs (allows duplicates)
+  const [cartItems, setCartItems] = useState<string[]>([]);
 
   // Reset to page 1 when search term or max cards changes
   useEffect(() => {
@@ -2581,15 +2559,34 @@ export default function App() {
   const pinnedProducts = useMemo(() => 
     products.filter(p => p.isPinned),
   [products]);
+  
+  const cartProducts = useMemo(() => 
+    cartItems.map(id => products.find(p => p.id === id)).filter(Boolean) as Product[],
+  [products, cartItems]);
 
   // Handlers
   const handlePin = (id: string) => {
     setProducts(prev => prev.map(p => p.id === id ? { ...p, isPinned: !p.isPinned } : p));
   };
+  
+  const handleAddToCart = (product: Product) => {
+    const isAlreadyInCart = cartItems.includes(product.id);
+    
+    if (isAlreadyInCart) {
+      const confirmAdd = window.confirm(`此產品「${product.name}」已在報價單中，是否再次添加？`);
+      if (!confirmAdd) return;
+    }
+    
+    setCartItems(prev => [...prev, product.id]);
+    
+    // Show success feedback
+    const message = isAlreadyInCart ? '產品已再次添加到報價單' : '產品已加入報價單';
+    alert(message);
+  };
 
   const handleGenerateQuote = () => {
-    if (pinnedProducts.length === 0) {
-      alert('請先釘選至少一項產品');
+    if (cartItems.length === 0) {
+      alert('請先將產品加入報價單');
       return;
     }
     setShowQuotePage(true);
@@ -2870,7 +2867,7 @@ export default function App() {
     <AppErrorOverlay>
       {showQuotePage ? (
         <QuotePage 
-          products={pinnedProducts}
+          products={cartProducts}
           config={config}
           onBack={() => setShowQuotePage(false)}
         />
@@ -3066,6 +3063,7 @@ export default function App() {
                     onPin={handlePin}
                     onEdit={(p) => { setEditingProduct(p); setIsFormOpen(true); }}
                     onDelete={handleDeleteRequest}
+                    onAddToCart={handleAddToCart}
                   />
                 ));
               })()}
@@ -3218,9 +3216,9 @@ export default function App() {
           <FileDown className="w-5 h-5 sm:w-6 sm:h-6 group-hover:animate-bounce" />
           <span className="hidden sm:inline">生成報價單</span>
           <span className="sm:hidden">報價單</span>
-          {pinnedProducts.length > 0 && (
+          {cartItems.length > 0 && (
             <span className="ml-1 bg-white/20 text-xs px-2 py-0.5 rounded-full">
-              {pinnedProducts.length}
+              {cartItems.length}
             </span>
           )}
         </button>
