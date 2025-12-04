@@ -1144,6 +1144,23 @@ const QuotePage = ({
   const [calcOperation, setCalcOperation] = useState<string | null>(null);
   const [calcNewNumber, setCalcNewNumber] = useState(true);
   
+  // Pipe & Wire Calculator state
+  const [showPipeWireCalc, setShowPipeWireCalc] = useState(false);
+  const [pipeWireItems, setPipeWireItems] = useState({
+    // 4種管路
+    pipe_2_3: { name: '2/3 管路', quantity: 0, unitPrice: 400 },
+    pipe_2_4: { name: '2/4 管路', quantity: 0, unitPrice: 450 },
+    pipe_2_5: { name: '2/5 管路', quantity: 0, unitPrice: 500 },
+    pipe_3_5: { name: '3/5 管路', quantity: 0, unitPrice: 550 },
+    // 2種訊號線
+    signal_2core: { name: '2C隔離線', quantity: 0, unitPrice: 100 },
+    signal_3core: { name: '1.25*4C訊號線', quantity: 0, unitPrice: 50 },
+    // 3種電源線
+    power_2mm: { name: '2.0mm電源線', quantity: 0, unitPrice: 120 },
+    power_3_5mm: { name: '3.5mm電源線', quantity: 0, unitPrice: 150 },
+    power_5_5mm: { name: '5.5mm電源線', quantity: 0, unitPrice: 200 },
+  });
+  
   const handleCalcNumber = (num: string) => {
     if (calcNewNumber) {
       setCalcDisplay(num);
@@ -1527,8 +1544,17 @@ const QuotePage = ({
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setShowPipeWireCalc(!showPipeWireCalc)}
+              className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-emerald-200 transition font-medium"
+              title="管路電線計算"
+            >
+              <Zap className="w-5 h-5" />
+              <span className="hidden sm:inline">管路電線</span>
+            </button>
+            
+            <button
               onClick={() => setShowCalculator(!showCalculator)}
-              className="flex items-center gap-2 bg-slate-100 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-200 transition font-medium"
+              className="flex items-center gap-2 bg-slate-100 text-slate-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-slate-200 transition font-medium"
               title="開啟計算機"
             >
               <Calculator className="w-5 h-5" />
@@ -2088,6 +2114,226 @@ const QuotePage = ({
                   {btn.label}
                 </button>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Pipe & Wire Calculator Modal */}
+      {showPipeWireCalc && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-sm p-0 sm:p-4">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:w-[600px] max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="p-4 sm:p-6 border-b flex justify-between items-center bg-gradient-to-r from-emerald-50 to-teal-50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-emerald-500 text-white rounded-lg">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="font-bold text-lg text-slate-800 block">管路電線計算器</span>
+                  <span className="text-xs text-slate-500">快速計算管路與電線費用</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPipeWireCalc(false)}
+                className="p-2 hover:bg-slate-100 rounded-full transition"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            {/* Calculator Body */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              {/* 管路區域 */}
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  管路規格
+                </h3>
+                <div className="space-y-2">
+                  {Object.entries(pipeWireItems)
+                    .filter(([key]) => key.startsWith('pipe_'))
+                    .map(([key, item]) => (
+                      <div key={key} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition">
+                        <div className="flex-1">
+                          <div className="font-medium text-slate-800 text-sm">{item.name}</div>
+                          <div className="text-xs text-slate-500">${item.unitPrice}/米</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setPipeWireItems(prev => ({
+                              ...prev,
+                              [key]: { ...prev[key as keyof typeof prev], quantity: Math.max(0, prev[key as keyof typeof prev].quantity - 1) }
+                            }))}
+                            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <input
+                            type="number"
+                            min="0"
+                            value={item.quantity}
+                            onChange={(e) => setPipeWireItems(prev => ({
+                              ...prev,
+                              [key]: { ...prev[key as keyof typeof prev], quantity: Math.max(0, parseInt(e.target.value) || 0) }
+                            }))}
+                            className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold"
+                          />
+                          <button
+                            onClick={() => setPipeWireItems(prev => ({
+                              ...prev,
+                              [key]: { ...prev[key as keyof typeof prev], quantity: prev[key as keyof typeof prev].quantity + 1 }
+                            }))}
+                            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* 訊號線區域 */}
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                  訊號線
+                </h3>
+                <div className="space-y-2">
+                  {Object.entries(pipeWireItems)
+                    .filter(([key]) => key.startsWith('signal_'))
+                    .map(([key, item]) => (
+                      <div key={key} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition">
+                        <div className="flex-1">
+                          <div className="font-medium text-slate-800 text-sm">{item.name}</div>
+                          <div className="text-xs text-slate-500">${item.unitPrice}/米</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setPipeWireItems(prev => ({
+                              ...prev,
+                              [key]: { ...prev[key as keyof typeof prev], quantity: Math.max(0, prev[key as keyof typeof prev].quantity - 1) }
+                            }))}
+                            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <input
+                            type="number"
+                            min="0"
+                            value={item.quantity}
+                            onChange={(e) => setPipeWireItems(prev => ({
+                              ...prev,
+                              [key]: { ...prev[key as keyof typeof prev], quantity: Math.max(0, parseInt(e.target.value) || 0) }
+                            }))}
+                            className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold"
+                          />
+                          <button
+                            onClick={() => setPipeWireItems(prev => ({
+                              ...prev,
+                              [key]: { ...prev[key as keyof typeof prev], quantity: prev[key as keyof typeof prev].quantity + 1 }
+                            }))}
+                            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* 電源線區域 */}
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  電源線
+                </h3>
+                <div className="space-y-2">
+                  {Object.entries(pipeWireItems)
+                    .filter(([key]) => key.startsWith('power_'))
+                    .map(([key, item]) => (
+                      <div key={key} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition">
+                        <div className="flex-1">
+                          <div className="font-medium text-slate-800 text-sm">{item.name}</div>
+                          <div className="text-xs text-slate-500">${item.unitPrice}/米</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setPipeWireItems(prev => ({
+                              ...prev,
+                              [key]: { ...prev[key as keyof typeof prev], quantity: Math.max(0, prev[key as keyof typeof prev].quantity - 1) }
+                            }))}
+                            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <input
+                            type="number"
+                            min="0"
+                            value={item.quantity}
+                            onChange={(e) => setPipeWireItems(prev => ({
+                              ...prev,
+                              [key]: { ...prev[key as keyof typeof prev], quantity: Math.max(0, parseInt(e.target.value) || 0) }
+                            }))}
+                            className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold"
+                          />
+                          <button
+                            onClick={() => setPipeWireItems(prev => ({
+                              ...prev,
+                              [key]: { ...prev[key as keyof typeof prev], quantity: prev[key as keyof typeof prev].quantity + 1 }
+                            }))}
+                            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* 總計 */}
+              <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-slate-600">總計金額</span>
+                  <span className="text-2xl font-black text-emerald-600">
+                    ${Object.values(pipeWireItems).reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0).toLocaleString()}
+                  </span>
+                </div>
+                <div className="text-xs text-slate-500">
+                  共 {Object.values(pipeWireItems).reduce((sum, item) => sum + item.quantity, 0)} 米
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 sm:p-6 border-t bg-slate-50 flex gap-3">
+              <button
+                onClick={() => {
+                  setPipeWireItems(prev => {
+                    const reset = { ...prev };
+                    Object.keys(reset).forEach(key => {
+                      reset[key as keyof typeof reset].quantity = 0;
+                    });
+                    return reset;
+                  });
+                }}
+                className="flex-1 py-3 bg-white border-2 border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-bold"
+              >
+                清除
+              </button>
+              <button
+                onClick={() => {
+                  const total = Object.values(pipeWireItems).reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+                  alert(`管路電線費用總計：$${total.toLocaleString()}`);
+                  setShowPipeWireCalc(false);
+                }}
+                className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition font-bold shadow-lg"
+              >
+                確認計算
+              </button>
             </div>
           </div>
         </div>
