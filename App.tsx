@@ -1099,10 +1099,10 @@ const QuotePage = ({
   onBack,
   onRemoveFromCart
 }: { 
-  products: Product[]; 
+  products: (Product & { cartItemId: string })[]; 
   config: AppConfig; 
   onBack: () => void;
-  onRemoveFromCart?: (productId: string) => void;
+  onRemoveFromCart?: (cartItemId: string) => void;
 }) => {
   const [customerName, setCustomerName] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
@@ -1115,7 +1115,7 @@ const QuotePage = ({
   const [productPrices, setProductPrices] = useState<Record<string, string>>(() => {
     const initialPrices: Record<string, string> = {};
     products.forEach(p => {
-      initialPrices[p.id] = p.price.toString();
+      initialPrices[p.cartItemId] = p.price.toString();
     });
     return initialPrices;
   });
@@ -1125,34 +1125,34 @@ const QuotePage = ({
   const [productQuantities, setProductQuantities] = useState<Record<string, number>>(() => {
     const initialQuantities: Record<string, number> = {};
     products.forEach(p => {
-      initialQuantities[p.id] = 1;
+      initialQuantities[p.cartItemId] = 1;
     });
     return initialQuantities;
   });
   const [editingQuantityId, setEditingQuantityId] = useState<string | null>(null);
   
-  const handleUpdateProductPrice = (productId: string, newPrice: string) => {
-    setProductPrices(prev => ({ ...prev, [productId]: newPrice }));
+  const handleUpdateProductPrice = (cartItemId: string, newPrice: string) => {
+    setProductPrices(prev => ({ ...prev, [cartItemId]: newPrice }));
   };
   
-  const handleUpdateProductQuantity = (productId: string, newQuantity: number) => {
+  const handleUpdateProductQuantity = (cartItemId: string, newQuantity: number) => {
     if (newQuantity === 0) {
-      const product = products.find(p => p.id === productId);
+      const product = products.find(p => p.cartItemId === cartItemId);
       const confirmRemove = window.confirm(`數量設為0，是否從報價單中移除「${product?.name}」？`);
       if (confirmRemove && onRemoveFromCart) {
-        onRemoveFromCart(productId);
+        onRemoveFromCart(cartItemId);
         // Also remove from quantity tracking
         setProductQuantities(prev => {
           const newQuantities = { ...prev };
-          delete newQuantities[productId];
+          delete newQuantities[cartItemId];
           return newQuantities;
         });
       } else {
         // Keep quantity at 1 if user cancels
-        setProductQuantities(prev => ({ ...prev, [productId]: 1 }));
+        setProductQuantities(prev => ({ ...prev, [cartItemId]: 1 }));
       }
     } else {
-      setProductQuantities(prev => ({ ...prev, [productId]: Math.max(1, newQuantity) }));
+      setProductQuantities(prev => ({ ...prev, [cartItemId]: Math.max(1, newQuantity) }));
     }
   };
   
@@ -1770,12 +1770,12 @@ const QuotePage = ({
                   const envColor = product.environment === 'heating' ? 'text-orange-500' : 
                                   product.environment === 'cooling' ? 'text-cyan-500' : 
                                   'text-indigo-500';
-                  const quantity = productQuantities[product.id] || 1;
-                  const unitPrice = parseInt((productPrices[product.id] || product.price).toString().replace(/,/g, ''), 10);
+                  const quantity = productQuantities[product.cartItemId] || 1;
+                  const unitPrice = parseInt((productPrices[product.cartItemId] || product.price).toString().replace(/,/g, ''), 10);
                   const subtotal = isNaN(unitPrice) ? 0 : unitPrice * quantity;
                   
                   return (
-                    <tr key={product.id} className="group border-b border-slate-200 hover:bg-slate-50">
+                    <tr key={product.cartItemId} className="group border-b border-slate-200 hover:bg-slate-50">
                       <td className="p-4 text-center align-middle text-slate-600 whitespace-nowrap">{index + 1}</td>
                       <td className="p-3 text-center align-middle">
                         <div className="font-medium text-slate-800 text-sm leading-tight">
@@ -1803,11 +1803,11 @@ const QuotePage = ({
                             value={quantity === 0 ? '' : quantity}
                             onChange={(e) => {
                               const newValue = e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value) || 0);
-                              handleUpdateProductQuantity(product.id, newValue);
+                              handleUpdateProductQuantity(product.cartItemId, newValue);
                             }}
                             onBlur={(e) => {
                               if (e.target.value === '' || parseInt(e.target.value) === 0) {
-                                handleUpdateProductQuantity(product.id, 0);
+                                handleUpdateProductQuantity(product.cartItemId, 0);
                               }
                             }}
                             className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -1819,17 +1819,17 @@ const QuotePage = ({
                       </td>
                       <td className="p-4 text-center align-middle whitespace-nowrap">
                         <div className="export-hide flex items-center justify-end gap-2">
-                          {editingPriceId === product.id ? (
+                          {editingPriceId === product.cartItemId ? (
                             <>
                               <input
                                 type="text"
-                                value={productPrices[product.id] || product.price}
-                                onChange={(e) => handleUpdateProductPrice(product.id, e.target.value)}
+                                value={productPrices[product.cartItemId] || product.price}
+                                onChange={(e) => handleUpdateProductPrice(product.cartItemId, e.target.value)}
                                 onBlur={() => setEditingPriceId(null)}
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') setEditingPriceId(null);
                                   if (e.key === 'Escape') {
-                                    handleUpdateProductPrice(product.id, product.price.toString());
+                                    handleUpdateProductPrice(product.cartItemId, product.price.toString());
                                     setEditingPriceId(null);
                                   }
                                 }}
@@ -1847,10 +1847,10 @@ const QuotePage = ({
                           ) : (
                             <>
                               <span className="font-mono font-bold text-slate-800">
-                                {productPrices[product.id] || product.price}
+                                {productPrices[product.cartItemId] || product.price}
                               </span>
                               <button
-                                onClick={() => setEditingPriceId(product.id)}
+                                onClick={() => setEditingPriceId(product.cartItemId)}
                                 className="text-indigo-600 hover:text-indigo-700 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                                 title="編輯價格"
                               >
@@ -1860,7 +1860,7 @@ const QuotePage = ({
                           )}
                         </div>
                         <div className="hidden export-show text-center font-mono font-bold text-slate-800 whitespace-nowrap">
-                          {productPrices[product.id] || product.price}
+                          {productPrices[product.cartItemId] || product.price}
                         </div>
                       </td>
                       <td className="p-4 text-center align-middle whitespace-nowrap">
@@ -1943,9 +1943,11 @@ const QuotePage = ({
                         <div className="export-hide">
                           <input
                             type="number"
-                            min="1"
-                            value={quantity}
-                            onChange={(e) => handleUpdateCustomItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                            value={quantity === 0 ? '' : quantity}
+                            onChange={(e) => {
+                              const newValue = e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value) || 0);
+                              handleUpdateCustomItem(index, 'quantity', newValue);
+                            }}
                             className="w-16 px-2 py-1 border border-slate-300 rounded text-center font-mono font-bold text-sm focus:ring-2 focus:ring-indigo-500"
                           />
                         </div>
@@ -2807,8 +2809,8 @@ export default function App() {
   // Comparison State
   const [compareList, setCompareList] = useState<string[]>([]);
   
-  // Cart State - stores product IDs (allows duplicates)
-  const [cartItems, setCartItems] = useState<string[]>([]);
+  // Cart State - stores cart items with unique IDs (allows same product multiple times)
+  const [cartItems, setCartItems] = useState<Array<{ cartItemId: string; productId: string }>>([]);
 
   // Reset to page 1 when search term or max cards changes
   useEffect(() => {
@@ -2842,7 +2844,10 @@ export default function App() {
   [products]);
   
   const cartProducts = useMemo(() => 
-    cartItems.map(id => products.find(p => p.id === id)).filter(Boolean) as Product[],
+    cartItems.map(item => {
+      const product = products.find(p => p.id === item.productId);
+      return product ? { ...product, cartItemId: item.cartItemId } : null;
+    }).filter(Boolean) as (Product & { cartItemId: string })[],
   [products, cartItems]);
 
   // Handlers
@@ -2851,29 +2856,23 @@ export default function App() {
   };
   
   const handleAddToCart = (product: Product) => {
-    const isAlreadyInCart = cartItems.includes(product.id);
+    const isAlreadyInCart = cartItems.some(item => item.productId === product.id);
     
     if (isAlreadyInCart) {
       const confirmAdd = window.confirm(`此產品「${product.name}」已在報價單中，是否再次添加？`);
       if (!confirmAdd) return;
       
-      setCartItems(prev => [...prev, product.id]);
+      const cartItemId = `${product.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setCartItems(prev => [...prev, { cartItemId, productId: product.id }]);
       alert('產品已再次添加到報價單');
     } else {
-      setCartItems(prev => [...prev, product.id]);
+      const cartItemId = `${product.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setCartItems(prev => [...prev, { cartItemId, productId: product.id }]);
     }
   };
   
-  const handleRemoveFromCart = (productId: string) => {
-    setCartItems(prev => {
-      const index = prev.indexOf(productId);
-      if (index > -1) {
-        const newItems = [...prev];
-        newItems.splice(index, 1);
-        return newItems;
-      }
-      return prev;
-    });
+  const handleRemoveFromCart = (cartItemId: string) => {
+    setCartItems(prev => prev.filter(item => item.cartItemId !== cartItemId));
   };
 
   const handleGenerateQuote = () => {
