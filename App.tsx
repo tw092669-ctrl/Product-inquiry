@@ -1816,12 +1816,6 @@ const QuotePage = ({
                                 }
                               }
                             }}
-                            onBlur={(e) => {
-                              if (e.target.value === '') {
-                                // 失焦時若為空,恢復為 1
-                                setProductQuantities(prev => ({ ...prev, [product.cartItemId]: 1 }));
-                              }
-                            }}
                             className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                           />
                         </div>
