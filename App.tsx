@@ -2941,10 +2941,10 @@ export default function App() {
 
         {/* Category Tabs */}
         <div className="mb-8 bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
-          <div className="flex flex-wrap">
+          <div className="flex overflow-x-auto">
             <button
               onClick={() => setActiveCategory('air-conditioning')}
-              className={`flex-1 min-w-[120px] px-6 py-4 font-bold text-sm transition-all border-b-4 ${
+              className={`flex-shrink-0 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-4 ${
                 activeCategory === 'air-conditioning'
                   ? 'bg-blue-50 border-blue-500 text-blue-700'
                   : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
@@ -2955,7 +2955,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveCategory('materials')}
-              className={`flex-1 min-w-[120px] px-6 py-4 font-bold text-sm transition-all border-b-4 ${
+              className={`flex-shrink-0 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-4 ${
                 activeCategory === 'materials'
                   ? 'bg-green-50 border-green-500 text-green-700'
                   : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
@@ -2966,7 +2966,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveCategory('tools')}
-              className={`flex-1 min-w-[120px] px-6 py-4 font-bold text-sm transition-all border-b-4 ${
+              className={`flex-shrink-0 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-4 ${
                 activeCategory === 'tools'
                   ? 'bg-orange-50 border-orange-500 text-orange-700'
                   : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
@@ -2977,7 +2977,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveCategory('high-altitude')}
-              className={`flex-1 min-w-[120px] px-6 py-4 font-bold text-sm transition-all border-b-4 ${
+              className={`flex-shrink-0 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-4 ${
                 activeCategory === 'high-altitude'
                   ? 'bg-purple-50 border-purple-500 text-purple-700'
                   : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
