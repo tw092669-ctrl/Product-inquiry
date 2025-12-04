@@ -1802,16 +1802,22 @@ const QuotePage = ({
                             onChange={(e) => {
                               const inputValue = e.target.value;
                               if (inputValue === '') {
-                                // 空字串時設為 1
-                                setProductQuantities(prev => ({ ...prev, [product.cartItemId]: 1 }));
+                                // 空字串時保持為 1,不阻止繼續輸入
+                                return;
+                              }
+                              const newValue = Math.max(0, parseInt(inputValue) || 0);
+                              if (newValue === 0) {
+                                // 明確輸入 0 時才觸發刪除警告
+                                handleUpdateProductQuantity(product.cartItemId, 0);
                               } else {
-                                const newValue = Math.max(0, parseInt(inputValue) || 0);
-                                if (newValue === 0) {
-                                  // 明確輸入 0 時才觸發刪除警告
-                                  handleUpdateProductQuantity(product.cartItemId, 0);
-                                } else {
-                                  setProductQuantities(prev => ({ ...prev, [product.cartItemId]: newValue }));
-                                }
+                                setProductQuantities(prev => ({ ...prev, [product.cartItemId]: newValue }));
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              // 當顯示空字串(實際為1)時,允許直接輸入數字
+                              if (e.key === '0') {
+                                e.preventDefault();
+                                handleUpdateProductQuantity(product.cartItemId, 0);
                               }
                             }}
                             className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
