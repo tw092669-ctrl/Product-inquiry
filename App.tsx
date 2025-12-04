@@ -2514,7 +2514,7 @@ export default function App() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [isDashboardOpen, setIsDashboardOpen] = useState(true);
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [isBTUOpen, setIsBTUOpen] = useState(false);
   const [isComparisonOpen, setIsComparisonOpen] = useState(false);
   const [googleSheetUrl, setGoogleSheetUrl] = useState('');
@@ -3141,8 +3141,8 @@ export default function App() {
                   {miscItems.filter(item => item.category === activeCategory).length > 0 ? (
                     miscItems.filter(item => item.category === activeCategory).map((item, index) => (
                       <tr key={item.id} className="hover:bg-slate-50 transition">
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-slate-800 whitespace-nowrap truncate max-w-[100px] sm:max-w-none">{item.name}</td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-600 whitespace-nowrap truncate max-w-[80px] sm:max-w-none">{item.specification}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-slate-800 whitespace-nowrap">{item.name}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-600 whitespace-nowrap">{item.specification}</td>
                         <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-600 whitespace-nowrap">{item.unit}</td>
                         <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold text-emerald-600 whitespace-nowrap">${item.price}</td>
                         <td className="hidden md:table-cell px-6 py-4 text-sm text-slate-500">{item.remarks || '-'}</td>
