@@ -1797,24 +1797,21 @@ const QuotePage = ({
                         </div>
                       </td>
                       <td className="p-4 text-center align-middle">
-                        <div className="export-hide flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => handleUpdateProductQuantity(product.id, Math.max(0, quantity - 1))}
-                            className="text-slate-600 hover:text-indigo-600 p-1 hover:bg-indigo-50 rounded transition"
-                            title="減少數量"
-                          >
-                            <Minus className="w-4 h-4" />
-                          </button>
-                          <span className="font-mono font-bold text-slate-800 min-w-[2rem] text-center">
-                            {quantity}
-                          </span>
-                          <button
-                            onClick={() => handleUpdateProductQuantity(product.id, quantity + 1)}
-                            className="text-slate-600 hover:text-indigo-600 p-1 hover:bg-indigo-50 rounded transition"
-                            title="增加數量"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
+                        <div className="export-hide flex items-center justify-center">
+                          <input
+                            type="number"
+                            value={quantity === 0 ? '' : quantity}
+                            onChange={(e) => {
+                              const newValue = e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value) || 0);
+                              handleUpdateProductQuantity(product.id, newValue);
+                            }}
+                            onBlur={(e) => {
+                              if (e.target.value === '' || parseInt(e.target.value) === 0) {
+                                handleUpdateProductQuantity(product.id, 0);
+                              }
+                            }}
+                            className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          />
                         </div>
                         <div className="hidden export-show text-center font-mono font-bold text-slate-800">
                           {quantity}
