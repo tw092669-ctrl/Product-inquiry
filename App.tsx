@@ -1147,10 +1147,8 @@ const QuotePage = ({
           delete newQuantities[cartItemId];
           return newQuantities;
         });
-      } else {
-        // Keep quantity at 1 if user cancels
-        setProductQuantities(prev => ({ ...prev, [cartItemId]: 1 }));
       }
+      // 如果取消刪除，不做任何操作，保持數量為 0
     } else {
       setProductQuantities(prev => ({ ...prev, [cartItemId]: Math.max(1, newQuantity) }));
     }
