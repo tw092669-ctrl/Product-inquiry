@@ -1798,12 +1798,12 @@ const QuotePage = ({
                         <div className="export-hide flex items-center justify-center">
                           <input
                             type="number"
-                            value={quantity === 0 ? '' : quantity}
+                            value={quantity === 1 ? '' : quantity}
                             onChange={(e) => {
                               const inputValue = e.target.value;
                               if (inputValue === '') {
-                                // 空字串時不觸發刪除警告,只更新顯示
-                                setProductQuantities(prev => ({ ...prev, [product.cartItemId]: 0 }));
+                                // 空字串時設為 1
+                                setProductQuantities(prev => ({ ...prev, [product.cartItemId]: 1 }));
                               } else {
                                 const newValue = Math.max(0, parseInt(inputValue) || 0);
                                 if (newValue === 0) {
