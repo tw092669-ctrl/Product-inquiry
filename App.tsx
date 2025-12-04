@@ -1130,6 +1130,7 @@ const QuotePage = ({
     return initialQuantities;
   });
   const [editingQuantityId, setEditingQuantityId] = useState<string | null>(null);
+  const [tempQuantityInput, setTempQuantityInput] = useState<string>('');
   
   const handleUpdateProductPrice = (cartItemId: string, newPrice: string) => {
     setProductPrices(prev => ({ ...prev, [cartItemId]: newPrice }));
@@ -1795,33 +1796,73 @@ const QuotePage = ({
                         </div>
                       </td>
                       <td className="p-4 text-center align-middle">
-                        <div className="export-hide flex items-center justify-center">
-                          <input
-                            type="number"
-                            value={quantity === 1 ? '' : quantity}
-                            onChange={(e) => {
-                              const inputValue = e.target.value;
-                              if (inputValue === '') {
-                                // 空字串時保持為 1,不阻止繼續輸入
-                                return;
-                              }
-                              const newValue = Math.max(0, parseInt(inputValue) || 0);
-                              if (newValue === 0) {
-                                // 明確輸入 0 時才觸發刪除警告
-                                handleUpdateProductQuantity(product.cartItemId, 0);
-                              } else {
-                                setProductQuantities(prev => ({ ...prev, [product.cartItemId]: newValue }));
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              // 當顯示空字串(實際為1)時,允許直接輸入數字
-                              if (e.key === '0') {
-                                e.preventDefault();
-                                handleUpdateProductQuantity(product.cartItemId, 0);
-                              }
-                            }}
-                            className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          />
+                        <div className="export-hide flex items-center justify-center relative">
+                          {editingQuantityId === product.cartItemId ? (
+                            <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setEditingQuantityId(null)}>
+                              <div className="bg-white rounded-xl shadow-2xl p-6 min-w-[300px]" onClick={(e) => e.stopPropagation()}>
+                                <div className="text-sm font-bold text-slate-700 mb-3">修改數量</div>
+                                <input
+                                  type="number"
+                                  value={tempQuantityInput}
+                                  onChange={(e) => setTempQuantityInput(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      const newValue = parseInt(tempQuantityInput) || 0;
+                                      if (newValue === 0) {
+                                        handleUpdateProductQuantity(product.cartItemId, 0);
+                                      } else {
+                                        setProductQuantities(prev => ({ ...prev, [product.cartItemId]: Math.max(1, newValue) }));
+                                      }
+                                      setEditingQuantityId(null);
+                                      setTempQuantityInput('');
+                                    } else if (e.key === 'Escape') {
+                                      setEditingQuantityId(null);
+                                      setTempQuantityInput('');
+                                    }
+                                  }}
+                                  className="w-full text-center py-2 px-3 border-2 border-indigo-300 rounded-lg font-mono font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                  autoFocus
+                                  placeholder="請輸入數量"
+                                />
+                                <div className="mt-4 flex gap-2">
+                                  <button
+                                    onClick={() => {
+                                      const newValue = parseInt(tempQuantityInput) || 0;
+                                      if (newValue === 0) {
+                                        handleUpdateProductQuantity(product.cartItemId, 0);
+                                      } else {
+                                        setProductQuantities(prev => ({ ...prev, [product.cartItemId]: Math.max(1, newValue) }));
+                                      }
+                                      setEditingQuantityId(null);
+                                      setTempQuantityInput('');
+                                    }}
+                                    className="flex-1 bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 transition"
+                                  >
+                                    確認
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setEditingQuantityId(null);
+                                      setTempQuantityInput('');
+                                    }}
+                                    className="flex-1 bg-slate-200 text-slate-700 py-2 rounded-lg font-medium hover:bg-slate-300 transition"
+                                  >
+                                    取消
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setEditingQuantityId(product.cartItemId);
+                                setTempQuantityInput('');
+                              }}
+                              className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold hover:border-indigo-400 hover:bg-indigo-50 transition cursor-pointer"
+                            >
+                              {quantity}
+                            </button>
+                          )}
                         </div>
                         <div className="hidden export-show text-center font-mono font-bold text-slate-800">
                           {quantity}
