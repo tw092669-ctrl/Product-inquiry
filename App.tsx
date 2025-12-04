@@ -1225,17 +1225,18 @@ const QuotePage = ({
   
   // Common custom items templates
   const commonItems = [
-    { name: '安裝費用', description: '分離式安裝工資', quantity: 1, unitPrice: '3500', price: '3500' },
-    { name: '移機費用', description: '拆除&安裝工資', quantity: 1, unitPrice: '4500', price: '4500' },
-    { name: '銅線費用', description: '客廳/主/次臥銅管&線材費用共計', quantity: 1, unitPrice: '5000', price: '5000' },
-    { name: '安裝架', description: '室外機不鏽鋼L/豪華架', quantity: 1, unitPrice: '2000', price: '2000' },
-    { name: '洗孔費用', description: '牆體洗洞工程', quantity: 1, unitPrice: '1000', price: '1000' },
-    { name: '焊接費用', description: '焊接工程', quantity: 1, unitPrice: '1500', price: '1500' },
-    { name: '管槽費用', description: '防曬美化管槽(○色)', quantity: 1, unitPrice: '3000', price: '3000' },
-    { name: '危險施工作業', description: '高空危險施工費用', quantity: 1, unitPrice: '5000', price: '5000' },
-    { name: '管路保養', description: '舊管冷凍油清洗工程', quantity: 1, unitPrice: '3000', price: '3000' },
+    { name: '安裝', description: '分離式安裝工資', quantity: 1, unitPrice: '3500', price: '3500' },
+    { name: '移機', description: '拆除&安裝工資', quantity: 1, unitPrice: '4500', price: '4500' },
+    { name: '銅管、電線', description: '客廳/主/次臥銅管&線材費用共計', quantity: 1, unitPrice: '5000', price: '5000' },
+    { name: '安裝架', description: '室外機白鐵L架/豪華架/落地架', quantity: 1, unitPrice: '2000', price: '2000' },
+    { name: '洗孔', description: '牆體洗洞工程', quantity: 1, unitPrice: '1000', price: '1000' },
+    { name: '焊接', description: '焊接工程', quantity: 1, unitPrice: '1500', price: '1500' },
+    { name: '管槽', description: '防曬美化管槽(白色)', quantity: 1, unitPrice: '3000', price: '3000' },
+    { name: '危險施工', description: '高空危險施工費用', quantity: 1, unitPrice: '5000', price: '5000' },
+    { name: '管路沖洗', description: '舊管冷凍油沖洗工程', quantity: 1, unitPrice: '3000', price: '3000' },
     { name: '清洗保養', description: '室內/外機-清洗保養服務', quantity: 1, unitPrice: '3000', price: '3000' },
-    { name: '打壁費用', description: '牆體切槽配管含水泥填回', quantity: 1, unitPrice: '2000', price: '2000' },
+    { name: '打壁填回', description: '牆體切槽配管含水泥填回', quantity: 1, unitPrice: '2000', price: '2000' },
+    { name: '風箱、風管', description: '集風箱、減速箱、風管及出風口耗材等施工費用', quantity: 1, unitPrice: '12000', price: '2000' },
     { name: '其他', description: '', quantity: 1, unitPrice: '0', price: '0' },
   ];
 
