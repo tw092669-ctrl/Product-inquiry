@@ -2171,11 +2171,10 @@ const QuotePage = ({
                           </button>
                           <input
                             type="number"
-                            min="0"
                             value={item.quantity}
                             onChange={(e) => setPipeWireItems(prev => ({
                               ...prev,
-                              [key]: { ...prev[key as keyof typeof prev], quantity: Math.max(0, parseInt(e.target.value) || 0) }
+                              [key]: { ...prev[key as keyof typeof prev], quantity: e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value) || 0) }
                             }))}
                             className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold"
                           />
@@ -2221,11 +2220,10 @@ const QuotePage = ({
                           </button>
                           <input
                             type="number"
-                            min="0"
                             value={item.quantity}
                             onChange={(e) => setPipeWireItems(prev => ({
                               ...prev,
-                              [key]: { ...prev[key as keyof typeof prev], quantity: Math.max(0, parseInt(e.target.value) || 0) }
+                              [key]: { ...prev[key as keyof typeof prev], quantity: e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value) || 0) }
                             }))}
                             className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold"
                           />
@@ -2271,11 +2269,10 @@ const QuotePage = ({
                           </button>
                           <input
                             type="number"
-                            min="0"
                             value={item.quantity}
                             onChange={(e) => setPipeWireItems(prev => ({
                               ...prev,
-                              [key]: { ...prev[key as keyof typeof prev], quantity: Math.max(0, parseInt(e.target.value) || 0) }
+                              [key]: { ...prev[key as keyof typeof prev], quantity: e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value) || 0) }
                             }))}
                             className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold"
                           />
@@ -2296,14 +2293,11 @@ const QuotePage = ({
 
               {/* 總計 */}
               <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-200">
-                <div className="flex justify-between items-center mb-2">
+                <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-slate-600">總計金額</span>
                   <span className="text-2xl font-black text-emerald-600">
                     ${Object.values(pipeWireItems).reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0).toLocaleString()}
                   </span>
-                </div>
-                <div className="text-xs text-slate-500">
-                  共 {Object.values(pipeWireItems).reduce((sum, item) => sum + item.quantity, 0)} 米
                 </div>
               </div>
             </div>
