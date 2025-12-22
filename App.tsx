@@ -79,22 +79,22 @@ const Dashboard = ({
   }, [products, config]);
 
   return (
-    <div className="mb-8 bg-gradient-to-br from-slate-900 to-black backdrop-blur-sm rounded-3xl shadow-2xl shadow-amber-500/20 border-2 border-amber-500/30 overflow-hidden transition-all duration-300">
+    <div className="mb-8 bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden transition-all duration-300">
       {/* Header / Toggle */}
       <div 
         onClick={onToggle}
-        className="bg-gradient-to-r from-black via-slate-900 to-black p-6 flex justify-between items-center cursor-pointer hover:from-slate-900 hover:via-slate-800 hover:to-slate-900 transition-all border-b-2 border-amber-500/30 group"
+        className="bg-white p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition border-b border-slate-100 group"
       >
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-gradient-to-br from-amber-500 to-yellow-600 text-black rounded-2xl group-hover:scale-110 transition-transform shadow-lg shadow-amber-500/50">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg group-hover:scale-110 transition-transform">
              <BarChart3 className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500 block">產品分析 📊</span>
-            <span className="text-sm text-amber-400/70 font-medium">即時庫存概況分析</span>
+            <span className="text-lg font-bold text-slate-800 block">產品分析</span>
+            <span className="text-xs text-slate-500 font-medium">即時庫存概況分析</span>
           </div>
         </div>
-        <button className="p-2 bg-amber-500/20 rounded-full text-amber-400 group-hover:text-amber-300 transition-colors shadow-sm border border-amber-500/30">
+        <button className="text-slate-400 group-hover:text-indigo-600 transition-colors">
           {isOpen ? <ChevronUp className="w-6 h-6" /> : <ChevronDown className="w-6 h-6" />}
         </button>
       </div>
@@ -105,74 +105,74 @@ const Dashboard = ({
           {/* Top Row: Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8">
             {/* Total Products */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 to-black rounded-3xl p-6 text-white shadow-2xl shadow-amber-500/30 group hover:-translate-y-1 hover:shadow-amber-500/50 transition-all border-2 border-amber-500/30">
-              <div className="absolute -top-6 -right-6 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-125">
-                <Package className="w-24 h-24" />
+            <div className="relative overflow-hidden bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl p-5 text-white shadow-lg shadow-indigo-500/30 group hover:-translate-y-1 transition-transform">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform group-hover:scale-125">
+                <Package className="w-16 h-16" />
               </div>
               <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-3 text-amber-400">
-                  <Package className="w-5 h-5" />
+                <div className="flex items-center gap-2 mb-2 text-indigo-100">
+                  <Package className="w-4 h-4" />
                   <span className="text-xs font-bold uppercase tracking-wider">總產品數</span>
                 </div>
-                <div className="text-4xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500">{stats.total}</div>
-                <div className="mt-3 text-sm text-amber-400 font-medium bg-amber-500/20 inline-block px-3 py-1 rounded-full border border-amber-500/30">
+                <div className="text-3xl font-black">{stats.total}</div>
+                <div className="mt-2 text-xs text-indigo-100 font-medium bg-white/20 inline-block px-2 py-0.5 rounded-full">
                   {stats.pinned} 個釘選項目
                 </div>
               </div>
             </div>
             
             {/* Heating */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 to-black rounded-3xl p-6 text-white shadow-2xl shadow-amber-500/30 group hover:-translate-y-1 hover:shadow-amber-500/50 transition-all border-2 border-amber-500/30">
+            <div className="relative overflow-hidden bg-gradient-to-br from-orange-400 to-rose-500 rounded-2xl p-5 text-white shadow-lg shadow-orange-500/30 group hover:-translate-y-1 transition-transform">
               <div className="absolute -bottom-4 -right-4 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform rotate-12">
                 <Sun className="w-24 h-24" />
               </div>
               <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-3 text-amber-400">
-                  <Sun className="w-5 h-5" />
+                <div className="flex items-center gap-2 mb-2 text-orange-50">
+                  <Sun className="w-4 h-4" />
                   <span className="text-xs font-bold uppercase tracking-wider">暖氣功能</span>
                 </div>
                 <div className="flex items-end gap-2">
-                  <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500">{stats.heating}</div>
-                  <div className="text-base font-medium text-amber-400/90 mb-1">台</div>
+                  <div className="text-3xl font-black">{stats.heating}</div>
+                  <div className="text-sm font-medium opacity-80 mb-1">台</div>
                 </div>
-                <div className="w-full bg-amber-500/20 h-2 rounded-full mt-4 overflow-hidden shadow-inner border border-amber-500/30">
-                  <div className="h-full bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full transition-all duration-500" style={{ width: `${stats.total ? (stats.heating/stats.total)*100 : 0}%` }}></div>
+                <div className="w-full bg-black/10 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div className="h-full bg-white/90" style={{ width: `${stats.total ? (stats.heating/stats.total)*100 : 0}%` }}></div>
                 </div>
               </div>
             </div>
 
             {/* Cooling */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 to-black rounded-3xl p-6 text-white shadow-2xl shadow-amber-500/30 group hover:-translate-y-1 hover:shadow-amber-500/50 transition-all border-2 border-amber-500/30">
+            <div className="relative overflow-hidden bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl p-5 text-white shadow-lg shadow-cyan-500/30 group hover:-translate-y-1 transition-transform">
                <div className="absolute -top-4 -right-4 p-4 opacity-10 group-hover:opacity-20 transition-opacity transform -rotate-12">
                 <Snowflake className="w-24 h-24" />
               </div>
               <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-3 text-amber-400">
-                  <Snowflake className="w-5 h-5" />
+                <div className="flex items-center gap-2 mb-2 text-cyan-50">
+                  <Snowflake className="w-4 h-4" />
                   <span className="text-xs font-bold uppercase tracking-wider">冷氣專用</span>
                 </div>
                  <div className="flex items-end gap-2">
-                  <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500">{stats.cooling}</div>
-                  <div className="text-base font-medium text-amber-400/90 mb-1">台</div>
+                  <div className="text-3xl font-black">{stats.cooling}</div>
+                  <div className="text-sm font-medium opacity-80 mb-1">台</div>
                 </div>
-                 <div className="w-full bg-amber-500/20 h-2 rounded-full mt-4 overflow-hidden shadow-inner border border-amber-500/30">
-                  <div className="h-full bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full transition-all duration-500" style={{ width: `${stats.total ? (stats.cooling/stats.total)*100 : 0}%` }}></div>
+                 <div className="w-full bg-black/10 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div className="h-full bg-white/90" style={{ width: `${stats.total ? (stats.cooling/stats.total)*100 : 0}%` }}></div>
                 </div>
               </div>
             </div>
 
              {/* Dominant Style (Replaced Avg Price) */}
-             <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 to-black rounded-3xl p-6 text-white shadow-2xl shadow-amber-500/30 group hover:-translate-y-1 hover:shadow-amber-500/50 transition-all border-2 border-amber-500/30">
+             <div className="relative overflow-hidden bg-gradient-to-br from-fuchsia-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg shadow-purple-500/30 group hover:-translate-y-1 transition-transform">
                <div className="absolute top-1/2 right-2 transform -translate-y-1/2 opacity-10 group-hover:opacity-20">
-                <LayoutGrid className="w-20 h-20" />
+                <LayoutGrid className="w-16 h-16" />
               </div>
               <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-3 text-amber-400">
-                  <TrendingUp className="w-5 h-5" />
+                <div className="flex items-center gap-2 mb-2 text-fuchsia-100">
+                  <TrendingUp className="w-4 h-4" />
                   <span className="text-xs font-bold uppercase tracking-wider">主流樣式</span>
                 </div>
-                <div className="text-2xl font-black tracking-tight truncate mb-2 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500">{stats.dominantStyle.label}</div>
-                <div className="mt-3 text-sm text-amber-400 font-medium">
+                <div className="text-2xl font-black tracking-tight truncate">{stats.dominantStyle.label}</div>
+                <div className="mt-2 text-xs text-fuchsia-100 font-medium">
                   佔庫存 {Math.round(stats.dominantStyle.percent)}% ({stats.dominantStyle.count}台)
                 </div>
               </div>
@@ -180,34 +180,34 @@ const Dashboard = ({
           </div>
 
           {/* Bottom Row: Brand Distribution */}
-          <div className="bg-gradient-to-br from-slate-900 to-black rounded-3xl p-6 border-2 border-amber-500/30 shadow-2xl">
-            <h4 className="text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500 mb-4 flex items-center gap-2">
-              <div className="p-2 bg-gradient-to-br from-amber-500 to-yellow-600 text-black rounded-xl shadow-md">
-                <PieChart className="w-5 h-5" /> 
+          <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+            <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+              <div className="p-1 bg-indigo-100 text-indigo-600 rounded">
+                <PieChart className="w-4 h-4" /> 
               </div>
-              品牌佔比分佈 🎉
+              品牌佔比分佈
             </h4>
             
-            <div className="h-8 w-full bg-black rounded-full overflow-hidden flex shadow-lg mb-5 border-2 border-amber-500/30">
+            <div className="h-6 w-full bg-white rounded-full overflow-hidden flex shadow-inner mb-4">
               {stats.brandStats.map((brand, index) => (
                 <div 
                   key={brand.id}
-                  className="h-full transition-all hover:brightness-125 hover:scale-y-110 relative group first:rounded-l-full last:rounded-r-full"
+                  className="h-full transition-all hover:brightness-110 relative group first:rounded-l-full last:rounded-r-full"
                   style={{ width: `${brand.percent}%`, backgroundColor: brand.color }}
                 >
-                   <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-amber-400 text-xs py-1.5 px-3 rounded-lg whitespace-nowrap z-10 pointer-events-none shadow-xl border border-amber-500/30">
+                   <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10 pointer-events-none">
                     {brand.label}: {Math.round(brand.percent)}%
                    </div>
                 </div>
               ))}
             </div>
             
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-x-6 gap-y-3">
               {stats.brandStats.map(brand => (
-                <div key={brand.id} className="flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-full border-2 border-amber-500/30 shadow-md hover:shadow-amber-500/30 transition-all hover:-translate-y-0.5">
-                  <div className="w-4 h-4 rounded-full shadow-md border border-amber-500/30" style={{ backgroundColor: brand.color }} />
-                  <span className="text-sm font-bold text-amber-400">{brand.label}</span>
-                  <span className="text-sm font-black text-black bg-gradient-to-r from-amber-400 to-yellow-500 px-2.5 py-0.5 rounded-full">{Math.round(brand.percent)}%</span>
+                <div key={brand.id} className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border border-slate-100 shadow-sm">
+                  <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: brand.color }} />
+                  <span className="text-xs font-medium text-slate-600">{brand.label}</span>
+                  <span className="text-xs font-bold text-slate-800 bg-slate-100 px-1.5 rounded-md">{Math.round(brand.percent)}%</span>
                 </div>
               ))}
             </div>
@@ -2497,44 +2497,52 @@ const ProductCard: React.FC<{
   // --- COMPACT VIEW ---
   if (viewMode === 'compact') {
     return (
-      <div id={cardId} className={`group relative bg-white rounded-3xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col p-5 text-center border-2 overflow-hidden ${isSelected ? 'border-pink-400 ring-4 ring-pink-200' : 'border-purple-100 hover:border-pink-200'}`}>
+      <div id={cardId} className={`group relative bg-white rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col p-5 text-center border overflow-hidden ${isSelected ? 'border-indigo-500 ring-2 ring-indigo-500 ring-offset-2' : 'border-slate-100'}`}>
         {/* Background Decorative Mesh */}
-        <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-gradient-to-br ${product.environment === 'heating' ? 'from-orange-300 to-pink-400' : 'from-cyan-300 to-purple-400'}`}></div>
+        <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-gradient-to-br ${product.environment === 'heating' ? 'from-orange-500 to-rose-500' : 'from-cyan-500 to-blue-500'}`}></div>
 
         {/* Pin Button - Top Left */}
         <button 
           onClick={() => onPin(product.id)} 
-          className={`absolute top-2 left-2 transition-all p-1.5 rounded-full z-10 shadow-sm ${product.isPinned ? 'text-white bg-gradient-to-br from-pink-400 to-purple-500 shadow-pink-400/50' : 'text-slate-300 hover:text-pink-400 bg-white/80 opacity-0 group-hover:opacity-100'}`}
+          className={`absolute top-2 left-2 transition-all p-1.5 rounded-full z-10 ${product.isPinned ? 'text-white bg-indigo-500 shadow-md shadow-indigo-500/30' : 'text-slate-300 hover:text-slate-400 opacity-0 group-hover:opacity-100'}`}
         >
           <Pin className={`w-3.5 h-3.5 ${product.isPinned ? 'fill-current' : ''}`} />
         </button>
 
         {/* Action Buttons (Overlay) */}
-        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-white/90 p-1.5 rounded-2xl shadow-md backdrop-blur-md border-2 border-purple-100">
-          <button onClick={() => onAddToCart(product)} className="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-xl transition" title="加入報價單">
+        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-white/90 p-1.5 rounded-lg shadow-sm backdrop-blur-md border border-slate-100">
+          <button onClick={() => onAddToCart(product)} className="p-1.5 text-slate-500 hover:text-emerald-600 rounded transition" title="加入報價單">
             <ShoppingCart className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => onEdit(product)} className="p-1.5 text-slate-400 hover:text-purple-500 hover:bg-purple-50 rounded-xl transition">
+          <button onClick={() => onEdit(product)} className="p-1.5 text-slate-500 hover:text-indigo-600 rounded transition">
             <Edit2 className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => onDelete(product.id)} className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-50 rounded-xl transition">
+          <button onClick={() => onDelete(product.id)} className="p-1.5 text-slate-500 hover:text-red-500 rounded transition">
             <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
         
         <div className="flex justify-center mb-4 relative z-10">
-          <div className={`p-4 rounded-2xl border-2 shadow-lg ${envGradientBg} ${envColorClass}`}>
+          <div className={`p-4 rounded-full border shadow-inner ${envGradientBg} ${envColorClass}`}>
             <EnvIcon className="w-8 h-8" />
           </div>
         </div>
         
-        <h3 className="font-black text-slate-800 text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5em] relative z-10">{product.name}</h3>
+        <h3 className="font-bold text-slate-800 text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5em] relative z-10">{product.name}</h3>
         
         <div className="mt-auto relative z-10">
-          <span className="text-lg font-black font-mono text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600">
+          <span className="text-lg font-black font-mono text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600">
              {product.price ? `$${product.price}` : '洽詢'}
           </span>
         </div>
+
+        {/* Pin (Overlay Top Left) */}
+         <button 
+            onClick={() => onPin(product.id)} 
+            className={`absolute top-2 left-2 transition-all p-1.5 rounded-full z-10 ${product.isPinned ? 'text-white bg-indigo-500 shadow-md shadow-indigo-500/30' : 'text-slate-300 hover:text-slate-400 opacity-0 group-hover:opacity-100'}`}
+          >
+            <Pin className={`w-3.5 h-3.5 ${product.isPinned ? 'fill-current' : ''}`} />
+          </button>
       </div>
     );
   }
@@ -2596,81 +2604,81 @@ const ProductCard: React.FC<{
 
   // --- GRID VIEW (Default) ---
   return (
-    <div className={`group relative bg-white rounded-3xl shadow-md hover:shadow-2xl border-2 hover:-translate-y-2 transition-all duration-300 flex flex-col overflow-hidden h-full ${isSelected ? 'border-pink-400 ring-4 ring-pink-200 ring-offset-2' : 'border-purple-100 hover:border-pink-200'}`}>
+    <div className={`group relative bg-white rounded-3xl shadow-sm hover:shadow-xl border hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden h-full ${isSelected ? 'border-indigo-500 ring-2 ring-indigo-500 ring-offset-2' : 'border-slate-100 hover:border-indigo-100'}`}>
       
       {/* Top Gradient Line */}
-      <div className={`h-2 w-full bg-gradient-to-r ${product.environment === 'heating' ? 'from-orange-300 via-pink-300 to-rose-400' : 'from-cyan-300 via-blue-300 to-purple-400'}`}></div>
+      <div className={`h-1.5 w-full bg-gradient-to-r ${product.environment === 'heating' ? 'from-orange-400 to-rose-500' : 'from-cyan-400 to-blue-500'}`}></div>
 
       {/* Pin Button - Top Left */}
       <button 
         onClick={() => onPin(product.id)} 
-        className={`absolute top-5 left-4 transition-all p-2 rounded-full z-10 shadow-md ${product.isPinned ? 'text-white bg-gradient-to-br from-pink-400 to-purple-500 shadow-pink-400/50 scale-110' : 'text-slate-300 hover:text-pink-400 bg-white/80 opacity-0 group-hover:opacity-100'}`}
+        className={`absolute top-4 left-3 transition-all p-1.5 rounded-full z-10 ${product.isPinned ? 'text-white bg-indigo-500 shadow-md shadow-indigo-500/30' : 'text-slate-200 hover:text-slate-300 opacity-0 group-hover:opacity-100'}`}
       >
         <Pin className={`w-4 h-4 ${product.isPinned ? 'fill-current' : ''}`} />
       </button>
 
       {/* Action Bar */}
-      <div className="absolute top-5 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-slate-800/95 backdrop-blur-md p-2 rounded-2xl shadow-xl border-2 border-amber-500/30">
-        <button onClick={() => onAddToCart(product)} className="p-2 text-amber-400/70 hover:text-amber-400 hover:bg-amber-500/20 rounded-xl transition-all hover:scale-110" title="加入報價單">
+      <div className="absolute top-4 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 bg-white/95 p-1.5 rounded-xl shadow-sm backdrop-blur-md border border-slate-100">
+        <button onClick={() => onAddToCart(product)} className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="加入報價單">
           <ShoppingCart className="w-4 h-4" />
         </button>
-        <button onClick={() => onEdit(product)} className="p-2 text-amber-400/70 hover:text-amber-400 hover:bg-amber-500/20 rounded-xl transition-all hover:scale-110" title="編輯">
+        <button onClick={() => onEdit(product)} className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="編輯">
           <Edit2 className="w-4 h-4" />
         </button>
-        <button onClick={() => exportToImage(cardId, product.name)} className="p-2 text-amber-400/70 hover:text-amber-400 hover:bg-amber-500/20 rounded-xl transition-all hover:scale-110" title="匯出圖檔">
+        <button onClick={() => exportToImage(cardId, product.name)} className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="匯出圖檔">
           <Download className="w-4 h-4" />
         </button>
-        <button onClick={() => onDelete(product.id)} className="p-2 text-amber-400/70 hover:text-red-400 hover:bg-red-500/20 rounded-xl transition-all hover:scale-110" title="刪除">
+        <button onClick={() => onDelete(product.id)} className="p-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="刪除">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
 
-      <div id={cardId} className="flex flex-col h-full bg-gradient-to-br from-slate-900/50 to-black/50 p-6">
+      <div id={cardId} className="flex flex-col h-full bg-white p-5">
         {/* Header: Environment Icon + Name */}
-        <div className="flex justify-between items-start mb-6">
-          <div className="flex items-start gap-3">
-            <div className={`mt-1 p-3.5 rounded-2xl flex-shrink-0 shadow-lg border-2 ${envGradientBg} ${envColorClass}`}>
-              <EnvIcon className="w-7 h-7" />
+        <div className="flex justify-between items-start mb-5">
+          <div className="flex items-start gap-4">
+            <div className={`mt-1 p-3 rounded-2xl flex-shrink-0 shadow-inner border ${envGradientBg} ${envColorClass}`}>
+              <EnvIcon className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-xs font-black tracking-wider uppercase mb-1.5 opacity-80" style={{ color: brand.color }}>
+              <div className="text-xs font-bold tracking-wider uppercase mb-1 opacity-90" style={{ color: brand.color }}>
                 {brand.label}
               </div>
-              <h3 className="text-lg font-black text-amber-400 leading-tight">{product.name}</h3>
+              <h3 className="text-lg font-bold text-slate-800 leading-tight">{product.name}</h3>
             </div>
           </div>
         </div>
 
         {/* Specs Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-6 flex-1">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-500/30 p-4 rounded-2xl hover:shadow-lg hover:shadow-amber-500/20 transition-all hover:-translate-y-0.5">
-            <span className="text-xs text-amber-400 font-bold block mb-1.5">種類</span>
-            <span className="font-black text-sm break-all text-amber-300" style={{color: type.color}}>{type.label}</span>
+        <div className="grid grid-cols-2 gap-3 mb-5 flex-1">
+          <div className="bg-slate-50/80 border border-slate-100 p-3 rounded-xl hover:bg-slate-50 transition-colors">
+            <span className="text-xs text-slate-400 block mb-1">種類</span>
+            <span className="font-semibold text-sm break-all" style={{color: type.color}}>{type.label}</span>
           </div>
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-500/30 p-4 rounded-2xl hover:shadow-lg hover:shadow-amber-500/20 transition-all hover:-translate-y-0.5">
-            <span className="text-xs text-amber-400 font-bold block mb-1.5">樣式</span>
-            <span className="font-black text-sm break-all text-amber-300" style={{color: style.color}}>{style.label}</span>
+          <div className="bg-slate-50/80 border border-slate-100 p-3 rounded-xl hover:bg-slate-50 transition-colors">
+            <span className="text-xs text-slate-400 block mb-1">樣式</span>
+            <span className="font-semibold text-sm break-all" style={{color: style.color}}>{style.label}</span>
           </div>
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-500/30 p-4 rounded-2xl hover:shadow-lg hover:shadow-amber-500/20 transition-all hover:-translate-y-0.5">
-            <span className="text-xs text-amber-400 font-bold block mb-1.5">管徑</span>
-            <span className="font-black text-sm break-all leading-tight text-amber-300" style={{color: pipe.color}}>{pipe.label}</span>
+          <div className="bg-slate-50/80 border border-slate-100 p-3 rounded-xl hover:bg-slate-50 transition-colors">
+            <span className="text-xs text-slate-400 block mb-1">管徑</span>
+            <span className="font-semibold text-sm break-all leading-tight" style={{color: pipe.color}}>{pipe.label}</span>
           </div>
           
           {/* Dimensions Box */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-500/30 p-4 rounded-2xl flex flex-col justify-center hover:shadow-lg hover:shadow-amber-500/20 transition-all hover:-translate-y-0.5">
-            <div className="mb-2">
-               <span className="text-xs font-black text-amber-400 break-all font-mono leading-tight block">{product.dimensions.indoor || '-'}</span>
+          <div className="bg-slate-50/80 border border-slate-100 p-3 rounded-xl flex flex-col justify-center hover:bg-slate-50 transition-colors">
+            <div className="mb-1.5">
+               <span className="text-xs font-semibold text-slate-700 break-all font-mono leading-tight">{product.dimensions.indoor || '-'}</span>
             </div>
             <div>
-               <span className="text-xs font-black text-amber-300 break-all font-mono leading-tight block">{product.dimensions.outdoor || '-'}</span>
+               <span className="text-xs font-semibold text-slate-700 break-all font-mono leading-tight">{product.dimensions.outdoor || '-'}</span>
             </div>
           </div>
         </div>
 
         {/* Footer: Price */}
-        <div className="mt-auto pt-5 border-t-2 border-dashed border-amber-500/30 flex justify-between items-center">
-          <span className="text-sm text-amber-400 font-bold">💰 建議售價</span>
-          <span className="text-2xl font-black font-mono text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600">
+        <div className="mt-auto pt-4 border-t border-dashed border-slate-200 flex justify-between items-center">
+          <span className="text-xs text-slate-400 font-medium">建議售價</span>
+          <span className="text-xl font-black font-mono text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600">
              {product.price ? `$${product.price}` : '洽詢'}
           </span>
         </div>
@@ -3207,27 +3215,24 @@ export default function App() {
           onRemoveFromCart={handleRemoveFromCart}
         />
       ) : (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black flex flex-col font-sans text-white pb-20">
+      <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans text-slate-800 pb-20">
       {/* Navbar */}
-      <header className="bg-gradient-to-r from-black via-slate-900 to-black sticky top-0 z-40 shadow-2xl shadow-amber-500/20 backdrop-blur-md border-b-2 border-amber-500/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="bg-gradient-to-br from-amber-400 to-yellow-600 p-3 rounded-2xl shadow-lg shadow-amber-500/50 hover:shadow-amber-400/70 transition-all hover:rotate-6 transform">
-              <img src="./icon.png" alt="Logo" className="w-8 h-8 object-contain" />
+      <header className="bg-slate-900 sticky top-0 z-40 shadow-xl shadow-indigo-900/20 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-br from-white to-slate-50 p-2 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-400/50 transition-all ring-2 ring-white/20">
+              <img src="./icon.png" alt="Logo" className="w-7 h-7 object-contain" />
             </div>
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600">
-                小隼 ver. 2.0
-              </h1>
-              <p className="text-xs text-amber-400/80 font-medium">專業至上 尊榮體驗 ✨</p>
-            </div>
+                    <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-slate-300">
+                      小隼 ver. 2.0
+                    </h1>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
              {/* BTU Calc Button (New) */}
              <button 
               onClick={() => setIsBTUOpen(true)}
-              className="p-3 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 hover:text-amber-300 rounded-2xl transition-all shadow-sm hover:shadow-amber-500/30 hover:scale-105 border border-amber-500/30"
+              className="p-2 text-slate-400 hover:text-orange-400 hover:bg-white/10 rounded-full transition"
               title="冷房能力試算"
             >
               <Calculator className="w-5 h-5" />
@@ -3235,16 +3240,16 @@ export default function App() {
 
             <button 
               onClick={() => setIsSettingsOpen(true)}
-              className="p-3 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 hover:text-amber-300 rounded-2xl transition-all shadow-sm hover:shadow-amber-500/30 hover:scale-105 border border-amber-500/30"
+              className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition"
               title="選項設定"
             >
               <Settings className="w-5 h-5" />
             </button>
             <button 
               onClick={() => { setEditingProduct(undefined); setIsFormOpen(true); }}
-              className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black px-6 py-3 rounded-full transition-all font-black shadow-lg shadow-amber-500/50 hover:shadow-xl hover:scale-105 active:scale-95"
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-2 rounded-full transition font-bold shadow-lg shadow-indigo-500/30 active:scale-95"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">新增產品</span>
             </button>
           </div>
@@ -3264,63 +3269,63 @@ export default function App() {
 
         {/* Search Bar */}
         <div className="relative mb-10 max-w-2xl mx-auto group">
-          <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-            <Search className="h-6 w-6 text-amber-400 group-focus-within:text-amber-300 transition-colors" />
+          <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+            <Search className="h-6 w-6 text-indigo-400 group-focus-within:text-indigo-600 transition-colors" />
           </div>
           <input
             type="text"
-            className="block w-full pl-16 pr-6 py-6 bg-slate-800/90 backdrop-blur-sm border-2 border-amber-500/30 rounded-full text-white placeholder-amber-400/50 focus:border-amber-400 focus:bg-slate-800 shadow-xl shadow-amber-500/20 transition-all text-lg hover:shadow-2xl hover:shadow-amber-500/30"
-            placeholder="搜尋產品名稱、型號、品牌... 🔍"
+            className="block w-full pl-14 pr-6 py-5 bg-white border-0 ring-1 ring-slate-200 rounded-3xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 shadow-xl shadow-slate-200/60 transition text-lg"
+            placeholder="搜尋產品名稱、型號、品牌..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
         {/* Category Tabs */}
-        <div className="mb-8 bg-slate-900/70 backdrop-blur-sm rounded-3xl shadow-lg border-2 border-amber-500/30 overflow-hidden p-2">
-          <div className="flex gap-2 overflow-x-auto">
+        <div className="mb-8 bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+          <div className="flex overflow-x-auto">
             <button
               onClick={() => setActiveCategory('air-conditioning')}
-              className={`flex-shrink-0 px-5 sm:px-7 py-4 font-bold text-sm transition-all rounded-2xl flex items-center gap-2 ${
+              className={`flex-shrink-0 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-4 ${
                 activeCategory === 'air-conditioning'
-                  ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-black shadow-lg shadow-amber-500/50 scale-105'
-                  : 'bg-slate-800/50 text-amber-400/70 hover:bg-slate-700 hover:text-amber-400 hover:shadow-md border border-amber-500/20'
+                  ? 'bg-blue-50 border-blue-500 text-blue-700'
+                  : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
               }`}
             >
-              <Package className="w-5 h-5" />
+              <Package className="w-5 h-5 inline-block mr-2" />
               空調
             </button>
             <button
               onClick={() => setActiveCategory('materials')}
-              className={`flex-shrink-0 px-5 sm:px-7 py-4 font-bold text-sm transition-all rounded-2xl flex items-center gap-2 ${
+              className={`flex-shrink-0 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-4 ${
                 activeCategory === 'materials'
-                  ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-black shadow-lg shadow-amber-500/50 scale-105'
-                  : 'bg-slate-800/50 text-amber-400/70 hover:bg-slate-700 hover:text-amber-400 hover:shadow-md border border-amber-500/20'
+                  ? 'bg-green-50 border-green-500 text-green-700'
+                  : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
               }`}
             >
-              <Scale className="w-5 h-5" />
+              <Scale className="w-5 h-5 inline-block mr-2" />
               材料
             </button>
             <button
               onClick={() => setActiveCategory('tools')}
-              className={`flex-shrink-0 px-5 sm:px-7 py-4 font-bold text-sm transition-all rounded-2xl flex items-center gap-2 ${
+              className={`flex-shrink-0 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-4 ${
                 activeCategory === 'tools'
-                  ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-black shadow-lg shadow-amber-500/50 scale-105'
-                  : 'bg-slate-800/50 text-amber-400/70 hover:bg-slate-700 hover:text-amber-400 hover:shadow-md border border-amber-500/20'
+                  ? 'bg-orange-50 border-orange-500 text-orange-700'
+                  : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
               }`}
             >
-              <Settings className="w-5 h-5" />
+              <Settings className="w-5 h-5 inline-block mr-2" />
               工具
             </button>
             <button
               onClick={() => setActiveCategory('high-altitude')}
-              className={`flex-shrink-0 px-5 sm:px-7 py-4 font-bold text-sm transition-all rounded-2xl flex items-center gap-2 ${
+              className={`flex-shrink-0 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-4 ${
                 activeCategory === 'high-altitude'
-                  ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-black shadow-lg shadow-amber-500/50 scale-105'
-                  : 'bg-slate-800/50 text-amber-400/70 hover:bg-slate-700 hover:text-amber-400 hover:shadow-md border border-amber-500/20'
+                  ? 'bg-purple-50 border-purple-500 text-purple-700'
+                  : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
               }`}
             >
-              <TrendingUp className="w-5 h-5" />
+              <TrendingUp className="w-5 h-5 inline-block mr-2" />
               高空
             </button>
           </div>
@@ -3329,54 +3334,42 @@ export default function App() {
         {/* Stats & View Switcher */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
            <div>
-             <h2 className={`text-4xl font-black tracking-tight mb-2 px-5 py-3 rounded-2xl inline-block ${
-               activeCategory === 'air-conditioning' ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500' : 
-               activeCategory === 'materials' ? 'text-amber-400 bg-gradient-to-r from-slate-900 to-black border-3 border-amber-500/30 shadow-md' :
-               activeCategory === 'tools' ? 'text-amber-400 bg-gradient-to-r from-slate-900 to-black border-3 border-amber-500/30 shadow-md' :
-               'text-amber-400 bg-gradient-to-r from-slate-900 to-black border-3 border-amber-500/30 shadow-md'
+             <h2 className={`text-3xl font-black tracking-tight mb-1 px-4 py-2 rounded-lg inline-block ${
+               activeCategory === 'air-conditioning' ? 'text-slate-800 bg-transparent' : 
+               activeCategory === 'materials' ? 'text-green-700 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200' :
+               activeCategory === 'tools' ? 'text-amber-700 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200' :
+               'text-red-700 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200'
              }`}>
-               {activeCategory === 'air-conditioning' ? '🌟 產品列表' : 
+               {activeCategory === 'air-conditioning' ? '產品列表' : 
                 activeCategory === 'materials' ? '📦 材料項目' :
                 activeCategory === 'tools' ? '🔧 工具項目' :
                 '⛰️ 高空項目'}
              </h2>
-             <span className="text-amber-400 font-bold bg-gradient-to-r from-slate-800 to-slate-900 px-4 py-2 rounded-full text-sm ml-2 border-2 border-amber-500/30 shadow-sm">
+             <span className="text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full text-sm ml-2">
                {activeCategory === 'air-conditioning' ? `共 ${filteredProducts.length} 筆` : `共 ${miscItems.filter(item => item.category === activeCategory).length} 筆`}
              </span>
            </div>
 
            {/* View Switcher Controls - Only show for air-conditioning */}
            {activeCategory === 'air-conditioning' && (
-           <div className="bg-slate-900/80 backdrop-blur-sm p-2 rounded-2xl border-2 border-amber-500/30 shadow-md flex items-center gap-1.5">
+           <div className="bg-white p-1.5 rounded-xl border border-slate-100 shadow-sm flex items-center gap-1">
              <button 
                onClick={() => setViewMode('grid')}
-               className={`p-3 rounded-xl transition-all ${
-                 viewMode === 'grid' 
-                   ? 'bg-gradient-to-br from-amber-500 to-yellow-600 text-black shadow-lg shadow-amber-500/50 scale-105' 
-                   : 'text-amber-400/70 hover:text-amber-400 hover:bg-amber-500/20'
-               }`}
+               className={`p-2.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
                title="卡片檢視"
              >
                <LayoutGrid className="w-5 h-5" />
              </button>
              <button 
                onClick={() => setViewMode('list')}
-               className={`p-3 rounded-xl transition-all ${
-                 viewMode === 'list' 
-                   ? 'bg-gradient-to-br from-amber-500 to-yellow-600 text-black shadow-lg shadow-amber-500/50 scale-105' 
-                   : 'text-amber-400/70 hover:text-amber-400 hover:bg-amber-500/20'
-               }`}
+               className={`p-2.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
                title="條列式"
              >
                <List className="w-5 h-5" />
              </button>
              <button 
                onClick={() => setViewMode('compact')}
-               className={`p-3 rounded-xl transition-all ${
-                 viewMode === 'compact' 
-                   ? 'bg-gradient-to-br from-amber-500 to-yellow-600 text-black shadow-lg shadow-amber-500/50 scale-105' 
-                   : 'text-amber-400/70 hover:text-amber-400 hover:bg-amber-500/20'
-               }`}
+               className={`p-2.5 rounded-lg transition-all ${viewMode === 'compact' ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
                title="小圖示"
              >
                <Grid3x3 className="w-5 h-5" />
@@ -3428,21 +3421,21 @@ export default function App() {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   disabled={currentPage === 1}
-                  className="p-4 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 border-2 border-amber-500/30 text-amber-400 hover:from-slate-700 hover:to-slate-800 hover:border-amber-400 hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:from-slate-800 disabled:hover:to-slate-900 disabled:hover:scale-100 transition-all shadow-md disabled:shadow-sm"
+                  className="p-3 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-slate-200 disabled:hover:text-slate-600 transition shadow-sm"
                   title="上一頁"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
                 
-                <div className="flex items-center gap-3 px-6 py-3 bg-slate-900/80 backdrop-blur-sm border-2 border-amber-500/30 rounded-2xl shadow-lg">
-                  <span className="text-base font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm">
+                  <span className="text-sm font-medium text-slate-600">
                     第 {currentPage} 頁
                   </span>
-                  <span className="text-amber-500/50 font-bold">/</span>
-                  <span className="text-base font-black text-amber-400">
+                  <span className="text-slate-400">/</span>
+                  <span className="text-sm font-medium text-slate-600">
                     共 {Math.ceil(filteredProducts.length / maxDisplayCards)} 頁
                   </span>
-                  <span className="text-xs text-amber-400/50 ml-2 bg-amber-500/10 px-2 py-1 rounded-full font-medium border border-amber-500/20">
+                  <span className="text-xs text-slate-400 ml-2">
                     ({(currentPage - 1) * maxDisplayCards + 1}-{Math.min(currentPage * maxDisplayCards, filteredProducts.length)} / {filteredProducts.length})
                   </span>
                 </div>
@@ -3453,52 +3446,52 @@ export default function App() {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   disabled={currentPage >= Math.ceil(filteredProducts.length / maxDisplayCards)}
-                  className="p-4 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 border-2 border-amber-500/30 text-amber-400 hover:from-slate-700 hover:to-slate-800 hover:border-amber-400 hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:from-slate-800 disabled:hover:to-slate-900 disabled:hover:scale-100 transition-all shadow-md disabled:shadow-sm"
+                  className="p-3 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-slate-200 disabled:hover:text-slate-600 transition shadow-sm"
                   title="下一頁"
                 >
-                  <ChevronRight className="w-6 h-6" />
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             )}
           </>
         ) : (
-          <div className="text-center py-24">
-            <div className="bg-gradient-to-br from-slate-800 to-slate-900 w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl border-4 border-amber-500/30 animate-pulse">
-              <Search className="w-14 h-14 text-amber-400" />
+          <div className="text-center py-20">
+            <div className="bg-white w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-slate-100 border border-slate-50">
+              <Search className="w-10 h-10 text-slate-300" />
             </div>
-            <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500 mb-3">🔍 沒有找到產品</h3>
-            <p className="text-amber-400/70 font-medium text-lg">試試看搜尋其他關鍵字或點擊上方「新增產品」</p>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">沒有找到產品</h3>
+            <p className="text-slate-500">試試看搜尋其他關鍵字或點擊上方「新增產品」</p>
           </div>
         )}
         </>
         ) : (
           // Show misc items table for other categories
-          <div className="bg-gradient-to-br from-slate-900 to-black backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-amber-500/30 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-b-2 border-amber-500/30">
+                <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-3 sm:px-6 py-4 sm:py-5 text-left text-xs font-black text-amber-400 uppercase tracking-wider whitespace-nowrap">名稱</th>
-                    <th className="px-3 sm:px-6 py-4 sm:py-5 text-left text-xs font-black text-amber-400 uppercase tracking-wider whitespace-nowrap">規格</th>
-                    <th className="px-3 sm:px-6 py-4 sm:py-5 text-left text-xs font-black text-amber-400 uppercase tracking-wider whitespace-nowrap">單位</th>
-                    <th className="px-3 sm:px-6 py-4 sm:py-5 text-left text-xs font-black text-amber-400 uppercase tracking-wider whitespace-nowrap">價格</th>
-                    <th className="hidden md:table-cell px-6 py-5 text-left text-xs font-black text-amber-400 uppercase tracking-wider whitespace-nowrap">備註</th>
-                    <th className="px-3 sm:px-6 py-4 sm:py-5 text-right text-xs font-black text-amber-400 uppercase tracking-wider whitespace-nowrap">操作</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">名稱</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">規格</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">單位</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">價格</th>
+                    <th className="hidden md:table-cell px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">備註</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-bold text-slate-600 uppercase tracking-wider whitespace-nowrap">操作</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-amber-500/20">
+                <tbody className="divide-y divide-slate-100">
                   {miscItems.filter(item => item.category === activeCategory).length > 0 ? (
                     miscItems.filter(item => item.category === activeCategory).map((item, index) => (
-                      <tr key={item.id} className="hover:bg-amber-500/10 transition-all">
-                        <td className="px-3 sm:px-6 py-4 sm:py-5 text-xs sm:text-sm font-bold text-amber-400 whitespace-nowrap">{item.name}</td>
-                        <td className="px-3 sm:px-6 py-4 sm:py-5 text-xs sm:text-sm text-amber-300/70 whitespace-nowrap">{item.specification}</td>
-                        <td className="px-3 sm:px-6 py-4 sm:py-5 text-xs sm:text-sm font-medium text-amber-300/70 whitespace-nowrap">{item.unit}</td>
-                        <td className="px-3 sm:px-6 py-4 sm:py-5 text-xs sm:text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500 whitespace-nowrap">${item.price}</td>
-                        <td className="hidden md:table-cell px-6 py-5 text-sm text-amber-300/50">{item.remarks || '-'}</td>
-                        <td className="px-3 sm:px-6 py-4 sm:py-5 text-right">
+                      <tr key={item.id} className="hover:bg-slate-50 transition">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-slate-800 whitespace-nowrap">{item.name}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-600 whitespace-nowrap">{item.specification}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-600 whitespace-nowrap">{item.unit}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold text-emerald-600 whitespace-nowrap">${item.price}</td>
+                        <td className="hidden md:table-cell px-6 py-4 text-sm text-slate-500">{item.remarks || '-'}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
                           <button 
                             onClick={() => handleDeleteMiscItem(item.id)}
-                            className="text-amber-400/50 hover:text-red-400 hover:bg-red-500/20 transition-all p-2.5 rounded-xl border border-transparent hover:border-red-500/30"
+                            className="text-slate-400 hover:text-red-600 transition p-2"
                             title="刪除項目"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -3508,25 +3501,20 @@ export default function App() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={6} className="px-6 py-16 text-center">
-                        <div className="flex flex-col items-center gap-4">
-                          <div className="w-20 h-20 bg-gradient-to-br from-slate-800 to-slate-900 rounded-full flex items-center justify-center border-2 border-amber-500/30">
-                            <Package className="w-10 h-10 text-amber-400" />
-                          </div>
-                          <p className="text-amber-400/70 font-medium">尚無資料，點擊下方按鈕新增項目</p>
-                        </div>
+                      <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
+                        尚無資料，點擊下方按鈕新增項目
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
-            <div className="p-5 border-t-2 border-amber-500/30 bg-gradient-to-r from-slate-900 to-black">
+            <div className="p-4 border-t border-slate-100 bg-slate-50">
               <button 
                 onClick={() => setIsMiscFormOpen(true)}
-                className="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black rounded-2xl font-black shadow-xl hover:shadow-2xl hover:shadow-amber-500/30 transition-all flex items-center justify-center gap-2 hover:scale-105 active:scale-95"
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/30 transition flex items-center justify-center gap-2"
               >
-                <Plus className="w-6 h-6" />
+                <Plus className="w-5 h-5" />
                 新增項目
               </button>
             </div>
@@ -3537,23 +3525,23 @@ export default function App() {
       {/* Floating Compare Bar */}
       {compareList.length > 0 && (
         <div className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5 px-4 w-full max-w-2xl">
-          <div className="bg-gradient-to-r from-black via-slate-900 to-black backdrop-blur-md text-white rounded-3xl sm:rounded-full pl-6 pr-3 py-3 sm:py-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6 shadow-2xl border-2 border-amber-500/50">
+          <div className="bg-slate-900/90 backdrop-blur-md text-white rounded-2xl sm:rounded-full pl-4 sm:pl-6 pr-2 py-2 sm:py-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-6 shadow-2xl border border-white/10">
             <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 px-2 sm:px-0">
-              <span className="font-black text-base sm:text-lg text-amber-400 whitespace-nowrap">✨ 已選 {compareList.length} 項</span>
-              <span className="text-xs sm:text-sm text-amber-400/70">(最多 3 項)</span>
+              <span className="font-bold text-sm sm:text-base whitespace-nowrap">已選 {compareList.length} 項</span>
+              <span className="text-xs sm:text-sm text-slate-400">(最多 3 項)</span>
             </div>
             <div className="flex gap-2 sm:ml-auto">
               <button 
                 onClick={() => setCompareList([])}
-                className="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 rounded-full transition-all text-sm font-bold backdrop-blur-sm border border-amber-500/30"
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 hover:bg-white/10 rounded-full transition text-xs sm:text-sm font-medium"
               >
                 清除
               </button>
               <button 
                 onClick={() => setIsComparisonOpen(true)}
-                className="flex-1 sm:flex-none px-5 sm:px-6 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black rounded-full transition-all text-sm font-black shadow-lg flex items-center justify-center gap-2 hover:scale-105"
+                className="flex-1 sm:flex-none px-4 sm:px-5 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-full transition text-xs sm:text-sm font-bold shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-1.5 sm:gap-2"
               >
-                <ArrowRightLeft className="w-4 h-4 sm:w-5 sm:h-5"/> 
+                <ArrowRightLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4"/> 
                 <span className="whitespace-nowrap">開始比較</span>
               </button>
             </div>
@@ -3565,14 +3553,14 @@ export default function App() {
       <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40">
         <button
           onClick={handleGenerateQuote}
-          className="group bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:via-yellow-400 hover:to-amber-500 text-black px-5 sm:px-7 py-4 sm:py-5 rounded-full shadow-2xl hover:shadow-amber-500/60 transition-all duration-300 flex items-center gap-2 font-black text-sm sm:text-base hover:scale-110 active:scale-95 border-2 border-amber-400"
+          className="group bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-full shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 flex items-center gap-2 font-bold text-sm sm:text-base hover:scale-105 active:scale-95"
           title="生成報價單"
         >
-          <FileDown className="w-6 h-6 sm:w-7 sm:h-7 group-hover:animate-bounce" />
+          <FileDown className="w-5 h-5 sm:w-6 sm:h-6 group-hover:animate-bounce" />
           <span className="hidden sm:inline">生成報價單</span>
           <span className="sm:hidden">報價單</span>
           {cartItems.length > 0 && (
-            <span className="ml-1 bg-black text-amber-400 text-xs font-black px-2.5 py-1 rounded-full">
+            <span className="ml-1 bg-white/20 text-xs px-2 py-0.5 rounded-full">
               {cartItems.length}
             </span>
           )}
