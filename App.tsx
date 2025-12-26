@@ -2136,21 +2136,21 @@ const QuotePage = ({
                 </tr>
               </tbody>
               <tfoot>
-                {/* 冷氣小計 */}
+                {/* 設備總價 */}
                 <tr className="border-t-2 border-slate-300">
                   <td colSpan={6} className="p-4 text-right font-bold text-base text-slate-700">
-                    冷氣小計
+                    設備總價
                   </td>
                   <td className="p-4 text-center">
                     <span className="font-mono font-bold text-lg text-slate-800">${airConditionerTotal.toLocaleString()}</span>
                   </td>
                   <td className="export-hide"></td>
                 </tr>
-                {/* 雜項小計 */}
+                {/* 施工總價 */}
                 {customItemsTotal > 0 && (
                   <tr className="border-t border-slate-200">
                     <td colSpan={6} className="p-4 text-right font-bold text-base text-slate-700">
-                      雜項小計
+                      施工總價
                     </td>
                     <td className="p-4 text-center">
                       <span className="font-mono font-bold text-lg text-slate-800">${customItemsTotal.toLocaleString()}</span>
