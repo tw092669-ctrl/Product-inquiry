@@ -1110,6 +1110,7 @@ const QuotePage = ({
   const [notes, setNotes] = useState('');
   const [quoteTitle, setQuoteTitle] = useState('冷氣估價單');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   
   // Product price adjustments
   const [productPrices, setProductPrices] = useState<Record<string, string>>(() => {
@@ -1153,6 +1154,28 @@ const QuotePage = ({
     } else {
       setProductQuantities(prev => ({ ...prev, [cartItemId]: Math.max(1, newQuantity) }));
     }
+  };
+
+  // 圖片上傳處理
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setUploadedImages(prev => [...prev, event.target!.result as string]);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
   };
   
   // Calculator state
@@ -1324,22 +1347,27 @@ const QuotePage = ({
     setCustomItems(customItems.filter((_, i) => i !== index));
   };
 
-  const totalPrice = useMemo(() => {
-    const productsTotal = products.reduce((sum, p) => {
+  // 分別計算冷氣價格和雜項價格
+  const airConditionerTotal = useMemo(() => {
+    return products.reduce((sum, p) => {
       const adjustedPrice = productPrices[p.id] || p.price.toString();
       const price = parseInt(adjustedPrice.replace(/,/g, ''), 10);
       const quantity = productQuantities[p.id] || 1;
       return sum + (isNaN(price) ? 0 : price * quantity);
     }, 0);
-    
-    const customTotal = customItems.reduce((sum, item) => {
+  }, [products, productPrices, productQuantities]);
+
+  const customItemsTotal = useMemo(() => {
+    return customItems.reduce((sum, item) => {
       const unitPrice = parseInt(item.unitPrice.replace(/,/g, ''), 10);
       const quantity = item.quantity || 1;
       return sum + (isNaN(unitPrice) ? 0 : unitPrice * quantity);
     }, 0);
-    
-    return productsTotal + customTotal;
-  }, [products, customItems, productPrices, productQuantities]);
+  }, [customItems]);
+
+  const totalPrice = useMemo(() => {
+    return airConditionerTotal + customItemsTotal;
+  }, [airConditionerTotal, customItemsTotal]);
 
   const [isExporting, setIsExporting] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -1735,6 +1763,64 @@ const QuotePage = ({
             </div>
           </div>
 
+          {/* Image Upload Section */}
+          {(uploadedImages.length > 0 || !isExporting) && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-indigo-600 rounded-full"></span>
+                  參考圖片
+                </label>
+                {uploadedImages.length > 0 && (
+                  <button
+                    onClick={() => setUploadedImages([])}
+                    className="export-hide text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1 transition"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    清除所有圖片
+                  </button>
+                )}
+              </div>
+              
+              {/* Upload Button (edit mode only) */}
+              <div className="export-hide mb-4">
+                <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 transition cursor-pointer">
+                  <Upload className="w-5 h-5" />
+                  <span className="font-medium">點擊上傳圖片</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* Images Display */}
+              {uploadedImages.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {uploadedImages.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={img}
+                        alt={`參考圖片 ${index + 1}`}
+                        className="w-full h-48 object-cover rounded-lg border-2 border-slate-200"
+                      />
+                      <button
+                        onClick={() => handleRemoveImage(index)}
+                        className="export-hide absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                        title="刪除圖片"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Products Table */}
           <div className="mb-8 overflow-x-auto">
             <table className="w-full border-collapse">
@@ -2050,8 +2136,31 @@ const QuotePage = ({
                 </tr>
               </tbody>
               <tfoot>
+                {/* 冷氣小計 */}
                 <tr className="border-t-2 border-slate-300">
-                  <td colSpan={6} className="p-5 text-center font-black text-xl text-slate-700">
+                  <td colSpan={6} className="p-4 text-right font-bold text-base text-slate-700">
+                    冷氣小計
+                  </td>
+                  <td className="p-4 text-center">
+                    <span className="font-mono font-bold text-lg text-slate-800">${airConditionerTotal.toLocaleString()}</span>
+                  </td>
+                  <td className="export-hide"></td>
+                </tr>
+                {/* 雜項小計 */}
+                {customItemsTotal > 0 && (
+                  <tr className="border-t border-slate-200">
+                    <td colSpan={6} className="p-4 text-right font-bold text-base text-slate-700">
+                      雜項小計
+                    </td>
+                    <td className="p-4 text-center">
+                      <span className="font-mono font-bold text-lg text-slate-800">${customItemsTotal.toLocaleString()}</span>
+                    </td>
+                    <td className="export-hide"></td>
+                  </tr>
+                )}
+                {/* 總計 */}
+                <tr className="border-t-2 border-slate-400 bg-slate-50">
+                  <td colSpan={6} className="p-5 text-right font-black text-xl text-slate-700">
                     總計
                   </td>
                   <td className="p-5 text-center">
