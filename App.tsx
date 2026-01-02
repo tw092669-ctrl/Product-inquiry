@@ -1275,7 +1275,7 @@ const QuotePage = ({
     id: string;
     name: string;
     description: string;
-    quantity: number;
+    quantity: number | string;
     unitPrice: string;
     price: string;
   };
@@ -1327,16 +1327,16 @@ const QuotePage = ({
   const handleUpdateCustomItem = (index: number, field: keyof CustomItem, value: string | number) => {
     const updated = [...customItems];
     if (field === 'quantity') {
-      updated[index][field] = typeof value === 'number' ? value : parseInt(value) || 1;
+      updated[index][field] = value;
       // 更新總價
       const unitPrice = parseInt(updated[index].unitPrice.replace(/,/g, ''), 10);
-      const quantity = updated[index].quantity;
+      const quantity = typeof value === 'number' ? value : (parseInt(value.toString()) || 0);
       updated[index].price = (isNaN(unitPrice) ? 0 : unitPrice * quantity).toString();
     } else if (field === 'unitPrice') {
       updated[index][field] = value.toString();
       // 更新總價
       const unitPrice = parseInt(value.toString().replace(/,/g, ''), 10);
-      const quantity = updated[index].quantity;
+      const quantity = typeof updated[index].quantity === 'number' ? updated[index].quantity : (parseInt(updated[index].quantity.toString()) || 0);
       updated[index].price = (isNaN(unitPrice) ? 0 : unitPrice * quantity).toString();
     } else {
       updated[index][field] = value as any;
@@ -1361,7 +1361,7 @@ const QuotePage = ({
   const customItemsTotal = useMemo(() => {
     return customItems.reduce((sum, item) => {
       const unitPrice = parseInt(item.unitPrice.replace(/,/g, ''), 10);
-      const quantity = item.quantity || 1;
+      const quantity = typeof item.quantity === 'number' ? item.quantity : (parseInt(item.quantity) || 0);
       return sum + (isNaN(unitPrice) ? 0 : unitPrice * quantity);
     }, 0);
   }, [customItems]);
@@ -2013,7 +2013,7 @@ const QuotePage = ({
                 
                 {/* Custom Items */}
                 {customItems.map((item, index) => {
-                  const quantity = item.quantity || 1;
+                  const quantity = typeof item.quantity === 'number' ? item.quantity : (parseInt(item.quantity) || 0);
                   const unitPrice = parseInt((item.unitPrice || '0').toString().replace(/,/g, ''), 10);
                   const subtotal = isNaN(unitPrice) ? 0 : unitPrice * quantity;
                   
