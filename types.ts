@@ -33,7 +33,7 @@ export interface Product {
   createdAt: number;
 }
 
-export type CategoryType = 'air-conditioning' | 'materials' | 'tools' | 'high-altitude';
+export type CategoryType = 'air-conditioning' | 'multi-unit' | 'materials' | 'tools' | 'high-altitude';
 
 export interface MiscItem {
   id: string;

@@ -757,7 +757,7 @@ const MiscItemForm = ({
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: { name: string; specification: string; unit: string; price: string; remarks: string }) => void;
-  category: 'air-conditioning' | 'materials' | 'tools' | 'high-altitude';
+  category: 'air-conditioning' | 'multi-unit' | 'materials' | 'tools' | 'high-altitude';
 }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -787,6 +787,7 @@ const MiscItemForm = ({
 
   const categoryLabels = {
     'air-conditioning': '空調',
+    'multi-unit': '多聯',
     'materials': '材料',
     'tools': '工具',
     'high-altitude': '高空'
@@ -1283,19 +1284,19 @@ const QuotePage = ({
   
   // Common custom items templates
   const commonItems = [
-    { name: '安裝', description: '分離式安裝工資', quantity: 1, unitPrice: '3500', price: '3500' },
-    { name: '移機', description: '拆除&安裝工資', quantity: 1, unitPrice: '4500', price: '4500' },
-    { name: '銅管、電線', description: '客廳/主/次臥銅管&線材費用共計', quantity: 1, unitPrice: '5000', price: '5000' },
-    { name: '安裝架', description: '室外機白鐵L架/豪華架/落地架', quantity: 1, unitPrice: '2000', price: '2000' },
-    { name: '洗孔', description: '牆體洗洞工程', quantity: 1, unitPrice: '1000', price: '1000' },
-    { name: '焊接', description: '焊接工程', quantity: 1, unitPrice: '1500', price: '1500' },
-    { name: '管槽', description: '防曬美化管槽(白色)', quantity: 1, unitPrice: '3000', price: '3000' },
-    { name: '危險施工', description: '高空危險施工費用', quantity: 1, unitPrice: '5000', price: '5000' },
-    { name: '管路沖洗', description: '舊管冷凍油沖洗工程', quantity: 1, unitPrice: '3000', price: '3000' },
-    { name: '清洗保養', description: '室內/外機-清洗保養服務', quantity: 1, unitPrice: '3000', price: '3000' },
-    { name: '打壁填回', description: '牆體切槽配管含水泥填回', quantity: 1, unitPrice: '2000', price: '2000' },
-    { name: '風箱、風管', description: '集風箱、減速箱、風管及出風口耗材等施工費用', quantity: 1, unitPrice: '12000', price: '2000' },
-    { name: '其他', description: '', quantity: 1, unitPrice: '0', price: '0' },
+    { name: '安裝', description: '分離式安裝工資', quantity: '', unitPrice: '3500', price: '3500' },
+    { name: '移機', description: '拆除&安裝工資', quantity: '', unitPrice: '4500', price: '4500' },
+    { name: '銅管、電線', description: '客廳/主/次臥銅管&線材費用共計', quantity: '', unitPrice: '5000', price: '5000' },
+    { name: '安裝架', description: '室外機白鐵L架/豪華架/落地架', quantity: '', unitPrice: '2000', price: '2000' },
+    { name: '洗孔', description: '牆體洗洞工程', quantity: '', unitPrice: '1000', price: '1000' },
+    { name: '焊接', description: '焊接工程', quantity: '', unitPrice: '1500', price: '1500' },
+    { name: '管槽', description: '防曬美化管槽(白色)', quantity: '', unitPrice: '3000', price: '3000' },
+    { name: '危險施工', description: '高空危險施工費用', quantity: '', unitPrice: '5000', price: '5000' },
+    { name: '管路沖洗', description: '舊管冷凍油沖洗工程', quantity: '', unitPrice: '3000', price: '3000' },
+    { name: '清洗保養', description: '室內/外機-清洗保養服務', quantity: '', unitPrice: '3000', price: '3000' },
+    { name: '打壁填回', description: '牆體切槽配管含水泥填回', quantity: '', unitPrice: '2000', price: '2000' },
+    { name: '風箱、風管', description: '集風箱、減速箱、風管及出風口耗材等施工費用', quantity: '', unitPrice: '12000', price: '2000' },
+    { name: '其他', description: '', quantity: '', unitPrice: '0', price: '0' },
   ];
 
   const handleAddCustomItem = () => {
@@ -2863,7 +2864,7 @@ export default function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   
   // Category State
-  const [activeCategory, setActiveCategory] = useState<'air-conditioning' | 'materials' | 'tools' | 'high-altitude'>('air-conditioning');
+  const [activeCategory, setActiveCategory] = useState<'air-conditioning' | 'multi-unit' | 'materials' | 'tools' | 'high-altitude'>('air-conditioning');
   const [miscItems, setMiscItems] = useState<any[]>([
     // 材料範例資料
     {
@@ -2979,7 +2980,22 @@ export default function App() {
 
   // Derived State
   const filteredProducts = useMemo(() => {
-    return products
+    let filtered = products;
+    
+    // Filter by category
+    if (activeCategory === 'multi-unit') {
+      // Show only "一對多" style products
+      const multiUnitStyleId = config.styles.find(s => s.label === '一對多')?.id;
+      filtered = filtered.filter(p => p.styleId === multiUnitStyleId);
+    } else if (activeCategory === 'air-conditioning') {
+      // Show all air conditioning products
+      filtered = filtered;
+    } else {
+      // For materials, tools, high-altitude, return empty (they use miscItems)
+      return [];
+    }
+    
+    return filtered
       .filter(p => {
         const lowerTerm = searchTerm.toLowerCase();
         // Includes remarks in search but remarks are hidden in UI
@@ -2993,7 +3009,7 @@ export default function App() {
         if (a.isPinned === b.isPinned) return b.createdAt - a.createdAt;
         return a.isPinned ? -1 : 1;
       });
-  }, [products, searchTerm, config]);
+  }, [products, searchTerm, config, activeCategory]);
 
   const compareProducts = useMemo(() => 
     products.filter(p => compareList.includes(p.id)), 
@@ -3405,6 +3421,17 @@ export default function App() {
               空調
             </button>
             <button
+              onClick={() => setActiveCategory('multi-unit')}
+              className={`flex-shrink-0 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-4 ${
+                activeCategory === 'multi-unit'
+                  ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+                  : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              <Package className="w-5 h-5 inline-block mr-2" />
+              多聯
+            </button>
+            <button
               onClick={() => setActiveCategory('materials')}
               className={`flex-shrink-0 px-4 sm:px-6 py-4 font-bold text-sm transition-all border-b-4 ${
                 activeCategory === 'materials'
@@ -3445,22 +3472,24 @@ export default function App() {
            <div>
              <h2 className={`text-3xl font-black tracking-tight mb-1 px-4 py-2 rounded-lg inline-block ${
                activeCategory === 'air-conditioning' ? 'text-slate-800 bg-transparent' : 
+               activeCategory === 'multi-unit' ? 'text-indigo-700 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200' :
                activeCategory === 'materials' ? 'text-green-700 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200' :
                activeCategory === 'tools' ? 'text-amber-700 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200' :
                'text-red-700 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200'
              }`}>
                {activeCategory === 'air-conditioning' ? '產品列表' : 
+                activeCategory === 'multi-unit' ? '🔗 多聯產品' :
                 activeCategory === 'materials' ? '📦 材料項目' :
                 activeCategory === 'tools' ? '🔧 工具項目' :
                 '⛰️ 高空項目'}
              </h2>
              <span className="text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full text-sm ml-2">
-               {activeCategory === 'air-conditioning' ? `共 ${filteredProducts.length} 筆` : `共 ${miscItems.filter(item => item.category === activeCategory).length} 筆`}
+               {activeCategory === 'air-conditioning' || activeCategory === 'multi-unit' ? `共 ${filteredProducts.length} 筆` : `共 ${miscItems.filter(item => item.category === activeCategory).length} 筆`}
              </span>
            </div>
 
-           {/* View Switcher Controls - Only show for air-conditioning */}
-           {activeCategory === 'air-conditioning' && (
+           {/* View Switcher Controls - Only show for air-conditioning and multi-unit */}
+           {(activeCategory === 'air-conditioning' || activeCategory === 'multi-unit') && (
            <div className="bg-white p-1.5 rounded-xl border border-slate-100 shadow-sm flex items-center gap-1">
              <button 
                onClick={() => setViewMode('grid')}
@@ -3488,7 +3517,7 @@ export default function App() {
         </div>
 
         {/* Content based on active category */}
-        {activeCategory === 'air-conditioning' ? (
+        {activeCategory === 'air-conditioning' || activeCategory === 'multi-unit' ? (
           // Show product cards
           <>
         {/* Product Grid / List / Compact Wrapper */}
