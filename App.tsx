@@ -1153,6 +1153,7 @@ const QuotePage = ({
     });
     
     setProductPrices(prev => ({ ...prev, ...updatedPrices }));
+    setTotalBulkAdjustment(prev => prev + (adjustAmount * products.length));
     setShowBulkPriceAdjust(false);
     setBulkAdjustAmount('');
   };
@@ -1208,6 +1209,7 @@ const QuotePage = ({
   // Bulk Price Adjustment state
   const [showBulkPriceAdjust, setShowBulkPriceAdjust] = useState(false);
   const [bulkAdjustAmount, setBulkAdjustAmount] = useState('');
+  const [totalBulkAdjustment, setTotalBulkAdjustment] = useState(0);
   
   // Pipe & Wire Calculator state
   const [showPipeWireCalc, setShowPipeWireCalc] = useState(false);
@@ -2175,7 +2177,15 @@ const QuotePage = ({
                     設備總價
                   </td>
                   <td className="p-4 text-center">
-                    <span className="font-mono font-bold text-lg text-slate-800">${airConditionerTotal.toLocaleString()}</span>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="font-mono font-bold text-lg text-slate-800">${airConditionerTotal.toLocaleString()}</span>
+                      {totalBulkAdjustment !== 0 && (
+                        <span className="export-hide inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-bold border border-amber-300 shadow-sm">
+                          <DollarSign className="w-3.5 h-3.5" />
+                          {totalBulkAdjustment > 0 ? '+' : ''}{totalBulkAdjustment.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="export-hide"></td>
                 </tr>
