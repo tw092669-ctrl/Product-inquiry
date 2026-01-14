@@ -1138,6 +1138,25 @@ const QuotePage = ({
     setProductPrices(prev => ({ ...prev, [cartItemId]: newPrice }));
   };
   
+  const handleBulkAdjustPrices = () => {
+    const adjustAmount = parseInt(bulkAdjustAmount.replace(/,/g, ''), 10);
+    if (isNaN(adjustAmount) || adjustAmount === 0) {
+      alert('請輸入有效的金額');
+      return;
+    }
+    
+    const updatedPrices: Record<string, string> = {};
+    products.forEach(p => {
+      const currentPrice = parseInt((productPrices[p.cartItemId] || p.price.toString()).replace(/,/g, ''), 10);
+      const newPrice = currentPrice + adjustAmount;
+      updatedPrices[p.cartItemId] = Math.max(0, newPrice).toString();
+    });
+    
+    setProductPrices(prev => ({ ...prev, ...updatedPrices }));
+    setShowBulkPriceAdjust(false);
+    setBulkAdjustAmount('');
+  };
+  
   const handleUpdateProductQuantity = (cartItemId: string, newQuantity: number) => {
     if (newQuantity === 0) {
       const product = products.find(p => p.cartItemId === cartItemId);
@@ -1185,6 +1204,10 @@ const QuotePage = ({
   const [calcPrevValue, setCalcPrevValue] = useState<string | null>(null);
   const [calcOperation, setCalcOperation] = useState<string | null>(null);
   const [calcNewNumber, setCalcNewNumber] = useState(true);
+  
+  // Bulk Price Adjustment state
+  const [showBulkPriceAdjust, setShowBulkPriceAdjust] = useState(false);
+  const [bulkAdjustAmount, setBulkAdjustAmount] = useState('');
   
   // Pipe & Wire Calculator state
   const [showPipeWireCalc, setShowPipeWireCalc] = useState(false);
@@ -1590,6 +1613,15 @@ const QuotePage = ({
           
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowBulkPriceAdjust(true)}
+              className="flex items-center gap-2 bg-amber-100 text-amber-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-amber-200 transition font-medium"
+              title="批量調整設備金額"
+            >
+              <DollarSign className="w-5 h-5" />
+              <span className="hidden sm:inline">批量調整</span>
+            </button>
+            
             <button
               onClick={() => setShowPipeWireCalc(!showPipeWireCalc)}
               className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-emerald-200 transition font-medium"
@@ -2224,6 +2256,87 @@ const QuotePage = ({
           </div>
         </div>
       </div>
+      
+      {/* Bulk Price Adjustment Modal */}
+      {showBulkPriceAdjust && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-amber-100 rounded-xl">
+                  <DollarSign className="w-6 h-6 text-amber-600" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800">批量調整設備金額</h3>
+              </div>
+              <button
+                onClick={() => {
+                  setShowBulkPriceAdjust(false);
+                  setBulkAdjustAmount('');
+                }}
+                className="text-slate-400 hover:text-slate-600 transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-slate-600 mb-4">
+                輸入要增加或減少的金額，將套用到所有設備項目。
+              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-blue-800 mb-1">
+                  <span className="font-semibold">提示：</span>
+                </p>
+                <p className="text-sm text-blue-700">
+                  • 正數表示增加金額（例如：+1000）<br />
+                  • 負數表示減少金額（例如：-500）
+                </p>
+              </div>
+              
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                調整金額
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={bulkAdjustAmount}
+                  onChange={(e) => setBulkAdjustAmount(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleBulkAdjustPrices();
+                    if (e.key === 'Escape') {
+                      setShowBulkPriceAdjust(false);
+                      setBulkAdjustAmount('');
+                    }
+                  }}
+                  placeholder="例如：1000 或 -500"
+                  className="w-full px-4 py-3 pl-10 border-2 border-slate-300 rounded-xl text-lg font-mono font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  autoFocus
+                />
+                <DollarSign className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowBulkPriceAdjust(false);
+                  setBulkAdjustAmount('');
+                }}
+                className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleBulkAdjustPrices}
+                className="flex-1 px-4 py-3 bg-amber-600 text-white rounded-xl font-medium hover:bg-amber-700 transition flex items-center justify-center gap-2"
+              >
+                <DollarSign className="w-5 h-5" />
+                確認調整
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Calculator Modal */}
       {showCalculator && (
