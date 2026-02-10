@@ -1098,12 +1098,14 @@ const QuotePage = ({
   products, 
   config, 
   onBack,
-  onRemoveFromCart
+  onRemoveFromCart,
+  onClearCart
 }: { 
   products: (Product & { cartItemId: string })[]; 
   config: AppConfig; 
   onBack: () => void;
   onRemoveFromCart?: (cartItemId: string) => void;
+  onClearCart?: () => void;
 }) => {
   const [customerName, setCustomerName] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
@@ -1306,6 +1308,23 @@ const QuotePage = ({
   };
   
   const [customItems, setCustomItems] = useState<CustomItem[]>([]);
+  const [hasLoadedSavedItems, setHasLoadedSavedItems] = useState(false);
+  
+  // Load saved custom items on mount
+  useEffect(() => {
+    const savedCustomItems = localStorage.getItem('savedQuoteCustomItems');
+    if (savedCustomItems) {
+      try {
+        const parsed = JSON.parse(savedCustomItems);
+        if (parsed.length > 0) {
+          setCustomItems(parsed);
+          setHasLoadedSavedItems(true);
+        }
+      } catch (e) {
+        console.error('Failed to load saved custom items:', e);
+      }
+    }
+  }, []);
   
   // Common custom items templates
   const commonItems = [
@@ -1605,7 +1624,26 @@ const QuotePage = ({
       <div className="bg-white border-b sticky top-0 z-40 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <button 
-            onClick={onBack}
+            onClick={() => {
+              // 只有當 customItems 不為空時才詢問
+              if (customItems.length > 0) {
+                const shouldSave = window.confirm(
+                  '是否要保留雜項資訊到下次使用？\n\n' +
+                  `目前有 ${customItems.length} 筆雜項資料。\n` +
+                  '• 點擊「確定」：保留這些雜項資訊，下次開啟報價單時會自動載入\n' +
+                  '• 點擊「取消」：清除雜項資訊，下次重新填寫'
+                );
+                
+                if (shouldSave) {
+                  // 保存到 localStorage
+                  localStorage.setItem('savedQuoteCustomItems', JSON.stringify(customItems));
+                } else {
+                  // 清除 localStorage
+                  localStorage.removeItem('savedQuoteCustomItems');
+                }
+              }
+              onBack();
+            }}
             className="flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium transition"
           >
             <X className="w-5 h-5" />
@@ -1615,6 +1653,25 @@ const QuotePage = ({
           
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const confirmClear = window.confirm('確定要保留雜項資訊並清空購物車嗎？\n\n購物車中的產品將被清空，但雜項（自訂項目）會保留並記憶到下次使用。');
+                if (confirmClear && onClearCart) {
+                  // 保存當前雜項到 localStorage
+                  if (customItems.length > 0) {
+                    localStorage.setItem('savedQuoteCustomItems', JSON.stringify(customItems));
+                  }
+                  onClearCart();
+                  alert('已清空購物車，雜項資訊已保留並記憶');
+                  onBack();
+                }
+              }}
+              className="flex items-center gap-2 bg-orange-100 text-orange-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-orange-200 transition font-medium"
+              title="保留雜項資訊並清空購物車"
+            >
+              <Save className="w-5 h-5" />
+              <span className="hidden sm:inline">保留</span>
+            </button>
             <button
               onClick={() => setShowBulkPriceAdjust(true)}
               className="flex items-center gap-2 bg-amber-100 text-amber-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-amber-200 transition font-medium"
@@ -1744,6 +1801,38 @@ const QuotePage = ({
               <h1 className="hidden export-show text-4xl sm:text-5xl font-black text-indigo-600 mb-4">{quoteTitle}</h1>
             </div>
           </div>
+
+          {/* Loaded Items Notice */}
+          {hasLoadedSavedItems && (
+            <div className="export-hide mb-6 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-emerald-800 mb-1">已載入上次保存的雜項資訊</h3>
+                <p className="text-sm text-emerald-700">
+                  已自動載入 {customItems.length} 筆雜項資料。您可以繼續編輯或點擊返回時選擇是否保留。
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  const confirmClear = window.confirm('確定要清除已保存的雜項資訊嗎？\n\n此操作將清空當前雜項資料並刪除記憶。');
+                  if (confirmClear) {
+                    setCustomItems([]);
+                    setHasLoadedSavedItems(false);
+                    localStorage.removeItem('savedQuoteCustomItems');
+                    alert('已清除保存的雜項資訊');
+                  }
+                }}
+                className="flex-shrink-0 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100 rounded-lg p-2 transition"
+                title="清除已保存的雜項"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
           {/* Info Section */}
           <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-4 mb-8 border border-slate-200">
@@ -3175,6 +3264,10 @@ export default function App() {
     setCartItems(prev => prev.filter(item => item.cartItemId !== cartItemId));
   };
 
+  const handleClearCart = () => {
+    setCartItems([]);
+  };
+
   const handleGenerateQuote = () => {
     if (cartItems.length === 0) {
       alert('請先將產品加入報價單');
@@ -3462,6 +3555,7 @@ export default function App() {
           config={config}
           onBack={() => setShowQuotePage(false)}
           onRemoveFromCart={handleRemoveFromCart}
+          onClearCart={handleClearCart}
         />
       ) : (
       <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans text-slate-800 pb-20">
