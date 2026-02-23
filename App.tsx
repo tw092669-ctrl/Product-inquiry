@@ -1238,8 +1238,13 @@ const QuotePage = ({
   
   const handleBulkAdjustPrices = () => {
     const adjustAmount = parseInt(bulkAdjustAmount.replace(/,/g, ''), 10);
-    if (isNaN(adjustAmount) || adjustAmount === 0) {
-      alert('請輸入有效的金額');
+    const adjustMergedMain = parseInt(bulkAdjustMergedMain.replace(/,/g, ''), 10);
+    const adjustMergedIndoor = parseInt(bulkAdjustMergedIndoor.replace(/,/g, ''), 10);
+    const hasRegularAdjust = !isNaN(adjustAmount) && adjustAmount !== 0;
+    const hasMergedAdjust = !isNaN(adjustMergedMain) || !isNaN(adjustMergedIndoor);
+
+    if (!hasRegularAdjust && !hasMergedAdjust) {
+      alert('請至少輸入一個有效的調整金額');
       return;
     }
     
@@ -1256,23 +1261,29 @@ const QuotePage = ({
       }
       
       if (mergeStatus.isMerged && mergeStatus.isMainUnit && mergeStatus.groupId) {
-        // For merged main unit: adjust all items in the group equally
+        // For merged main unit: adjust main by M1 and each indoor unit by M2
         const mergedGroup = mergedGroups[mergeStatus.groupId];
         const mainQuantity = productQuantities[p.cartItemId] || 1;
-        
-        mergedGroup.indoorUnits.forEach(id => {
+        const indoorCount = Math.max(mergedGroup.indoorUnits.length - 1, 0);
+
+        const mainUnitId = mergedGroup.indoorUnits[0];
+        const mainOriginalPrice = parseInt((products.find(prod => prod.cartItemId === mainUnitId)?.price || '0').toString().replace(/,/g, ''), 10);
+        const mainNewPrice = Math.max(0, (isNaN(mainOriginalPrice) ? 0 : mainOriginalPrice) + (isNaN(adjustMergedMain) ? 0 : adjustMergedMain));
+        updatedPrices[mainUnitId] = mainNewPrice.toString();
+
+        mergedGroup.indoorUnits.slice(1).forEach(id => {
           const originalPrice = parseInt((products.find(prod => prod.cartItemId === id)?.price || '0').toString().replace(/,/g, ''), 10);
-          const newPrice = originalPrice + adjustAmount; // Adjust unit price only
-          updatedPrices[id] = Math.max(0, newPrice).toString();
+          const newPrice = Math.max(0, (isNaN(originalPrice) ? 0 : originalPrice) + (isNaN(adjustMergedIndoor) ? 0 : adjustMergedIndoor));
+          updatedPrices[id] = newPrice.toString();
         });
-        
-        // Total adjustment for merged group = adjustAmount × number of units × main quantity
-        totalAdjustment += adjustAmount * mergedGroup.indoorUnits.length * mainQuantity;
-      } else {
+
+        const perSetAdjustment = (isNaN(adjustMergedMain) ? 0 : adjustMergedMain) + (isNaN(adjustMergedIndoor) ? 0 : adjustMergedIndoor) * indoorCount;
+        totalAdjustment += perSetAdjustment * mainQuantity;
+      } else if (hasRegularAdjust) {
         // For regular items: adjust price and consider quantity
         const originalPrice = parseInt(p.price.toString().replace(/,/g, ''), 10);
         const quantity = productQuantities[p.cartItemId] || 1;
-        const newPrice = originalPrice + adjustAmount;
+        const newPrice = (isNaN(originalPrice) ? 0 : originalPrice) + adjustAmount;
         updatedPrices[p.cartItemId] = Math.max(0, newPrice).toString();
         
         // Total adjustment for regular item = adjustAmount × quantity
@@ -1285,6 +1296,8 @@ const QuotePage = ({
     setTotalBulkAdjustment(totalAdjustment);
     setShowBulkPriceAdjust(false);
     setBulkAdjustAmount('');
+    setBulkAdjustMergedMain('');
+    setBulkAdjustMergedIndoor('');
   };
   
   const handleResetPrices = () => {
@@ -1381,6 +1394,8 @@ const QuotePage = ({
   // Bulk Price Adjustment state
   const [showBulkPriceAdjust, setShowBulkPriceAdjust] = useState(false);
   const [bulkAdjustAmount, setBulkAdjustAmount] = useState('');
+  const [bulkAdjustMergedMain, setBulkAdjustMergedMain] = useState('');
+  const [bulkAdjustMergedIndoor, setBulkAdjustMergedIndoor] = useState('');
   const [totalBulkAdjustment, setTotalBulkAdjustment] = useState(0);
   
   // Pipe & Wire Calculator state
@@ -2661,6 +2676,8 @@ const QuotePage = ({
                 onClick={() => {
                   setShowBulkPriceAdjust(false);
                   setBulkAdjustAmount('');
+                  setBulkAdjustMergedMain('');
+                  setBulkAdjustMergedIndoor('');
                 }}
                 className="text-slate-400 hover:text-slate-600 transition"
               >
@@ -2670,7 +2687,7 @@ const QuotePage = ({
             
             <div className="flex-1 overflow-y-auto p-6">
               <p className="text-slate-600 mb-4">
-                輸入要增加或減少的金額，將套用到所有設備項目。
+                輸入要增加或減少的金額，分別套用到一般項目與合併項目。
               </p>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                 <p className="text-sm text-blue-800 mb-1">
@@ -2681,30 +2698,84 @@ const QuotePage = ({
                   • 負數表示減少金額（例如：-500）<br />
                   • 每次調整都會基於<span className="font-bold">原始價格</span>重新計算<br />
                   • <span className="font-bold">一般項目：</span>調整金額 × 數量<br />
-                  • <span className="font-bold">合併項目：</span>調整每個子項目單價，總調整 = 調整金額 × 合併數 × 主機數量
+                  • <span className="font-bold">合併項目：</span>(主機 + M1) + (內機 + M2) × 內機數，再乘數量
                 </p>
               </div>
               
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                調整金額（單位金額）
-              </label>
-              <div className="relative mb-6">
-                <input
-                  type="text"
-                  value={bulkAdjustAmount}
-                  onChange={(e) => setBulkAdjustAmount(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleBulkAdjustPrices();
-                    if (e.key === 'Escape') {
-                      setShowBulkPriceAdjust(false);
-                      setBulkAdjustAmount('');
-                    }
-                  }}
-                  placeholder="例如：1000 或 -500"
-                  className="w-full px-4 py-3 pl-10 border-2 border-slate-300 rounded-xl text-lg font-mono font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                  autoFocus
-                />
-                <DollarSign className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    一般項目調整金額
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={bulkAdjustAmount}
+                      onChange={(e) => setBulkAdjustAmount(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleBulkAdjustPrices();
+                        if (e.key === 'Escape') {
+                          setShowBulkPriceAdjust(false);
+                          setBulkAdjustAmount('');
+                          setBulkAdjustMergedMain('');
+                          setBulkAdjustMergedIndoor('');
+                        }
+                      }}
+                      placeholder="例如：1000 或 -500"
+                      className="w-full px-4 py-3 pl-10 border-2 border-slate-300 rounded-xl text-lg font-mono font-bold focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      autoFocus
+                    />
+                    <DollarSign className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+
+                <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                  <div className="text-sm font-bold text-indigo-700 mb-3">合併後調整</div>
+                  <label className="block text-xs font-medium text-indigo-700 mb-1">
+                    主機 M1
+                  </label>
+                  <div className="relative mb-3">
+                    <input
+                      type="text"
+                      value={bulkAdjustMergedMain}
+                      onChange={(e) => setBulkAdjustMergedMain(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleBulkAdjustPrices();
+                        if (e.key === 'Escape') {
+                          setShowBulkPriceAdjust(false);
+                          setBulkAdjustAmount('');
+                          setBulkAdjustMergedMain('');
+                          setBulkAdjustMergedIndoor('');
+                        }
+                      }}
+                      placeholder="例如：1000 或 -500"
+                      className="w-full px-3 py-2 pl-8 border-2 border-indigo-300 rounded-lg text-base font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                    <DollarSign className="w-4 h-4 text-indigo-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  </div>
+                  <label className="block text-xs font-medium text-indigo-700 mb-1">
+                    內機 M2
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={bulkAdjustMergedIndoor}
+                      onChange={(e) => setBulkAdjustMergedIndoor(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleBulkAdjustPrices();
+                        if (e.key === 'Escape') {
+                          setShowBulkPriceAdjust(false);
+                          setBulkAdjustAmount('');
+                          setBulkAdjustMergedMain('');
+                          setBulkAdjustMergedIndoor('');
+                        }
+                      }}
+                      placeholder="例如：500 或 -200"
+                      className="w-full px-3 py-2 pl-8 border-2 border-indigo-300 rounded-lg text-base font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                    <DollarSign className="w-4 h-4 text-indigo-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
               </div>
               
               {/* Product Categories Display */}
@@ -2716,24 +2787,19 @@ const QuotePage = ({
                   
                   // Categorize products
                   const regularItems: typeof products = [];
-                  const multiMainUnits: typeof products = [];
-                  const indoorUnits: typeof products = [];
                   const mergedMainUnits: typeof products = [];
                   
                   products.forEach(p => {
                     const mergeStatus = isInMergedGroup(p.cartItemId);
                     
                     if (mergeStatus.isMerged && !mergeStatus.isMainUnit) {
-                      // Skip - will be counted with main unit
                       return;
                     }
                     
                     if (mergeStatus.isMerged && mergeStatus.isMainUnit) {
                       mergedMainUnits.push(p);
-                    } else if (p.styleId === multiUnitStyleId && p.environment !== 'indoor-unit') {
-                      multiMainUnits.push(p);
                     } else if (p.styleId === multiUnitStyleId && p.environment === 'indoor-unit') {
-                      indoorUnits.push(p);
+                      return;
                     } else {
                       regularItems.push(p);
                     }
@@ -2754,7 +2820,7 @@ const QuotePage = ({
                             </span>
                           </div>
                           <div className="space-y-2 max-h-32 overflow-y-auto">
-                            {regularItems.map((item, idx) => {
+                            {regularItems.map((item) => {
                               const qty = productQuantities[item.cartItemId] || 1;
                               return (
                                 <div key={item.cartItemId} className="flex items-center justify-between text-xs bg-white p-2 rounded border border-slate-100">
@@ -2767,13 +2833,13 @@ const QuotePage = ({
                         </div>
                       )}
                       
-                      {/* 2. Multi-unit Main Units (Merged) */}
+                      {/* 2. Merged Items */}
                       {mergedMainUnits.length > 0 && (
                         <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-200">
                           <div className="flex items-center justify-between mb-3">
                             <h5 className="text-sm font-bold text-indigo-700 flex items-center gap-2">
                               <ArrowRightLeft className="w-4 h-4 text-indigo-500" />
-                              一對多主機（已合併）
+                              合併後
                             </h5>
                             <span className="text-xs font-bold text-indigo-600 bg-indigo-200 px-2 py-1 rounded">
                               {mergedMainUnits.length} 組
@@ -2801,58 +2867,6 @@ const QuotePage = ({
                           </div>
                         </div>
                       )}
-                      
-                      {/* 3. Multi-unit Main Units (Not Merged) */}
-                      {multiMainUnits.length > 0 && (
-                        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                          <div className="flex items-center justify-between mb-3">
-                            <h5 className="text-sm font-bold text-blue-700 flex items-center gap-2">
-                              <Package className="w-4 h-4 text-blue-500" />
-                              一對多主機
-                            </h5>
-                            <span className="text-xs font-bold text-blue-600 bg-blue-200 px-2 py-1 rounded">
-                              {multiMainUnits.length} 項
-                            </span>
-                          </div>
-                          <div className="space-y-2 max-h-32 overflow-y-auto">
-                            {multiMainUnits.map((item) => {
-                              const qty = productQuantities[item.cartItemId] || 1;
-                              return (
-                                <div key={item.cartItemId} className="flex items-center justify-between text-xs bg-white p-2 rounded border border-blue-100">
-                                  <span className="text-blue-700 truncate flex-1">{item.name}</span>
-                                  <span className="text-blue-600 ml-2">× {qty}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* 4. Indoor Units */}
-                      {indoorUnits.length > 0 && (
-                        <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-                          <div className="flex items-center justify-between mb-3">
-                            <h5 className="text-sm font-bold text-green-700 flex items-center gap-2">
-                              <Package className="w-4 h-4 text-green-500" />
-                              內機
-                            </h5>
-                            <span className="text-xs font-bold text-green-600 bg-green-200 px-2 py-1 rounded">
-                              {indoorUnits.length} 項
-                            </span>
-                          </div>
-                          <div className="space-y-2 max-h-32 overflow-y-auto">
-                            {indoorUnits.map((item) => {
-                              const qty = productQuantities[item.cartItemId] || 1;
-                              return (
-                                <div key={item.cartItemId} className="flex items-center justify-between text-xs bg-white p-2 rounded border border-green-100">
-                                  <span className="text-green-700 truncate flex-1">{item.name}</span>
-                                  <span className="text-green-600 ml-2">× {qty}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
                     </>
                   );
                 })()}
@@ -2865,6 +2879,8 @@ const QuotePage = ({
                   onClick={() => {
                     setShowBulkPriceAdjust(false);
                     setBulkAdjustAmount('');
+                    setBulkAdjustMergedMain('');
+                    setBulkAdjustMergedIndoor('');
                   }}
                   className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition"
                 >
@@ -2883,6 +2899,8 @@ const QuotePage = ({
                   handleResetPrices();
                   setShowBulkPriceAdjust(false);
                   setBulkAdjustAmount('');
+                  setBulkAdjustMergedMain('');
+                  setBulkAdjustMergedIndoor('');
                 }}
                 className="w-full px-4 py-3 bg-slate-600 text-white rounded-xl font-medium hover:bg-slate-700 transition flex items-center justify-center gap-2"
               >
