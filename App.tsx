@@ -3044,24 +3044,6 @@ const QuotePage = ({
           </div>
         </div>
       )}
-
-      {/* Google Sheets Sync Toasts */}
-      {syncToasts.length > 0 && (
-        <div className="fixed right-6 bottom-6 z-[9999] flex flex-col items-end gap-2">
-          {syncToasts.map(toast => (
-            <div
-              key={toast.id}
-              className={`max-w-xs px-4 py-3 rounded-xl shadow-lg border text-sm font-medium bg-white text-slate-700 transition-all duration-300 ${
-                toast.leaving
-                  ? 'opacity-0 translate-y-4'
-                  : 'opacity-100 -translate-y-0'
-              }`}
-            >
-              {toast.text}
-            </div>
-          ))}
-        </div>
-      )}
       
       {/* Calculator Modal */}
       {showCalculator && (
@@ -4682,6 +4664,24 @@ export default function App() {
         products={compareProducts}
         config={config}
       />
+
+      {/* Google Sheets Sync Toasts */}
+      {syncToasts.length > 0 && (
+        <div className="fixed right-6 bottom-6 z-[9999] flex flex-col items-end gap-2">
+          {syncToasts.map(toast => (
+            <div
+              key={toast.id}
+              className={`max-w-xs px-4 py-3 rounded-xl shadow-lg border text-sm font-medium bg-white text-slate-700 transition-all duration-300 ${
+                toast.leaving
+                  ? 'opacity-0 translate-y-4'
+                  : 'opacity-100 -translate-y-0'
+              }`}
+            >
+              {toast.text}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Version Update Notification */}
       {showUpdateNotification && (
