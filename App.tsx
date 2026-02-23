@@ -2245,9 +2245,12 @@ const QuotePage = ({
                       <td className="p-3 text-center align-middle">
                         <div className="font-medium text-slate-800 text-sm leading-tight">
                           {mergedGroup ? (
-                            // Display merged units: main unit + indoor units
+                            // Display merged units: show individual product names
                             <div className="whitespace-pre-line">
-                              {"一對多\n" + mergedGroup.indoorUnits.slice(1).map(() => "內機").join("\n")}
+                              {mergedGroup.indoorUnits.map(id => {
+                                const p = products.find(prod => prod.cartItemId === id);
+                                return p?.name || '';
+                              }).join('\n')}
                             </div>
                           ) : (
                             product.name.split('/').map((part, i, arr) => (
