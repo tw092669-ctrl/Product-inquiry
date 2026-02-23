@@ -3783,7 +3783,9 @@ export default function App() {
   const [googleSheetUrl, setGoogleSheetUrl] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [autoSync, setAutoSync] = useState(false);
-  const [syncToasts, setSyncToasts] = useState<Array<{ id: string; text: string; leaving: boolean }>>([]);
+  const [syncToastLines, setSyncToastLines] = useState<string[]>([]);
+  const [showSyncToast, setShowSyncToast] = useState(false);
+  const [syncToastLeaving, setSyncToastLeaving] = useState(false);
   const [showQuotePage, setShowQuotePage] = useState(false);
   const [maxDisplayCards, setMaxDisplayCards] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
@@ -3969,21 +3971,28 @@ export default function App() {
 
   const pushSyncToast = (text: string) => {
     const id = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    setSyncToasts(prev => [...prev, { id, text, leaving: false }]);
-
-    setTimeout(() => {
-      setSyncToasts(prev => prev.map(t => (t.id === id ? { ...t, leaving: true } : t)));
-    }, 3500);
-
-    setTimeout(() => {
-      setSyncToasts(prev => prev.filter(t => t.id !== id));
-    }, 3900);
+    setSyncToastLines(prev => [...prev, text]);
   };
 
   const showSyncSuccessToasts = (lines: string[]) => {
+    setShowSyncToast(true);
+    setSyncToastLeaving(false);
+    setSyncToastLines([]);
+    
     lines.forEach((line, index) => {
-      setTimeout(() => pushSyncToast(line), index * 700);
+      setTimeout(() => {
+        setSyncToastLines(prev => [...prev, line]);
+      }, index * 1000);
     });
+
+    setTimeout(() => {
+      setSyncToastLeaving(true);
+    }, lines.length * 1000 + 2500);
+
+    setTimeout(() => {
+      setShowSyncToast(false);
+      setSyncToastLines([]);
+    }, lines.length * 1000 + 3000);
   };
 
   const handleDeleteMiscItem = (id: string) => {
@@ -4665,21 +4674,20 @@ export default function App() {
         config={config}
       />
 
-      {/* Google Sheets Sync Toasts */}
-      {syncToasts.length > 0 && (
-        <div className="fixed right-6 bottom-6 z-[9999] flex flex-col items-end gap-2">
-          {syncToasts.map(toast => (
-            <div
-              key={toast.id}
-              className={`max-w-xs px-4 py-3 rounded-xl shadow-lg border text-sm font-medium bg-white text-slate-700 transition-all duration-300 ${
-                toast.leaving
-                  ? 'opacity-0 translate-y-4'
-                  : 'opacity-100 -translate-y-0'
-              }`}
-            >
-              {toast.text}
-            </div>
-          ))}
+      {/* Google Sheets Sync Toast (Single Box) */}
+      {showSyncToast && (
+        <div className={`fixed left-6 bottom-6 z-[9999] max-w-xs px-4 py-3 rounded-xl shadow-lg border text-sm font-medium bg-white text-slate-700 transition-all duration-300 ${
+          syncToastLeaving
+            ? 'opacity-0 translate-y-4'
+            : 'opacity-100 -translate-y-0'
+        }`}>
+          <div className="space-y-1">
+            {syncToastLines.map((line, idx) => (
+              <div key={idx} className="animate-in fade-in duration-300">
+                {line}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
