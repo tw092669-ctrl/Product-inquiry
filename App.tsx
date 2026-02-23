@@ -3044,6 +3044,24 @@ const QuotePage = ({
           </div>
         </div>
       )}
+
+      {/* Google Sheets Sync Toasts */}
+      {syncToasts.length > 0 && (
+        <div className="fixed right-6 bottom-6 z-[9999] flex flex-col items-end gap-2">
+          {syncToasts.map(toast => (
+            <div
+              key={toast.id}
+              className={`max-w-xs px-4 py-3 rounded-xl shadow-lg border text-sm font-medium bg-white text-slate-700 transition-all duration-300 ${
+                toast.leaving
+                  ? 'opacity-0 translate-y-4'
+                  : 'opacity-100 -translate-y-0'
+              }`}
+            >
+              {toast.text}
+            </div>
+          ))}
+        </div>
+      )}
       
       {/* Calculator Modal */}
       {showCalculator && (
@@ -3783,6 +3801,7 @@ export default function App() {
   const [googleSheetUrl, setGoogleSheetUrl] = useState('');
   const [isSyncing, setIsSyncing] = useState(false);
   const [autoSync, setAutoSync] = useState(false);
+  const [syncToasts, setSyncToasts] = useState<Array<{ id: string; text: string; leaving: boolean }>>([]);
   const [showQuotePage, setShowQuotePage] = useState(false);
   const [maxDisplayCards, setMaxDisplayCards] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
@@ -3966,6 +3985,25 @@ export default function App() {
     setMiscItems(prev => [...prev, newItem]);
   };
 
+  const pushSyncToast = (text: string) => {
+    const id = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    setSyncToasts(prev => [...prev, { id, text, leaving: false }]);
+
+    setTimeout(() => {
+      setSyncToasts(prev => prev.map(t => (t.id === id ? { ...t, leaving: true } : t)));
+    }, 3500);
+
+    setTimeout(() => {
+      setSyncToasts(prev => prev.filter(t => t.id !== id));
+    }, 3900);
+  };
+
+  const showSyncSuccessToasts = (lines: string[]) => {
+    lines.forEach((line, index) => {
+      setTimeout(() => pushSyncToast(line), index * 700);
+    });
+  };
+
   const handleDeleteMiscItem = (id: string) => {
     if (confirm('確定要刪除此項目嗎？')) {
       setMiscItems(prev => prev.filter(item => item.id !== id));
@@ -4084,12 +4122,12 @@ export default function App() {
       setProducts(newProducts);
       setMiscItems(newMiscItems);
       
-      let message = `成功從 Google 試算表同步資料：\n`;
-      message += `- 空調產品：${newProducts.length} 筆\n`;
-      message += `- 雜項項目：${newMiscItems.length} 筆\n`;
-      message += `(已清除舊有資料)`;
-      
-      alert(message);
+      showSyncSuccessToasts([
+        '已偵測到新的試算表項目，為您更新...',
+        `空調產品：${newProducts.length} 筆`,
+        `雜項項目：${newMiscItems.length} 筆`,
+        '已清除舊有資料'
+      ]);
       // 保存使用的 URL（可能是參數傳入的或狀態中的）
       localStorage.setItem('googleSheetUrl', urlToUse);
     } catch (err) {
@@ -4650,14 +4688,14 @@ export default function App() {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-300">
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-500 to-violet-600 p-6 text-white">
+            <div className="bg-gradient-to-r from-slate-900 to-slate-700 p-6 text-white">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
                   <Zap className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold">系統更新通知</h3>
-                  <p className="text-sm text-indigo-100 mt-1">檢測到新版本</p>
+                  <p className="text-sm text-slate-300 mt-1">檢測到新版本</p>
                 </div>
               </div>
             </div>
@@ -4702,7 +4740,7 @@ export default function App() {
                 </button>
                 <button
                   onClick={handleUpdateConfirm}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-xl hover:from-indigo-600 hover:to-violet-700 transition font-bold shadow-lg shadow-indigo-500/30"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-slate-900 to-slate-700 text-white rounded-xl hover:from-slate-800 hover:to-slate-600 transition font-bold shadow-lg shadow-slate-900/30"
                 >
                   立即更新
                 </button>
