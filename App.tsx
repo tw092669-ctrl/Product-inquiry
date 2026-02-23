@@ -1164,15 +1164,17 @@ const QuotePage = ({
     const mergeItems: string[] = [startProduct.cartItemId]; // Start with main unit
     let currentIndex = startIndex + 1;
     
-    // Find following indoor units
+    // Find following indoor units (skip unrelated items, stop at next multi-unit main unit)
     while (currentIndex < products.length) {
       const product = products[currentIndex];
-      if (product.styleId === multiUnitStyleId && product.environment === 'indoor-unit') {
-        mergeItems.push(product.cartItemId);
-        currentIndex++;
-      } else {
+      const isNextMainUnit = product.styleId === multiUnitStyleId && ['heating', 'cooling', 'both'].includes(product.environment);
+      if (isNextMainUnit) {
         break;
       }
+      if (product.styleId === multiUnitStyleId && product.environment === 'indoor-unit') {
+        mergeItems.push(product.cartItemId);
+      }
+      currentIndex++;
     }
     
     if (mergeItems.length >= 2) { // At least main unit + 1 indoor unit
@@ -1353,15 +1355,17 @@ const QuotePage = ({
     const units: (Product & { cartItemId: string })[] = [startProduct]; // Start with main unit
     let currentIndex = mergeStartIndex + 1;
     
-    // Find following indoor units
+    // Find following indoor units (skip unrelated items, stop at next multi-unit main unit)
     while (currentIndex < products.length) {
       const product = products[currentIndex];
-      if (product.styleId === multiUnitStyleId && product.environment === 'indoor-unit') {
-        units.push(product);
-        currentIndex++;
-      } else {
+      const isNextMainUnit = product.styleId === multiUnitStyleId && ['heating', 'cooling', 'both'].includes(product.environment);
+      if (isNextMainUnit) {
         break;
       }
+      if (product.styleId === multiUnitStyleId && product.environment === 'indoor-unit') {
+        units.push(product);
+      }
+      currentIndex++;
     }
     
     return units;
@@ -2205,10 +2209,20 @@ const QuotePage = ({
                   // Check if this is a multi-unit main unit that can be merged with indoor units
                   const multiUnitStyleId = config.styles.find(s => s.label === '一對多')?.id;
                   const isMultiUnitMain = product.styleId === multiUnitStyleId && ['heating', 'cooling', 'both'].includes(product.environment);
-                  const canMerge = isMultiUnitMain && !mergeStatus.isMerged && 
-                    index < products.length - 1 && 
-                    products[index + 1]?.styleId === multiUnitStyleId && 
-                    products[index + 1]?.environment === 'indoor-unit';
+                  const hasMergeableIndoorUnits = (() => {
+                    for (let i = index + 1; i < products.length; i++) {
+                      const nextProduct = products[i];
+                      const isNextMainUnit = nextProduct.styleId === multiUnitStyleId && ['heating', 'cooling', 'both'].includes(nextProduct.environment);
+                      if (isNextMainUnit) {
+                        break;
+                      }
+                      if (nextProduct.styleId === multiUnitStyleId && nextProduct.environment === 'indoor-unit') {
+                        return true;
+                      }
+                    }
+                    return false;
+                  })();
+                  const canMerge = isMultiUnitMain && !mergeStatus.isMerged && hasMergeableIndoorUnits;
                   
                   return (
                     <tr key={product.cartItemId} className="group border-b border-slate-200 hover:bg-slate-50">
