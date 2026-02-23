@@ -4114,10 +4114,10 @@ export default function App() {
       setMiscItems(newMiscItems);
       
       showSyncSuccessToasts([
-        '已偵測到新的試算表項目，為您更新...',
-        `空調產品：${newProducts.length} 筆`,
-        `雜項項目：${newMiscItems.length} 筆`,
-        '已清除舊有資料'
+        '偵測到試算表雲端項目',
+        '已為您自動匯入系統',
+        `導入資料共${newProducts.length + newMiscItems.length}筆`,
+        '祝您使用愉快'
       ]);
       // 保存使用的 URL（可能是參數傳入的或狀態中的）
       localStorage.setItem('googleSheetUrl', urlToUse);
