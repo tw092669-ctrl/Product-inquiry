@@ -3981,18 +3981,22 @@ export default function App() {
     
     lines.forEach((line, index) => {
       setTimeout(() => {
-        setSyncToastLines(prev => [...prev, line]);
-      }, index * 1000);
+        setSyncToastLines(prev => {
+          const updated = [...prev, line];
+          // 只保留最後2行
+          return updated.slice(-2);
+        });
+      }, index * 2000);
     });
 
     setTimeout(() => {
       setSyncToastLeaving(true);
-    }, lines.length * 1000 + 2500);
+    }, lines.length * 2000 + 2500);
 
     setTimeout(() => {
       setShowSyncToast(false);
       setSyncToastLines([]);
-    }, lines.length * 1000 + 3000);
+    }, lines.length * 2000 + 3000);
   };
 
   const handleDeleteMiscItem = (id: string) => {
@@ -4676,12 +4680,12 @@ export default function App() {
 
       {/* Google Sheets Sync Toast (Single Box) */}
       {showSyncToast && (
-        <div className={`fixed left-6 bottom-6 z-[9999] max-w-xs px-4 py-3 rounded-xl shadow-lg border text-sm font-medium bg-white text-slate-700 transition-all duration-300 ${
+        <div className={`fixed left-6 bottom-6 z-[9999] max-w-xs px-6 py-4 rounded-xl shadow-lg border text-sm font-medium bg-white text-slate-700 transition-all duration-300 text-center ${
           syncToastLeaving
             ? 'opacity-0 translate-y-4'
             : 'opacity-100 -translate-y-0'
         }`}>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {syncToastLines.map((line, idx) => (
               <div key={idx} className="animate-in fade-in duration-300">
                 {line}
