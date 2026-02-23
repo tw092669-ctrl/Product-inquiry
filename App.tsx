@@ -3788,7 +3788,10 @@ export default function App() {
   useEffect(() => {
     const checkVersion = async () => {
       try {
-        const response = await fetch('/version.json?' + Date.now()); // 添加時間戳防止緩存
+        const baseUrl = import.meta.env.BASE_URL || '/';
+        const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+        const versionUrl = `${normalizedBaseUrl}version.json`;
+        const response = await fetch(`${versionUrl}?${Date.now()}`); // 添加時間戳防止緩存
         if (response.ok) {
           const versionData = await response.json();
           const currentVersion = versionData.version;
