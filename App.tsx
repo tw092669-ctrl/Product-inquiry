@@ -1154,9 +1154,9 @@ const QuotePage = ({
     const multiUnitStyleId = config.styles.find(s => s.label === '一對多')?.id;
     if (!multiUnitStyleId) return;
     
-    // Check if starting product is a multi-unit system (not indoor-unit)
+    // Check if starting product is a multi-unit main unit (heating/cooling/both)
     const startProduct = products[startIndex];
-    if (startProduct.styleId !== multiUnitStyleId || startProduct.environment === 'indoor-unit') {
+    if (startProduct.styleId !== multiUnitStyleId || !['heating', 'cooling', 'both'].includes(startProduct.environment)) {
       return; // Must start from a multi-unit main unit
     }
     
@@ -1346,7 +1346,7 @@ const QuotePage = ({
     if (!multiUnitStyleId) return [];
     
     const startProduct = products[mergeStartIndex];
-    if (!startProduct || startProduct.styleId !== multiUnitStyleId || startProduct.environment === 'indoor-unit') {
+    if (!startProduct || startProduct.styleId !== multiUnitStyleId || !['heating', 'cooling', 'both'].includes(startProduct.environment)) {
       return [];
     }
     
@@ -2204,7 +2204,7 @@ const QuotePage = ({
                   
                   // Check if this is a multi-unit main unit that can be merged with indoor units
                   const multiUnitStyleId = config.styles.find(s => s.label === '一對多')?.id;
-                  const isMultiUnitMain = product.styleId === multiUnitStyleId && product.environment !== 'indoor-unit';
+                  const isMultiUnitMain = product.styleId === multiUnitStyleId && ['heating', 'cooling', 'both'].includes(product.environment);
                   const canMerge = isMultiUnitMain && !mergeStatus.isMerged && 
                     index < products.length - 1 && 
                     products[index + 1]?.styleId === multiUnitStyleId && 
