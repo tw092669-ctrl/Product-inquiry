@@ -1148,16 +1148,38 @@ const QuotePage = ({
     }
     
     const updatedPrices: Record<string, string> = {};
+    let totalAdjustment = 0;
+    
     products.forEach(p => {
-      const currentPrice = parseInt((productPrices[p.cartItemId] || p.price.toString()).replace(/,/g, ''), 10);
-      const newPrice = currentPrice + adjustAmount;
+      // 每次都從原始價格開始計算，並考慮數量
+      const originalPrice = parseInt(p.price.toString().replace(/,/g, ''), 10);
+      const quantity = productQuantities[p.cartItemId] || 1;
+      // 調整金額需要乘以數量
+      const priceAdjustment = adjustAmount * quantity;
+      const newPrice = originalPrice + priceAdjustment;
       updatedPrices[p.cartItemId] = Math.max(0, newPrice).toString();
+      
+      // 累計總調整金額（用於顯示標籤）
+      totalAdjustment += priceAdjustment;
     });
     
     setProductPrices(prev => ({ ...prev, ...updatedPrices }));
-    setTotalBulkAdjustment(prev => prev + (adjustAmount * products.length));
+    // 設定總調整量
+    setTotalBulkAdjustment(totalAdjustment);
     setShowBulkPriceAdjust(false);
     setBulkAdjustAmount('');
+  };
+  
+  const handleResetPrices = () => {
+    if (window.confirm('確定要將所有設備價格重置為原始價格嗎？')) {
+      const resetPrices: Record<string, string> = {};
+      products.forEach(p => {
+        resetPrices[p.cartItemId] = p.price.toString();
+      });
+      setProductPrices(resetPrices);
+      setTotalBulkAdjustment(0);
+      alert('已重置所有設備價格');
+    }
   };
   
   const handleUpdateProductQuantity = (cartItemId: string, newQuantity: number) => {
@@ -1395,9 +1417,9 @@ const QuotePage = ({
   // 分別計算冷氣價格和雜項價格
   const airConditionerTotal = useMemo(() => {
     return products.reduce((sum, p) => {
-      const adjustedPrice = productPrices[p.id] || p.price.toString();
+      const adjustedPrice = productPrices[p.cartItemId] || p.price.toString();
       const price = parseInt(adjustedPrice.replace(/,/g, ''), 10);
-      const quantity = productQuantities[p.id] || 1;
+      const quantity = productQuantities[p.cartItemId] || 1;
       return sum + (isNaN(price) ? 0 : price * quantity);
     }, 0);
   }, [products, productPrices, productQuantities]);
@@ -2388,12 +2410,14 @@ const QuotePage = ({
                 </p>
                 <p className="text-sm text-blue-700">
                   • 正數表示增加金額（例如：+1000）<br />
-                  • 負數表示減少金額（例如：-500）
+                  • 負數表示減少金額（例如：-500）<br />
+                  • 每次調整都會基於<span className="font-bold">原始價格</span>重新計算<br />
+                  • 調整金額會<span className="font-bold">乘以數量</span>（數量2則調整×2）
                 </p>
               </div>
               
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                調整金額
+                調整金額（單位金額）
               </label>
               <div className="relative">
                 <input
@@ -2415,22 +2439,35 @@ const QuotePage = ({
               </div>
             </div>
             
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowBulkPriceAdjust(false);
+                    setBulkAdjustAmount('');
+                  }}
+                  className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleBulkAdjustPrices}
+                  className="flex-1 px-4 py-3 bg-amber-600 text-white rounded-xl font-medium hover:bg-amber-700 transition flex items-center justify-center gap-2"
+                >
+                  <DollarSign className="w-5 h-5" />
+                  確認調整
+                </button>
+              </div>
               <button
                 onClick={() => {
+                  handleResetPrices();
                   setShowBulkPriceAdjust(false);
                   setBulkAdjustAmount('');
                 }}
-                className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition"
+                className="w-full px-4 py-3 bg-slate-600 text-white rounded-xl font-medium hover:bg-slate-700 transition flex items-center justify-center gap-2"
               >
-                取消
-              </button>
-              <button
-                onClick={handleBulkAdjustPrices}
-                className="flex-1 px-4 py-3 bg-amber-600 text-white rounded-xl font-medium hover:bg-amber-700 transition flex items-center justify-center gap-2"
-              >
-                <DollarSign className="w-5 h-5" />
-                確認調整
+                <ArrowRightLeft className="w-5 h-5" />
+                重置所有價格
               </button>
             </div>
           </div>
