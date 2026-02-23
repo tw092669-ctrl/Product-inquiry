@@ -1136,9 +1136,103 @@ const QuotePage = ({
   const [editingQuantityId, setEditingQuantityId] = useState<string | null>(null);
   const [tempQuantityInput, setTempQuantityInput] = useState<string>('');
   
+  // Merged indoor units state
+  // Structure: { [groupId]: { mainUnitId: string, indoorUnits: string[] } }
+  const [mergedGroups, setMergedGroups] = useState<Record<string, { mainUnitId: string, indoorUnits: string[] }>>({});
+  
+  // Merge selection modal state
+  const [showMergeModal, setShowMergeModal] = useState(false);
+  const [mergeStartIndex, setMergeStartIndex] = useState<number>(-1);
+  const [selectedIndoorUnits, setSelectedIndoorUnits] = useState<string[]>([]);
+  
   const handleUpdateProductPrice = (cartItemId: string, newPrice: string) => {
     setProductPrices(prev => ({ ...prev, [cartItemId]: newPrice }));
   };
+  
+  // Open merge selection modal
+  const handleOpenMergeModal = (startIndex: number) => {
+    const multiUnitStyleId = config.styles.find(s => s.label === '一對多')?.id;
+    if (!multiUnitStyleId) return;
+    
+    // Check if starting product is a multi-unit system (not indoor-unit)
+    const startProduct = products[startIndex];
+    if (startProduct.styleId !== multiUnitStyleId || startProduct.environment === 'indoor-unit') {
+      return; // Must start from a multi-unit main unit
+    }
+    
+    // Find the main unit and consecutive indoor units
+    const mergeItems: string[] = [startProduct.cartItemId]; // Start with main unit
+    let currentIndex = startIndex + 1;
+    
+    // Find following indoor units
+    while (currentIndex < products.length) {
+      const product = products[currentIndex];
+      if (product.styleId === multiUnitStyleId && product.environment === 'indoor-unit') {
+        mergeItems.push(product.cartItemId);
+        currentIndex++;
+      } else {
+        break;
+      }
+    }
+    
+    if (mergeItems.length >= 2) { // At least main unit + 1 indoor unit
+      setMergeStartIndex(startIndex);
+      setSelectedIndoorUnits(mergeItems); // Pre-select all by default
+      setShowMergeModal(true);
+    }
+  };
+  
+  // Confirm merge with selected units (main unit + indoor units)
+  const handleConfirmMerge = () => {
+    if (selectedIndoorUnits.length >= 2) { // At least main unit + 1 indoor unit
+      const groupId = `merged_${Date.now()}`;
+      setMergedGroups(prev => ({
+        ...prev,
+        [groupId]: {
+          mainUnitId: selectedIndoorUnits[0], // First item is the main unit
+          indoorUnits: selectedIndoorUnits // All selected items including main
+        }
+      }));
+    }
+    setShowMergeModal(false);
+    setSelectedIndoorUnits([]);
+    setMergeStartIndex(-1);
+  };
+  
+  // Toggle indoor unit selection
+  const handleToggleIndoorUnit = (cartItemId: string) => {
+    setSelectedIndoorUnits(prev => {
+      if (prev.includes(cartItemId)) {
+        return prev.filter(id => id !== cartItemId);
+      } else {
+        return [...prev, cartItemId];
+      }
+    });
+  };
+  
+  // Unmerge indoor units
+  const handleUnmergeIndoorUnits = (groupId: string) => {
+    setMergedGroups(prev => {
+      const updated = { ...prev };
+      delete updated[groupId];
+      return updated;
+    });
+  };
+  
+  // Check if a product is in a merged group (but not the main unit)
+  const isInMergedGroup = (cartItemId: string): { isMerged: boolean; groupId?: string; isMainUnit?: boolean } => {
+    for (const [groupId, group] of Object.entries(mergedGroups)) {
+      if (group.indoorUnits.includes(cartItemId)) {
+        return {
+          isMerged: true,
+          groupId: groupId,
+          isMainUnit: group.mainUnitId === cartItemId
+        };
+      }
+    }
+    return { isMerged: false };
+  };
+
   
   const handleBulkAdjustPrices = () => {
     const adjustAmount = parseInt(bulkAdjustAmount.replace(/,/g, ''), 10);
@@ -1151,16 +1245,37 @@ const QuotePage = ({
     let totalAdjustment = 0;
     
     products.forEach(p => {
-      // 每次都從原始價格開始計算，並考慮數量
-      const originalPrice = parseInt(p.price.toString().replace(/,/g, ''), 10);
-      const quantity = productQuantities[p.cartItemId] || 1;
-      // 調整金額需要乘以數量
-      const priceAdjustment = adjustAmount * quantity;
-      const newPrice = originalPrice + priceAdjustment;
-      updatedPrices[p.cartItemId] = Math.max(0, newPrice).toString();
+      // Check if this product is in a merged group
+      const mergeStatus = isInMergedGroup(p.cartItemId);
       
-      // 累計總調整金額（用於顯示標籤）
-      totalAdjustment += priceAdjustment;
+      if (mergeStatus.isMerged && !mergeStatus.isMainUnit) {
+        // Skip merged items that are not the main unit (they'll be adjusted with the main unit)
+        return;
+      }
+      
+      if (mergeStatus.isMerged && mergeStatus.isMainUnit && mergeStatus.groupId) {
+        // For merged main unit: adjust all items in the group equally
+        const mergedGroup = mergedGroups[mergeStatus.groupId];
+        const mainQuantity = productQuantities[p.cartItemId] || 1;
+        
+        mergedGroup.indoorUnits.forEach(id => {
+          const originalPrice = parseInt((products.find(prod => prod.cartItemId === id)?.price || '0').toString().replace(/,/g, ''), 10);
+          const newPrice = originalPrice + adjustAmount; // Adjust unit price only
+          updatedPrices[id] = Math.max(0, newPrice).toString();
+        });
+        
+        // Total adjustment for merged group = adjustAmount × number of units × main quantity
+        totalAdjustment += adjustAmount * mergedGroup.indoorUnits.length * mainQuantity;
+      } else {
+        // For regular items: adjust price and consider quantity
+        const originalPrice = parseInt(p.price.toString().replace(/,/g, ''), 10);
+        const quantity = productQuantities[p.cartItemId] || 1;
+        const newPrice = originalPrice + adjustAmount;
+        updatedPrices[p.cartItemId] = Math.max(0, newPrice).toString();
+        
+        // Total adjustment for regular item = adjustAmount × quantity
+        totalAdjustment += adjustAmount * quantity;
+      }
     });
     
     setProductPrices(prev => ({ ...prev, ...updatedPrices }));
@@ -1222,6 +1337,35 @@ const QuotePage = ({
   const handleRemoveImage = (index: number) => {
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
   };
+  
+  // Calculate available units for merge modal (main unit + indoor units)
+  const availableMergeUnits = useMemo(() => {
+    if (mergeStartIndex < 0) return [];
+    
+    const multiUnitStyleId = config.styles.find(s => s.label === '一對多')?.id;
+    if (!multiUnitStyleId) return [];
+    
+    const startProduct = products[mergeStartIndex];
+    if (!startProduct || startProduct.styleId !== multiUnitStyleId || startProduct.environment === 'indoor-unit') {
+      return [];
+    }
+    
+    const units: (Product & { cartItemId: string })[] = [startProduct]; // Start with main unit
+    let currentIndex = mergeStartIndex + 1;
+    
+    // Find following indoor units
+    while (currentIndex < products.length) {
+      const product = products[currentIndex];
+      if (product.styleId === multiUnitStyleId && product.environment === 'indoor-unit') {
+        units.push(product);
+        currentIndex++;
+      } else {
+        break;
+      }
+    }
+    
+    return units;
+  }, [mergeStartIndex, products, config]);
   
   // Calculator state
   const [showCalculator, setShowCalculator] = useState(false);
@@ -1417,12 +1561,37 @@ const QuotePage = ({
   // 分別計算冷氣價格和雜項價格
   const airConditionerTotal = useMemo(() => {
     return products.reduce((sum, p) => {
-      const adjustedPrice = productPrices[p.cartItemId] || p.price.toString();
-      const price = parseInt(adjustedPrice.replace(/,/g, ''), 10);
-      const quantity = productQuantities[p.cartItemId] || 1;
-      return sum + (isNaN(price) ? 0 : price * quantity);
+      // Skip merged items that are not the main unit
+      const mergeStatus = isInMergedGroup(p.cartItemId);
+      if (mergeStatus.isMerged && !mergeStatus.isMainUnit) {
+        return sum; // Skip this item as it's already counted in the main unit
+      }
+      
+      // Check if this is a main unit with merged items
+      const mergedGroup = mergeStatus.isMainUnit && mergeStatus.groupId 
+        ? mergedGroups[mergeStatus.groupId] 
+        : null;
+      
+      if (mergedGroup) {
+        // For merged items: (sum of all unit prices) × main unit quantity
+        const mainUnitId = mergedGroup.indoorUnits[0];
+        const mainQuantity = productQuantities[mainUnitId] || 1;
+        
+        const totalUnitPrice = mergedGroup.indoorUnits.reduce((priceSum, id) => {
+          const price = parseInt((productPrices[id] || products.find(prod => prod.cartItemId === id)?.price || '0').toString().replace(/,/g, ''), 10);
+          return priceSum + (isNaN(price) ? 0 : price);
+        }, 0);
+        
+        return sum + (totalUnitPrice * mainQuantity);
+      } else {
+        // For regular items: price × quantity
+        const adjustedPrice = productPrices[p.cartItemId] || p.price.toString();
+        const price = parseInt(adjustedPrice.replace(/,/g, ''), 10);
+        const quantity = productQuantities[p.cartItemId] || 1;
+        return sum + (isNaN(price) ? 0 : price * quantity);
+      }
     }, 0);
-  }, [products, productPrices, productQuantities]);
+  }, [products, productPrices, productQuantities, mergedGroups]);
 
   const customItemsTotal = useMemo(() => {
     return customItems.reduce((sum, item) => {
@@ -1984,6 +2153,19 @@ const QuotePage = ({
               </thead>
               <tbody>
                 {products.map((product, index) => {
+                  // Check if this product is part of a merged group
+                  const mergeStatus = isInMergedGroup(product.cartItemId);
+                  
+                  // Skip rendering if this is a merged item but not the main unit
+                  if (mergeStatus.isMerged && !mergeStatus.isMainUnit) {
+                    return null;
+                  }
+                  
+                  // Get merged group info if this is the main unit
+                  const mergedGroup = mergeStatus.isMainUnit && mergeStatus.groupId 
+                    ? mergedGroups[mergeStatus.groupId] 
+                    : null;
+                  
                   const brand = config.brands.find(b => b.id === product.brandId);
                   const style = config.styles.find(s => s.id === product.styleId);
                   const type = config.types.find(t => t.id === product.typeId);
@@ -2001,21 +2183,51 @@ const QuotePage = ({
                   const envColor = product.environment === 'heating' ? 'text-orange-500' : 
                                   product.environment === 'cooling' ? 'text-cyan-500' : 
                                   'text-indigo-500';
-                  const quantity = productQuantities[product.cartItemId] || 1;
-                  const unitPrice = parseInt((productPrices[product.cartItemId] || product.price).toString().replace(/,/g, ''), 10);
+                  
+                  // Calculate quantity and price for merged items
+                  let quantity = productQuantities[product.cartItemId] || 1;
+                  let unitPrice = parseInt((productPrices[product.cartItemId] || product.price).toString().replace(/,/g, ''), 10);
+                  
+                  if (mergedGroup) {
+                    // Merged items: quantity = main unit quantity, unitPrice = sum of all unit prices (not multiplied by quantity)
+                    const mainUnitId = mergedGroup.indoorUnits[0]; // First item is the main unit
+                    quantity = productQuantities[mainUnitId] || 1; // Use main unit's quantity
+                    
+                    // Sum all unit prices (without multiplying by their quantities)
+                    unitPrice = mergedGroup.indoorUnits.reduce((sum, id) => {
+                      const price = parseInt((productPrices[id] || products.find(p => p.cartItemId === id)?.price || '0').toString().replace(/,/g, ''), 10);
+                      return sum + (isNaN(price) ? 0 : price);
+                    }, 0);
+                  }
+                  
                   const subtotal = isNaN(unitPrice) ? 0 : unitPrice * quantity;
+                  
+                  // Check if this is a multi-unit main unit that can be merged with indoor units
+                  const multiUnitStyleId = config.styles.find(s => s.label === '一對多')?.id;
+                  const isMultiUnitMain = product.styleId === multiUnitStyleId && product.environment !== 'indoor-unit';
+                  const canMerge = isMultiUnitMain && !mergeStatus.isMerged && 
+                    index < products.length - 1 && 
+                    products[index + 1]?.styleId === multiUnitStyleId && 
+                    products[index + 1]?.environment === 'indoor-unit';
                   
                   return (
                     <tr key={product.cartItemId} className="group border-b border-slate-200 hover:bg-slate-50">
                       <td className="p-4 text-center align-middle text-slate-600 whitespace-nowrap">{index + 1}</td>
                       <td className="p-3 text-center align-middle">
                         <div className="font-medium text-slate-800 text-sm leading-tight">
-                          {product.name.split('/').map((part, i, arr) => (
-                            <span key={i}>
-                              {part.trim()}
-                              {i < arr.length - 1 && <br />}
-                            </span>
-                          ))}
+                          {mergedGroup ? (
+                            // Display merged units: main unit + indoor units
+                            <div className="whitespace-pre-line">
+                              {"一對多\n" + mergedGroup.indoorUnits.slice(1).map(() => "內機").join("\n")}
+                            </div>
+                          ) : (
+                            product.name.split('/').map((part, i, arr) => (
+                              <span key={i}>
+                                {part.trim()}
+                                {i < arr.length - 1 && <br />}
+                              </span>
+                            ))
+                          )}
                         </div>
                       </td>
                       <td className="p-4 text-center align-middle text-slate-700 whitespace-nowrap">
@@ -2029,7 +2241,7 @@ const QuotePage = ({
                       </td>
                       <td className="p-4 text-center align-middle">
                         <div className="export-hide flex items-center justify-center relative">
-                          {editingQuantityId === product.cartItemId ? (
+                          {editingQuantityId === product.cartItemId && !mergedGroup ? (
                             <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setEditingQuantityId(null)}>
                               <div className="bg-white rounded-xl shadow-2xl p-6 min-w-[300px]" onClick={(e) => e.stopPropagation()}>
                                 <div className="text-sm font-bold text-slate-700 mb-3">修改數量</div>
@@ -2087,10 +2299,18 @@ const QuotePage = ({
                           ) : (
                             <button
                               onClick={() => {
-                                setEditingQuantityId(product.cartItemId);
-                                setTempQuantityInput('');
+                                if (!mergedGroup) {
+                                  setEditingQuantityId(product.cartItemId);
+                                  setTempQuantityInput('');
+                                }
                               }}
-                              className="w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold hover:border-indigo-400 hover:bg-indigo-50 transition cursor-pointer"
+                              className={`w-16 text-center py-1 border border-slate-300 rounded-lg font-mono font-bold transition ${
+                                mergedGroup 
+                                  ? 'cursor-not-allowed bg-slate-100 text-slate-500' 
+                                  : 'hover:border-indigo-400 hover:bg-indigo-50 cursor-pointer'
+                              }`}
+                              disabled={!!mergedGroup}
+                              title={mergedGroup ? '合併項目的數量不可編輯' : '點擊修改數量'}
                             >
                               {quantity}
                             </button>
@@ -2106,9 +2326,10 @@ const QuotePage = ({
                             <>
                               <input
                                 type="text"
-                                value={productPrices[product.cartItemId] || product.price}
+                                value={mergedGroup ? unitPrice.toString() : (productPrices[product.cartItemId] || product.price)}
                                 onChange={(e) => handleUpdateProductPrice(product.cartItemId, e.target.value)}
                                 onBlur={() => setEditingPriceId(null)}
+                                disabled={!!mergedGroup}
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') setEditingPriceId(null);
                                   if (e.key === 'Escape') {
@@ -2130,20 +2351,22 @@ const QuotePage = ({
                           ) : (
                             <>
                               <span className="font-mono font-bold text-slate-800">
-                                {productPrices[product.cartItemId] || product.price}
+                                {mergedGroup ? unitPrice.toLocaleString() : (productPrices[product.cartItemId] || product.price)}
                               </span>
-                              <button
-                                onClick={() => setEditingPriceId(product.cartItemId)}
-                                className="text-indigo-600 hover:text-indigo-700 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                title="編輯價格"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </button>
+                              {!mergedGroup && (
+                                <button
+                                  onClick={() => setEditingPriceId(product.cartItemId)}
+                                  className="text-indigo-600 hover:text-indigo-700 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  title="編輯價格"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                              )}
                             </>
                           )}
                         </div>
                         <div className="hidden export-show text-center font-mono font-bold text-slate-800 whitespace-nowrap">
-                          {productPrices[product.cartItemId] || product.price}
+                          {mergedGroup ? unitPrice.toLocaleString() : (productPrices[product.cartItemId] || product.price)}
                         </div>
                       </td>
                       <td className="p-4 text-center align-middle whitespace-nowrap">
@@ -2151,10 +2374,41 @@ const QuotePage = ({
                           ${subtotal.toLocaleString()}
                         </span>
                       </td>
-                      <td className="export-hide"></td>
+                      <td className="export-hide p-2">
+                        <div className="flex items-center justify-center gap-1">
+                          {canMerge && (
+                            <button
+                              onClick={() => handleOpenMergeModal(index)}
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition"
+                              title="合併內機"
+                            >
+                              <ArrowRightLeft className="w-4 h-4" />
+                            </button>
+                          )}
+                          {mergeStatus.isMerged && mergeStatus.isMainUnit && mergeStatus.groupId && (
+                            <button
+                              onClick={() => handleUnmergeIndoorUnits(mergeStatus.groupId!)}
+                              className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition"
+                              title="取消合併"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                          {onRemoveFromCart && (
+                            <button
+                              onClick={() => onRemoveFromCart(product.cartItemId)}
+                              className="p-1.5 text-red-500 hover:bg-red-50 rounded transition"
+                              title="刪除"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
+
                 
                 {/* Custom Items */}
                 {customItems.map((item, index) => {
@@ -2381,8 +2635,8 @@ const QuotePage = ({
       {/* Bulk Price Adjustment Modal */}
       {showBulkPriceAdjust && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-amber-100 rounded-xl">
                   <DollarSign className="w-6 h-6 text-amber-600" />
@@ -2400,7 +2654,7 @@ const QuotePage = ({
               </button>
             </div>
             
-            <div className="mb-6">
+            <div className="flex-1 overflow-y-auto p-6">
               <p className="text-slate-600 mb-4">
                 輸入要增加或減少的金額，將套用到所有設備項目。
               </p>
@@ -2412,14 +2666,15 @@ const QuotePage = ({
                   • 正數表示增加金額（例如：+1000）<br />
                   • 負數表示減少金額（例如：-500）<br />
                   • 每次調整都會基於<span className="font-bold">原始價格</span>重新計算<br />
-                  • 調整金額會<span className="font-bold">乘以數量</span>（數量2則調整×2）
+                  • <span className="font-bold">一般項目：</span>調整金額 × 數量<br />
+                  • <span className="font-bold">合併項目：</span>調整每個子項目單價，總調整 = 調整金額 × 合併數 × 主機數量
                 </p>
               </div>
               
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 調整金額（單位金額）
               </label>
-              <div className="relative">
+              <div className="relative mb-6">
                 <input
                   type="text"
                   value={bulkAdjustAmount}
@@ -2437,9 +2692,160 @@ const QuotePage = ({
                 />
                 <DollarSign className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
+              
+              {/* Product Categories Display */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-slate-700 mb-3">將調整以下項目：</h4>
+                
+                {(() => {
+                  const multiUnitStyleId = config.styles.find(s => s.label === '一對多')?.id;
+                  
+                  // Categorize products
+                  const regularItems: typeof products = [];
+                  const multiMainUnits: typeof products = [];
+                  const indoorUnits: typeof products = [];
+                  const mergedMainUnits: typeof products = [];
+                  
+                  products.forEach(p => {
+                    const mergeStatus = isInMergedGroup(p.cartItemId);
+                    
+                    if (mergeStatus.isMerged && !mergeStatus.isMainUnit) {
+                      // Skip - will be counted with main unit
+                      return;
+                    }
+                    
+                    if (mergeStatus.isMerged && mergeStatus.isMainUnit) {
+                      mergedMainUnits.push(p);
+                    } else if (p.styleId === multiUnitStyleId && p.environment !== 'indoor-unit') {
+                      multiMainUnits.push(p);
+                    } else if (p.styleId === multiUnitStyleId && p.environment === 'indoor-unit') {
+                      indoorUnits.push(p);
+                    } else {
+                      regularItems.push(p);
+                    }
+                  });
+                  
+                  return (
+                    <>
+                      {/* 1. Regular Items */}
+                      {regularItems.length > 0 && (
+                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                          <div className="flex items-center justify-between mb-3">
+                            <h5 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                              <Package className="w-4 h-4 text-slate-500" />
+                              一般項目
+                            </h5>
+                            <span className="text-xs font-bold text-slate-500 bg-slate-200 px-2 py-1 rounded">
+                              {regularItems.length} 項
+                            </span>
+                          </div>
+                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                            {regularItems.map((item, idx) => {
+                              const qty = productQuantities[item.cartItemId] || 1;
+                              return (
+                                <div key={item.cartItemId} className="flex items-center justify-between text-xs bg-white p-2 rounded border border-slate-100">
+                                  <span className="text-slate-700 truncate flex-1">{item.name}</span>
+                                  <span className="text-slate-500 ml-2">× {qty}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* 2. Multi-unit Main Units (Merged) */}
+                      {mergedMainUnits.length > 0 && (
+                        <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-200">
+                          <div className="flex items-center justify-between mb-3">
+                            <h5 className="text-sm font-bold text-indigo-700 flex items-center gap-2">
+                              <ArrowRightLeft className="w-4 h-4 text-indigo-500" />
+                              一對多主機（已合併）
+                            </h5>
+                            <span className="text-xs font-bold text-indigo-600 bg-indigo-200 px-2 py-1 rounded">
+                              {mergedMainUnits.length} 組
+                            </span>
+                          </div>
+                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                            {mergedMainUnits.map((item) => {
+                              const mergeStatus = isInMergedGroup(item.cartItemId);
+                              const mergedGroup = mergeStatus.groupId ? mergedGroups[mergeStatus.groupId] : null;
+                              const qty = productQuantities[item.cartItemId] || 1;
+                              const mergedCount = mergedGroup?.indoorUnits.length || 1;
+                              
+                              return (
+                                <div key={item.cartItemId} className="bg-white p-3 rounded border border-indigo-100">
+                                  <div className="flex items-center justify-between text-xs mb-1">
+                                    <span className="text-indigo-700 font-medium truncate flex-1">{item.name}</span>
+                                    <span className="text-indigo-600 ml-2">× {qty}</span>
+                                  </div>
+                                  <div className="text-xs text-indigo-500">
+                                    包含 {mergedCount} 個項目（主機 + {mergedCount - 1} 個內機）
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* 3. Multi-unit Main Units (Not Merged) */}
+                      {multiMainUnits.length > 0 && (
+                        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                          <div className="flex items-center justify-between mb-3">
+                            <h5 className="text-sm font-bold text-blue-700 flex items-center gap-2">
+                              <Package className="w-4 h-4 text-blue-500" />
+                              一對多主機
+                            </h5>
+                            <span className="text-xs font-bold text-blue-600 bg-blue-200 px-2 py-1 rounded">
+                              {multiMainUnits.length} 項
+                            </span>
+                          </div>
+                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                            {multiMainUnits.map((item) => {
+                              const qty = productQuantities[item.cartItemId] || 1;
+                              return (
+                                <div key={item.cartItemId} className="flex items-center justify-between text-xs bg-white p-2 rounded border border-blue-100">
+                                  <span className="text-blue-700 truncate flex-1">{item.name}</span>
+                                  <span className="text-blue-600 ml-2">× {qty}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* 4. Indoor Units */}
+                      {indoorUnits.length > 0 && (
+                        <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                          <div className="flex items-center justify-between mb-3">
+                            <h5 className="text-sm font-bold text-green-700 flex items-center gap-2">
+                              <Package className="w-4 h-4 text-green-500" />
+                              內機
+                            </h5>
+                            <span className="text-xs font-bold text-green-600 bg-green-200 px-2 py-1 rounded">
+                              {indoorUnits.length} 項
+                            </span>
+                          </div>
+                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                            {indoorUnits.map((item) => {
+                              const qty = productQuantities[item.cartItemId] || 1;
+                              return (
+                                <div key={item.cartItemId} className="flex items-center justify-between text-xs bg-white p-2 rounded border border-green-100">
+                                  <span className="text-green-700 truncate flex-1">{item.name}</span>
+                                  <span className="text-green-600 ml-2">× {qty}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
             </div>
             
-            <div className="flex flex-col gap-3">
+            <div className="p-6 border-t bg-slate-50 flex flex-col gap-3">
               <div className="flex gap-3">
                 <button
                   onClick={() => {
@@ -2474,7 +2880,140 @@ const QuotePage = ({
         </div>
       )}
       
-      {/* Calculator Modal */}
+      {/* Merge Indoor Units Modal */}
+      {showMergeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col max-h-[80vh]">
+            {/* Header */}
+            <div className="p-6 border-b flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 text-blue-600 rounded-xl">
+                  <ArrowRightLeft className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800">選擇要合併的項目</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">勾選一對多主機與內機</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowMergeModal(false);
+                  setSelectedIndoorUnits([]);
+                  setMergeStartIndex(-1);
+                }}
+                className="p-2 hover:bg-slate-100 rounded-full transition"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-3">
+                {availableMergeUnits.map((unit, idx) => {
+                  const isSelected = selectedIndoorUnits.includes(unit.cartItemId);
+                  const brand = config.brands.find(b => b.id === unit.brandId);
+                  const quantity = productQuantities[unit.cartItemId] || 1;
+                  const price = productPrices[unit.cartItemId] || unit.price;
+                  const isMainUnit = idx === 0; // First item is the main unit
+                  const itemLabel = isMainUnit ? '一對多主機' : '內機';
+                  
+                  return (
+                    <div
+                      key={unit.cartItemId}
+                      onClick={() => handleToggleIndoorUnit(unit.cartItemId)}
+                      className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        isSelected 
+                          ? 'border-blue-500 bg-blue-50 shadow-md' 
+                          : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        {/* Checkbox */}
+                        <div className="pt-0.5">
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                            isSelected 
+                              ? 'bg-blue-500 border-blue-500' 
+                              : 'border-slate-300 bg-white'
+                          }`}>
+                            {isSelected && (
+                              <CheckCircle2 className="w-4 h-4 text-white" />
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Product Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                              #{mergeStartIndex + idx + 1}
+                            </span>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                              isMainUnit 
+                                ? 'bg-indigo-100 text-indigo-700' 
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {itemLabel}
+                            </span>
+                            <span className="text-sm font-medium text-slate-700 truncate">
+                              {unit.name}
+                            </span>
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {brand?.label.split(' (')[0]} | 數量: {quantity} | 單價: ${price}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Selection Summary */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-700">已選擇項目：</span>
+                  <span className="text-lg font-bold text-blue-600">{selectedIndoorUnits.length} 個項目</span>
+                </div>
+                {selectedIndoorUnits.length < 2 && (
+                  <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    請至少選擇 2 個項目（主機 + 內機）
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="p-6 border-t bg-slate-50 flex gap-3">
+              <button
+                onClick={() => {
+                  setShowMergeModal(false);
+                  setSelectedIndoorUnits([]);
+                  setMergeStartIndex(-1);
+                }}
+                className="flex-1 px-4 py-3 border-2 border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-100 transition"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleConfirmMerge}
+                disabled={selectedIndoorUnits.length < 2}
+                className={`flex-1 px-4 py-3 rounded-xl font-medium transition flex items-center justify-center gap-2 ${
+                  selectedIndoorUnits.length < 2
+                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                <ArrowRightLeft className="w-5 h-5" />
+                確認合併
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Calculator Modal */
       {showCalculator && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-black rounded-3xl shadow-2xl w-full max-w-xs overflow-hidden">
