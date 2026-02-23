@@ -3761,10 +3761,64 @@ export default function App() {
   // Cart State - stores cart items with unique IDs (allows same product multiple times)
   const [cartItems, setCartItems] = useState<Array<{ cartItemId: string; productId: string }>>([]);
 
+  // Version Update Detection State
+  const [showUpdateNotification, setShowUpdateNotification] = useState(false);
+  const [newVersion, setNewVersion] = useState<string>('');
+
   // Reset to page 1 when search term or max cards changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, maxDisplayCards]);
+
+  // Version Check - 檢測系統更新
+  useEffect(() => {
+    const checkVersion = async () => {
+      try {
+        const response = await fetch('/version.json?' + Date.now()); // 添加時間戳防止緩存
+        if (response.ok) {
+          const versionData = await response.json();
+          const currentVersion = versionData.version;
+          const storedVersion = localStorage.getItem('app_version');
+          
+          if (storedVersion && storedVersion !== currentVersion) {
+            // 版本不同，顯示更新提示
+            setNewVersion(currentVersion);
+            setShowUpdateNotification(true);
+          } else if (!storedVersion) {
+            // 首次訪問，儲存版本
+            localStorage.setItem('app_version', currentVersion);
+          }
+        }
+      } catch (error) {
+        // 無法獲取版本文件，靜默失敗（開發環境可能不存在）
+        console.debug('Version check skipped:', error);
+      }
+    };
+
+    // 頁面載入時檢查版本
+    checkVersion();
+
+    // 每 5 分鐘檢查一次版本更新
+    const intervalId = setInterval(checkVersion, 5 * 60 * 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // 處理版本更新確認
+  const handleUpdateConfirm = () => {
+    // 更新儲存的版本號
+    localStorage.setItem('app_version', newVersion);
+    setShowUpdateNotification(false);
+    // 重新載入頁面以獲取最新版本
+    window.location.reload();
+  };
+
+  // 處理版本更新忽略
+  const handleUpdateDismiss = () => {
+    // 更新儲存的版本號但不重新載入
+    localStorage.setItem('app_version', newVersion);
+    setShowUpdateNotification(false);
+  };
 
   // Derived State
   const filteredProducts = useMemo(() => {
@@ -4555,6 +4609,73 @@ export default function App() {
         products={compareProducts}
         config={config}
       />
+
+      {/* Version Update Notification */}
+      {showUpdateNotification && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-300">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-500 to-violet-600 p-6 text-white">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <Zap className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">系統更新通知</h3>
+                  <p className="text-sm text-indigo-100 mt-1">檢測到新版本</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <div className="flex items-start gap-3 mb-6">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-slate-700 leading-relaxed">
+                    系統已更新至最新版本，建議您重新載入頁面以獲得最佳體驗。
+                  </p>
+                  <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <p className="text-xs text-slate-500 mb-1">更新內容可能包括：</p>
+                    <ul className="text-xs text-slate-600 space-y-1">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-3 h-3 text-green-500" />
+                        功能改進與優化
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-3 h-3 text-green-500" />
+                        錯誤修復
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-3 h-3 text-green-500" />
+                        效能提升
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleUpdateDismiss}
+                  className="flex-1 px-4 py-3 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition font-medium"
+                >
+                  稍後再說
+                </button>
+                <button
+                  onClick={handleUpdateConfirm}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-xl hover:from-indigo-600 hover:to-violet-700 transition font-bold shadow-lg shadow-indigo-500/30"
+                >
+                  立即更新
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
       )}
     </AppErrorOverlay>
