@@ -4461,7 +4461,7 @@ export default function App() {
               {viewMode === 'style-grouped' ? (
                 // Style-grouped view: Group products by style
                 (() => {
-                  // Group products by style
+                  // Group products by style for display
                   const groupedProducts: Record<string, Product[]> = {};
                   const startIndex = (currentPage - 1) * maxDisplayCards;
                   const endIndex = startIndex + maxDisplayCards;
@@ -4476,60 +4476,34 @@ export default function App() {
                     groupedProducts[styleLabel].push(product);
                   });
 
-                  // Separate wall-mounted and window types
-                  const wallMountedStyles = ['壁掛型'];
-                  const windowStyles = ['窗型'];
-                  
-                  const wallMountedGroups = Object.entries(groupedProducts).filter(([styleLabel]) => 
-                    wallMountedStyles.includes(styleLabel)
-                  );
-                  
-                  const windowGroups = Object.entries(groupedProducts).filter(([styleLabel]) => 
-                    windowStyles.includes(styleLabel)
-                  );
-                  
-                  const otherGroups = Object.entries(groupedProducts).filter(([styleLabel]) => 
-                    !wallMountedStyles.includes(styleLabel) && !windowStyles.includes(styleLabel)
-                  );
-
-                  const renderGroup = (groups: [string, Product[]][], title: string, bgColor: string) => (
-                    <div className={`rounded-2xl border ${bgColor} p-6`}>
-                      <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
-                        {title}
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {groups.map(([styleLabel, products]) => (
-                          <div key={styleLabel} className="space-y-4">
-                            <h4 className="text-sm font-semibold text-slate-600 border-b border-slate-200 pb-2">{styleLabel}</h4>
-                            <div className="grid grid-cols-1 gap-4">
-                              {products.map(product => (
-                                <ProductCard
-                                  key={product.id}
-                                  product={product}
-                                  config={config}
-                                  viewMode="grid"
-                                  isSelected={compareList.includes(product.id)}
-                                  onToggleCompare={handleToggleCompare}
-                                  onPin={handlePin}
-                                  onEdit={(p) => { setEditingProduct(p); setIsFormOpen(true); }}
-                                  onDelete={handleDeleteRequest}
-                                  onAddToCart={handleAddToCart}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-
                   return (
-                    <>
-                      {wallMountedGroups.length > 0 && renderGroup(wallMountedGroups, '壁掛式空調', 'bg-blue-50 border-blue-200')}
-                      {windowGroups.length > 0 && renderGroup(windowGroups, '窗型空調', 'bg-green-50 border-green-200')}
-                      {otherGroups.length > 0 && renderGroup(otherGroups, '其他樣式', 'bg-slate-50 border-slate-200')}
-                    </>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                      {Object.entries(groupedProducts).map(([styleLabel, products]) => (
+                        <div key={styleLabel} className="col-span-full">
+                          <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: config.styles.find(s => s.label === styleLabel)?.color || '#475569' }}></div>
+                            {styleLabel}
+                            <span className="text-sm font-normal text-slate-500">({products.length} 款)</span>
+                          </h3>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                            {products.map(product => (
+                              <ProductCard
+                                key={product.id}
+                                product={product}
+                                config={config}
+                                viewMode="grid"
+                                isSelected={compareList.includes(product.id)}
+                                onToggleCompare={handleToggleCompare}
+                                onPin={handlePin}
+                                onEdit={(p) => { setEditingProduct(p); setIsFormOpen(true); }}
+                                onDelete={handleDeleteRequest}
+                                onAddToCart={handleAddToCart}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   );
                 })()
               ) : (
