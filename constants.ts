@@ -21,11 +21,11 @@ export const INITIAL_CONFIG: AppConfig = {
     { id: 'b17', label: '冰點 (Frost)', color: '#0891b2' }, // Cyan
   ],
   styles: [
-    { id: 's1', label: '壁掛型', color: '#475569' },
-    { id: 's2', label: '埋入型', color: '#475569' },
-    { id: 's3', label: '窗型', color: '#475569' },
-    { id: 's4', label: '落地型', color: '#475569' },
-    { id: 's5', label: '一對多', color: '#475569' },
+    { id: 's1', label: '壁掛型', color: '#3b82f6' }, // Blue
+    { id: 's2', label: '埋入型', color: '#8b5cf6' }, // Purple
+    { id: 's3', label: '窗型', color: '#10b981' }, // Green
+    { id: 's4', label: '落地型', color: '#f59e0b' }, // Orange
+    { id: 's5', label: '一對多', color: '#ef4444' }, // Red
   ],
   types: [
     { id: 't1', label: '變頻', color: '#059669' },

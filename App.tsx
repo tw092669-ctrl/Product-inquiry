@@ -1402,15 +1402,15 @@ const QuotePage = ({
   const [showPipeWireCalc, setShowPipeWireCalc] = useState(false);
   const [pipeWireItems, setPipeWireItems] = useState({
     // 4種管路
-    pipe_2_3: { name: '2/3 管路', quantity: 0, unitPrice: 400 },
-    pipe_2_4: { name: '2/4 管路', quantity: 0, unitPrice: 450 },
-    pipe_2_5: { name: '2/5 管路', quantity: 0, unitPrice: 500 },
-    pipe_3_5: { name: '3/5 管路', quantity: 0, unitPrice: 550 },
+    pipe_2_3: { name: '2/3 管路', quantity: 0, unitPrice: 450 },
+    pipe_2_4: { name: '2/4 管路', quantity: 0, unitPrice: 500 },
+    pipe_2_5: { name: '2/5 管路', quantity: 0, unitPrice: 550 },
+    pipe_3_5: { name: '3/5 管路', quantity: 0, unitPrice: 600 },
     // 2種訊號線
-    signal_2core: { name: '2C隔離線', quantity: 0, unitPrice: 100 },
-    signal_3core: { name: '1.25*4C訊號線', quantity: 0, unitPrice: 50 },
+    signal_2core: { name: '2C隔離線', quantity: 0, unitPrice: 105 },
+    signal_3core: { name: '1.25*4C訊號線', quantity: 0, unitPrice: 55 },
     // 3種電源線
-    power_2mm: { name: '2.0mm電源線', quantity: 0, unitPrice: 120 },
+    power_2mm: { name: '2.0mm電源線', quantity: 0, unitPrice: 125 },
     power_3_5mm: { name: '3.5mm電源線', quantity: 0, unitPrice: 150 },
     power_5_5mm: { name: '5.5mm電源線', quantity: 0, unitPrice: 200 },
   });
@@ -3363,7 +3363,7 @@ const QuotePage = ({
 };
 
 // 7. Product Card
-type ViewMode = 'grid' | 'list' | 'compact';
+type ViewMode = 'grid' | 'list' | 'compact' | 'style-grouped';
 
 const ProductCard: React.FC<{ 
   product: Product; 
@@ -4431,6 +4431,13 @@ export default function App() {
              >
                <Grid3x3 className="w-5 h-5" />
              </button>
+             <button 
+               onClick={() => setViewMode('style-grouped')}
+               className={`p-2.5 rounded-lg transition-all ${viewMode === 'style-grouped' ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+               title="設備樣式"
+             >
+               <Package className="w-5 h-5" />
+             </button>
            </div>
            )}
         </div>
@@ -4447,26 +4454,105 @@ export default function App() {
                 ? "flex flex-col gap-3" 
                 : viewMode === 'compact'
                 ? "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-5"
+                : viewMode === 'style-grouped'
+                ? "flex flex-col gap-8"
                 : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
             }>
-              {(() => {
-                const startIndex = (currentPage - 1) * maxDisplayCards;
-                const endIndex = startIndex + maxDisplayCards;
-                return filteredProducts.slice(startIndex, endIndex).map(product => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    config={config}
-                    viewMode={viewMode}
-                    isSelected={compareList.includes(product.id)}
-                    onToggleCompare={handleToggleCompare}
-                    onPin={handlePin}
-                    onEdit={(p) => { setEditingProduct(p); setIsFormOpen(true); }}
-                    onDelete={handleDeleteRequest}
-                    onAddToCart={handleAddToCart}
-                  />
-                ));
-              })()}
+              {viewMode === 'style-grouped' ? (
+                // Style-grouped view: Group products by style
+                (() => {
+                  // Group products by style
+                  const groupedProducts: Record<string, Product[]> = {};
+                  const startIndex = (currentPage - 1) * maxDisplayCards;
+                  const endIndex = startIndex + maxDisplayCards;
+                  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+                  
+                  paginatedProducts.forEach(product => {
+                    const style = config.styles.find(s => s.id === product.styleId);
+                    const styleLabel = style?.label || '其他';
+                    if (!groupedProducts[styleLabel]) {
+                      groupedProducts[styleLabel] = [];
+                    }
+                    groupedProducts[styleLabel].push(product);
+                  });
+
+                  // Separate wall-mounted and window types
+                  const wallMountedStyles = ['壁掛型'];
+                  const windowStyles = ['窗型'];
+                  
+                  const wallMountedGroups = Object.entries(groupedProducts).filter(([styleLabel]) => 
+                    wallMountedStyles.includes(styleLabel)
+                  );
+                  
+                  const windowGroups = Object.entries(groupedProducts).filter(([styleLabel]) => 
+                    windowStyles.includes(styleLabel)
+                  );
+                  
+                  const otherGroups = Object.entries(groupedProducts).filter(([styleLabel]) => 
+                    !wallMountedStyles.includes(styleLabel) && !windowStyles.includes(styleLabel)
+                  );
+
+                  const renderGroup = (groups: [string, Product[]][], title: string, bgColor: string) => (
+                    <div className={`rounded-2xl border ${bgColor} p-6`}>
+                      <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
+                        {title}
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {groups.map(([styleLabel, products]) => (
+                          <div key={styleLabel} className="space-y-4">
+                            <h4 className="text-sm font-semibold text-slate-600 border-b border-slate-200 pb-2">{styleLabel}</h4>
+                            <div className="grid grid-cols-1 gap-4">
+                              {products.map(product => (
+                                <ProductCard
+                                  key={product.id}
+                                  product={product}
+                                  config={config}
+                                  viewMode="grid"
+                                  isSelected={compareList.includes(product.id)}
+                                  onToggleCompare={handleToggleCompare}
+                                  onPin={handlePin}
+                                  onEdit={(p) => { setEditingProduct(p); setIsFormOpen(true); }}
+                                  onDelete={handleDeleteRequest}
+                                  onAddToCart={handleAddToCart}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+
+                  return (
+                    <>
+                      {wallMountedGroups.length > 0 && renderGroup(wallMountedGroups, '壁掛式空調', 'bg-blue-50 border-blue-200')}
+                      {windowGroups.length > 0 && renderGroup(windowGroups, '窗型空調', 'bg-green-50 border-green-200')}
+                      {otherGroups.length > 0 && renderGroup(otherGroups, '其他樣式', 'bg-slate-50 border-slate-200')}
+                    </>
+                  );
+                })()
+              ) : (
+                // Normal views: grid, list, compact
+                (() => {
+                  const startIndex = (currentPage - 1) * maxDisplayCards;
+                  const endIndex = startIndex + maxDisplayCards;
+                  return filteredProducts.slice(startIndex, endIndex).map(product => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      config={config}
+                      viewMode={viewMode}
+                      isSelected={compareList.includes(product.id)}
+                      onToggleCompare={handleToggleCompare}
+                      onPin={handlePin}
+                      onEdit={(p) => { setEditingProduct(p); setIsFormOpen(true); }}
+                      onDelete={handleDeleteRequest}
+                      onAddToCart={handleAddToCart}
+                    />
+                  ));
+                })()
+              )}
             </div>
             
             {/* Pagination Controls */}
